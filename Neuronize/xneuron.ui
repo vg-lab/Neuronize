@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>XNeuronClass</class>
+ <widget class="QMainWindow" name="XNeuronClass">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>750</width>
+    <height>663</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Neuronize</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QTabWidget" name="tabWidget_MainContainer">
+      <property name="tabPosition">
+       <enum>QTabWidget::North</enum>
+      </property>
+      <property name="tabShape">
+       <enum>QTabWidget::Rounded</enum>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <property name="usesScrollButtons">
+       <bool>true</bool>
+      </property>
+      <widget class="QWidget" name="tab_SomaCreator">
+       <attribute name="title">
+        <string>Load File</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_SomaCreator"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_SomaGenerator">
+       <attribute name="title">
+        <string>Soma builder</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_SomaDeformer"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_DendritesGenerator">
+       <attribute name="title">
+        <string>Dendrites/Spines builder</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_DendritesGenerator"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_SpinesGenerator">
+       <attribute name="title">
+        <string>Spines builder</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_SpinesGenerator"/>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>750</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionGenerateNewNeuron"/>
+    <addaction name="actionQuit"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionTake_a_snapshot"/>
+   </widget>
+   <widget class="QMenu" name="menuAbout">
+    <property name="title">
+     <string>About</string>
+    </property>
+    <addaction name="actionHelp"/>
+    <addaction name="actionAbout_Neuronize"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionUndo"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuView"/>
+   <addaction name="menuAbout"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionGenerateNewNeuron"/>
+   <addaction name="separator"/>
+   <addaction name="actionUndo"/>
+   <addaction name="separator"/>
+   <addaction name="actionTake_a_snapshot"/>
+   <addaction name="separator"/>
+   <addaction name="actionHelp"/>
+   <addaction name="separator"/>
+   <addaction name="actionQuit"/>
+  </widget>
+  <action name="actionQuit">
+   <property name="icon">
+    <iconset resource="xneuron.qrc">
+     <normaloff>:/XNeuron/Content/icons/application-exit.png</normaloff>:/XNeuron/Content/icons/application-exit.png</iconset>
+   </property>
+   <property name="text">
+    <string>Quit</string>
+   </property>
+  </action>
+  <action name="actionHelp">
+   <property name="icon">
+    <iconset resource="xneuron.qrc">
+     <normaloff>:/XNeuron/Content/icons/help-2.png</normaloff>:/XNeuron/Content/icons/help-2.png</iconset>
+   </property>
+   <property name="text">
+    <string>Help</string>
+   </property>
+  </action>
+  <action name="actionAbout_Neuronize">
+   <property name="text">
+    <string>About Neuronize</string>
+   </property>
+  </action>
+  <action name="actionGenerateNewNeuron">
+   <property name="icon">
+    <iconset resource="xneuron.qrc">
+     <normaloff>:/XNeuron/Content/icons/document-open-6.png</normaloff>:/XNeuron/Content/icons/document-open-6.png</iconset>
+   </property>
+   <property name="text">
+    <string>Generate new Neuron</string>
+   </property>
+  </action>
+  <action name="actionTake_a_snapshot">
+   <property name="icon">
+    <iconset resource="xneuron.qrc">
+     <normaloff>:/XNeuron/Content/icons/Camera.app.png</normaloff>:/XNeuron/Content/icons/Camera.app.png</iconset>
+   </property>
+   <property name="text">
+    <string>Take a snapshot</string>
+   </property>
+  </action>
+  <action name="actionUndo">
+   <property name="icon">
+    <iconset resource="xneuron.qrc">
+     <normaloff>:/XNeuron/Content/icons/edit-undo-8.png</normaloff>:/XNeuron/Content/icons/edit-undo-8.png</iconset>
+   </property>
+   <property name="text">
+    <string>Undo</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources>
+  <include location="xneuron.qrc"/>
+ </resources>
+ <connections/>
+</ui>

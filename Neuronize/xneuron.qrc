@@ -1,0 +1,11 @@
+<RCC>
+  <qresource prefix="XNeuron">
+    <file>Content/icons/edit-undo-8.png</file>
+    <file>Content/icons/application-exit.png</file>
+    <file>Content/icons/arrow-left.png</file>
+    <file>Content/icons/arrow-right.png</file>
+    <file>Content/icons/Camera.app.png</file>
+    <file>Content/icons/document-open-6.png</file>
+    <file>Content/icons/help-2.png</file>
+  </qresource>
+</RCC>
