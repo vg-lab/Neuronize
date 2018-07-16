@@ -27,7 +27,7 @@ para indexar de manera correcta se ha de desactivar.
 #include <algorithm>
 
 #include "NeuroSWC.h"
-#include "defs.h"
+#include <libs/libSysNeuroUtils/defs.h>
 
 #define NEURODESP    1
 #define RANDRANGE    1.0

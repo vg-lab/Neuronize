@@ -28,7 +28,7 @@
 #include <math.h>
 
 #include "SWCSpinesDistributor.h"
-#include "randomUtils.h"
+#include <libs/libSysNeuroUtils/randomUtils.h>
 
 //#define DNEARDISTTOSOMA		10.0
 //#define DFARDISTTOSOMA		40.0

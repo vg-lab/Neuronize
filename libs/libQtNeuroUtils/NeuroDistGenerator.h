@@ -28,7 +28,7 @@
  * @version 0.1
  */
 
-#include <defs.h>
+#include <libs/libSysNeuroUtils/defs.h>
 #include <string>
 #include <map>
 #include <vector>

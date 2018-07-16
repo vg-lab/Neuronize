@@ -36,7 +36,7 @@
 
 #include <OpenMesh/Core/Mesh/PolyMesh_ArrayKernelT.hh>
 
-#include "MathUtils.h"
+#include <libs/libSysNeuroUtils/MathUtils.h>
 //#include "defs.h"
 
 using namespace std;

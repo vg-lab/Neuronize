@@ -1,41 +1,79 @@
-cmake_minimum_required (VERSION 3.2)
-project (Neuronize)
+cmake_minimum_required( VERSION 3.1 )
+set( PROJECT_VERSION_MAJOR "0" )
+set( PROJECT_VERSION_MINOR "0" )
+set( PROJECT_VERSION_PATCH "1" )
+set( PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH} )
+project( Neuronize VERSION ${PROJECT_VERSION} )
+set( neuronize_VERSION_ABI 1 )
+# Disable in source building
+if( "${PROJECT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}" )
+  message( FATAL "no in source building allowed." )
+endif( )
 
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
-endif(NOT CMAKE_BUILD_TYPE)
+list( APPEND CMAKE_MODULE_PATH
+        ${PROJECT_SOURCE_DIR}/CMake
+        ${CMAKE_SOURCE_DIR}/CMake/common
+        )
 
-#OpenGL
-find_package(GLEW REQUIRED)
-include_directories($(GLEW_INCLUDE_DIRS))
-link_directories(${GLEW_LIBRARY_DIRS})
+# Default build type is Debug
+if( NOT CMAKE_BUILD_TYPE )
+  set( CMAKE_BUILD_TYPE Debug )
+endif( NOT CMAKE_BUILD_TYPE )
 
-find_package(OpenGL REQUIRED)
-include_directories(${OpenGL_INCLUDE_DIRS})
-link_directories(${OpenGL_LIBRARY_DIRS})
+if ( CMAKE_BUILD_TYPE MATCHES "Debug" )
+  add_definitions( -DDEBUG )
+endif( )
 
-find_package(GLUT REQUIRED) 
-include_directories(${GLUT_INCLUDE_DIRS})
-link_directories(${GLUT_LIBRARY_DIRS})
+include( GitExternal )
 
-#Qt
-find_package (Qt5Widgets)
-find_package (Qt5Core)
-find_package (Qt5Gui)
-find_package (Qt5OpenGL)
-find_package (Qt5Xml)
+set( NEURONIZE_DESCRIPTION "Neuronize" )
+set( COMMON_PROJECT_DOMAIN gmrv.es )
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC ")
-set(CMAKE_AUTORCC ON)
+include( Common )
 
-#Build libraries
+common_find_package(Boost REQUIRED)
+common_find_package(GLEW REQUIRED)
+common_find_package(OpenGL REQUIRED)
+common_find_package(GLUT REQUIRED)
+common_find_package(Qt5Widgets)
+common_find_package(Qt5Core)
+common_find_package(Qt5Gui)
+common_find_package(Qt5OpenGL)
+common_find_package(Qt5Xml)
+common_find_package_post( )
+
+list( APPEND DATACOOKING_DEPENDENT_LIBRARIES
+        Qt5::Core
+        Qt5::Widgets
+        Qt5::Gui
+        Qt5::OpenGL
+        Qt5::Xml
+        GLEW
+        GLUT
+        OpenGL
+        )
+
+
 add_subdirectory( libs/libSysNeuroUtils )
 add_subdirectory( libs/libNeuroUtils )
 add_subdirectory( libs/libGLNeuroUtils )
 add_subdirectory( libs/libQtNeuroUtils )
-
-#Build tools
 add_subdirectory( Neuronize )
+
+
+if( MSVC )
+  # Set DataCooking as startup project on Visual Studio, CMake v3.6
+  if( CMAKE_VERSION VERSION_GREATER 3.6 )
+    set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT DataCooking )
+  endif( )
+endif( )
+
+set( DOXYGEN_MAINPAGE_MD README.md )
+set( DOXYGEN_EXTRA_INPUT ${PROJECT_SOURCE_DIR}/README.md )
+include( DoxygenRule )
+
+include( CPackConfig )
+
 
 #Copy content (this must be improved)
 file(GLOB MY_CONTENT "Content/*")

@@ -30,8 +30,8 @@
 
 #include "MeshDef.hpp"
 
-#include "randomUtils.h"
-#include "MathUtils.h"
+#include <libs/libSysNeuroUtils/randomUtils.h>
+#include <libs/libSysNeuroUtils/MathUtils.h>
 
 #include <OpenMesh/Tools/Subdivider/Uniform/SubdividerT.hh>
 

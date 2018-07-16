@@ -1,36 +1,48 @@
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
-endif(NOT CMAKE_BUILD_TYPE)
+source_group(\\ FILES CMakeLists.txt)
 
-mark_as_advanced(CMAKE_BUILD_TYPE)
+set (GLNEUROUTILS_SOURCES
+		LightManager.cpp
+		MeshRenderer.cpp
+		NeuroGraphRenderer.cpp
+		OldLODController.cpp
+		Shader.cpp
+		ShaderManager.cpp
+		skybox.cpp
+		VBOMeshRenderer.cpp
+		)
 
-#Code and headers
-file (GLOB GLNeuroUtils_src "*.cpp")
-file (GLOB GLNeuroUtils_h "*.h")
-											
-include_directories (${PROJECT_SOURCE_DIR})
-include_directories (${PROJECT_BINARY_DIR})
+set(GLNEUROUTILS_HEADERS
+		config.h
+		GLHelper.hpp
+		LightManager.h
+		MeshRenderer.h
+		NeuroGraphRenderer.h
+		OldLODController.h
+		Shader.h
+		ShaderManager.h
+		skybox.h
+		VBOMeshRenderer.h
+		)
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR}
-					${CMAKE_CURRENT_SOURCE_DIR}
-					)
+set(GLNEUROUTILS_LINK_LIBRARIES
+		SysNeuroUtils
+		NeuroUtils
+		SOIL
+		GLEW
+		${OPENGL_LIBRARIES}
+		${GLUT_LIBRARY}
+		)
 
-include_directories(../libSysNeuroUtils)
-include_directories(../libNeuroUtils)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR}/src)
 
-#Construccion de la librería
-add_library (GLNeuroUtils SHARED 
-    ${GLNeuroUtils_src}
-    ${GLNeuroUtils_h}
-)
+add_definitions("-w")
 
-target_link_libraries ( GLNeuroUtils	SysNeuroUtils
-										NeuroUtils
-										SOIL
-										${GLEW_LIBRARIES}
-										${OPENGL_LIBRARIES} 
-										${GLUT_LIBRARY}
-						)
+if (MSVC)
+	add_definitions("/W4")
+	# Static build
+	add_definitions(-DVISHNU3DVIEWER_STATIC)
+endif ()
 
-set_target_properties( GLNeuroUtils
-  PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+common_library(GLNeuroUtils)
+

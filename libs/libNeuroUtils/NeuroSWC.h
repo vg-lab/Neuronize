@@ -34,7 +34,7 @@
 #include "SWCImporter.h"
 #include "BaseMesh.h"
 #include "BaseMeshContainer.h"
-#include "MathUtils.h"
+#include <libs/libSysNeuroUtils/MathUtils.h>
 
 using namespace std;
 using namespace NSBaseMesh;

@@ -31,9 +31,9 @@
 #include <string>
 #include <GL/glew.h>
 
-#include <BaseMesh.h>
+#include <libs/libNeuroUtils/BaseMesh.h>
 
-#include <defs.h>
+#include <libs/libSysNeuroUtils/defs.h>
 
 //#include "ShaderManager.h"
 #include "Shader.h"

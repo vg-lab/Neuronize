@@ -23,8 +23,8 @@
 
 #include "GLHelper.hpp"
 
-#include <BaseMesh.h>
-#include <ProceduralMesh.h>
+#include <libs/libNeuroUtils/BaseMesh.h>
+#include <libs/libNeuroUtils/ProceduralMesh.h>
 
 using namespace NSBaseMesh;
 using namespace NSProceduralMesh;

@@ -22,7 +22,7 @@
 
 #include <GL/glut.h>
 
-#include "NeuronGraph.h"
+#include <libs/libNeuroUtils/NeuronGraph.h>
 
 class NeuronGraphRenderer
 {

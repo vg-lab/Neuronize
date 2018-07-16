@@ -28,7 +28,7 @@
 #ifndef MATHUTILS_H_
 #define MATHUTILS_H_
 
-#include <defs.h>
+#include "defs.h"
 
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/matrix.hpp>

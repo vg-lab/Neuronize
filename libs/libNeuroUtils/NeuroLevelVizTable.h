@@ -22,7 +22,7 @@
 
 #include "NeuroLevelVizNode.h"
 
-#include <SWCImporter.h>
+#include "SWCImporter.h"
 using namespace NSSWCImporter;
 
 #include <string>

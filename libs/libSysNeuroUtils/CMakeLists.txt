@@ -1,31 +1,36 @@
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
-endif(NOT CMAKE_BUILD_TYPE)
+source_group(\\ FILES CMakeLists.txt)
 
-mark_as_advanced(CMAKE_BUILD_TYPE)
+set (SYSNEUROUTILS_SOURCES
+        defs.cpp
+        MathUtils.cpp
+        randomUtils.cpp
+        SystemUtils.cpp
+        Timer.cpp
+        )
 
-#Boost
-find_package (Boost REQUIRED COMPONENTS)
+set(SYSNEUROUTILS_HEADERS
+        defs.h
+        MathUtils.h
+        randomUtils.h
+        SystemUtils.h
+        Timer.h
+        )
 
-#Code and headers
-file (GLOB SysNeuroUtils_src "*.cpp")
-file (GLOB SysNeuroUtils_h "*.h")
+set(SYSNEUROUTILS_LINK_LIBRARIES
+        ${Boost_LIBRARIES}
+        )
 
-INCLUDE_DIRECTORIES ( ${Boost_INCLUDE_DIRS} )
-											
-include_directories (${PROJECT_SOURCE_DIR})
-include_directories (${PROJECT_BINARY_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR}/src)
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR}
-					${CMAKE_CURRENT_SOURCE_DIR})
+add_definitions("-w")
 
-#Construccion de la librería
-add_library (SysNeuroUtils SHARED 
-    ${SysNeuroUtils_src}
-    ${SysNeuroUtils_h}
-)
+if (MSVC)
+    add_definitions("/W4")
+    # Static build
+    add_definitions(-DVISHNU3DVIEWER_STATIC)
+endif ()
 
-target_link_libraries ( SysNeuroUtils	${Boost_LIBRARIES} )
 
-set_target_properties( SysNeuroUtils
-  PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+
+common_library(SysNeuroUtils)

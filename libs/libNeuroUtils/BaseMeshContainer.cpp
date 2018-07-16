@@ -19,7 +19,7 @@
  */
 
 #include "BaseMeshContainer.h"
-#include "MathUtils.h"
+#include <libs/libSysNeuroUtils/MathUtils.h>
 
 namespace NSBaseMeshContainer
 {
