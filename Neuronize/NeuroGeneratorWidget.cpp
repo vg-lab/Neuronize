@@ -20,7 +20,7 @@
 
 #include "NeuroGeneratorWidget.h"
 
-#include <QtThreadsManager.hpp>
+#include <libs/libQtNeuroUtils/QtThreadsManager.hpp>
 
 //#include <QtGui>
 

@@ -18,8 +18,8 @@
  *
  */
 
-#include "neuronize.h"
 #include <QApplication>
+#include "neuronize.h"
 
 int main ( int argc, char *argv[] )
 {

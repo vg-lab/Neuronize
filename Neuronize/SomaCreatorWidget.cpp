@@ -29,7 +29,7 @@
 
 #include <QDebug>
 
-#include <ASC2SWC.h>
+#include <libs/libNeuroUtils/ASC2SWC.h>
 
 using namespace std;
 

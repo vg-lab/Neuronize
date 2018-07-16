@@ -20,7 +20,7 @@
 #define FRAME_CONSTRICTOR_H_
 
 #include <QGLViewer/constraint.h>
-#include <MSNode.h>
+#include <libs/libNeuroUtils/MSNode.h>
 
 class FrameConstrictor: public qglviewer::Constraint
 {

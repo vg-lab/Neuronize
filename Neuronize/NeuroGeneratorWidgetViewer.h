@@ -26,16 +26,16 @@
 #include <QDir>
 #include <QGLViewer/qglviewer.h>
 
-#include <BaseMesh.h>
-#include <BaseMeshContainer.h>
-#include <NeuroSWC.h>
-#include <SpinesSWC.h>
-#include <SWCImporter.h>
+#include <libs/libNeuroUtils/BaseMesh.h>
+#include <libs/libNeuroUtils/BaseMeshContainer.h>
+#include <libs/libNeuroUtils/NeuroSWC.h>
+#include <libs/libNeuroUtils/SpinesSWC.h>
+#include <libs/libNeuroUtils/SWCImporter.h>
 
-#include <XMLProgressiveNeuroVizManager.h>
+#include <libs/libQtNeuroUtils/XMLProgressiveNeuroVizManager.h>
 
-#include <MeshRenderer.h>
-#include <LightManager.h>
+#include <libs/libGLNeuroUtils/MeshRenderer.h>
+#include <libs/libGLNeuroUtils/LightManager.h>
 
 using namespace NSBaseMesh;
 using namespace NSBaseMeshContainer;

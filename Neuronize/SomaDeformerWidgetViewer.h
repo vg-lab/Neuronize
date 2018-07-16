@@ -21,18 +21,18 @@
 #ifndef QTSDW
 #define QTSDW
 
-#include <config.h>
+#include <libs/libGLNeuroUtils/config.h>
 
 #include <QVector3D>
 #include <QColor>
 #include <QDir>
 #include <QGLViewer/qglviewer.h>
 
-#include <SWCImporter.h>
-#include <MeshRenderer.h>
-#include <BaseMeshContainer.h>
-#include <MSObject.h>
-#include <XMLSomaDefManager.h>
+#include <libs/libNeuroUtils/SWCImporter.h>
+#include <libs/libGLNeuroUtils/MeshRenderer.h>
+#include <libs/libNeuroUtils/BaseMeshContainer.h>
+#include <libs/libNeuroUtils/MSObject.h>
+#include <libs/libQtNeuroUtils/XMLSomaDefManager.h>
 
 #include "FrameConstrictor.h"
 #include "manipulatedFrameSetConstraint.h"

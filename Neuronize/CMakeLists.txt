@@ -1,78 +1,91 @@
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
-endif(NOT CMAKE_BUILD_TYPE)
+source_group(\\ FILES CMakeLists.txt)
 
-#Boost
-find_package (Boost)
+set (NEURONIZELIB_SOURCES
+		batchbuilder.cpp
+		FrameConstrictor.cpp
+		manipulatedFrameSetConstraint.cpp
+		NeuroGeneratorWidget.cpp
+		NeuroGeneratorWidgetViewer.cpp
+		neuronize.cpp
+		object.cpp
+		SomaCreatorWidget.cpp
+		SomaDeformerWidget.cpp
+		SomaDeformerWidgetViewer.cpp
+		)
 
-INCLUDE_DIRECTORIES (${Boost_INCLUDE_DIRS} )
+set(NEURONIZELIB_HEADERS
+		batchbuilder.h
+		batchbuilder.ui
+		FrameConstrictor.h
+		manipulatedFrameSetConstraint.h
+		NeuroGeneratorWidget.h
+		NeuroGeneratorWidget.ui
+		NeuroGeneratorWidgetViewer.h
+		neuronize.h
+		neuronize.ui
+		object.h
+		SomaCreatorWidget.h
+		SomaCreatorWidget.ui
+		SomaDeformerWidget.h
+		SomaDeformerWidget.ui
+		SomaDeformerWidgetViewer.h
+		xneuron.ui
+		xneuron.qrc
+		neuronize.qrc
+		)
 
-include_directories( ../libs/libSysNeuroUtils )
-include_directories( ../libs/libNeuroUtils )
-include_directories( ../libs/libGLNeuroUtils )
-include_directories( ../libs/libQtNeuroUtils )
+set(NEURONIZELIB_LINK_LIBRARIES
+		SysNeuroUtils
+		NeuroUtils
+		GLNeuroUtils
+		QtNeuroUtils
+		OpenMeshCore
+		OpenMeshTools
+		${OPENGL_LIBRARIES}
+		${GLUT_LIBRARY}
+		QGLViewer
+		Qt5::Widgets
+		Qt5::Xml
+		Qt5::OpenGL
+		${Boost_LIBRARIES}
+		)
 
-file (GLOB neuronize_src "*.cpp")
-file (GLOB neuronize_hdr "*.h")
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR}/src)
 
-set (neuronize_ui   ${CMAKE_CURRENT_SOURCE_DIR}/neuronize.ui
-                    ${CMAKE_CURRENT_SOURCE_DIR}/batchbuilder.ui
-                    ${CMAKE_CURRENT_SOURCE_DIR}/NeuroGeneratorWidget.ui
-                    ${CMAKE_CURRENT_SOURCE_DIR}/SomaCreatorWidget.ui
-                    ${CMAKE_CURRENT_SOURCE_DIR}/SomaDeformerWidget.ui
-)
+add_definitions("-w")
 
-#Luego se genera la aplica
-set (MyProjectBin_src ${CMAKE_CURRENT_SOURCE_DIR}/main.cxx)
+if (MSVC)
+	add_definitions("/W4")
+	# Static build
+	add_definitions(-DVISHNU3DVIEWER_STATIC)
+endif ()
 
-#Para invocar al MOC
-qt5_wrap_cpp(neuronize_hdr_moc ${neuronize_hdr})
-qt5_wrap_ui(neuronize_ui_moc  ${neuronize_ui})
+common_library(neuronizelib)
 
-SET(UI_RESOURCES neuronize.qrc)
-QT5_ADD_RESOURCES(UI_RESOURCES_RCC ${UI_RESOURCES})
 
-include_directories (${PROJECT_SOURCE_DIR})
-include_directories (${PROJECT_BINARY_DIR})
+source_group(\\ FILES CMakeLists.txt)
 
-include_directories(${QT_INCLUDES} 
-					${CMAKE_CURRENT_BINARY_DIR}
-					${CMAKE_CURRENT_SOURCE_DIR} 
-					)
+set (NEURONIZE_SOURCES
+		main.cxx
+		)
 
-#Construccion de la librería
-add_library (neuronizeLib SHARED 
-    ${neuronize_src}
-    ${neuronize_hdr_moc}
-    ${neuronize_ui_moc}
-    ${UI_RESOURCES_RCC}
-)
+set(NEURONIZE_HEADERS
+		)
 
-target_link_libraries ( neuronizeLib  SysNeuroUtils
-                                      NeuroUtils
-                                      GLNeuroUtils 
-                                      QtNeuroUtils 
-                                      OpenMeshCore 
-                                      OpenMeshTools
-                                      ${OPENGL_LIBRARIES} 
-                                      ${GLUT_LIBRARY}								
-                                      QGLViewer
-                                      Qt5::Widgets
-                                      Qt5::Xml
-                                      Qt5::OpenGL
-                                      ${Boost_LIBRARIES}
-                                  )
-						
-#Construcción de la apli
-add_executable(neuronize ${MyProjectBin_src} ${UI_RESOURCES_RCC})
-target_link_libraries (neuronize neuronizeLib)
+set(NEURONIZE_LINK_LIBRARIES
+		neuronizelib
+		)
 
-set_target_properties( neuronizeLib
-  PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR}/src)
 
-set_target_properties( neuronize
-  PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+add_definitions("-w")
 
-#add_custom_command(TARGET neuronize PRE_BUILD
-#                   COMMAND ${CMAKE_COMMAND} -E copy_directory
-#                       ${PROJECT_SOURCE_DIR}/Content ${RUNTIME_OUTPUT_DIRECTORY}/Content)
+if (MSVC)
+	add_definitions("/W4")
+	# Static build
+	add_definitions(-DVISHNU3DVIEWER_STATIC)
+endif ()
+
+common_application(neuronize)

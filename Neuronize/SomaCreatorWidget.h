@@ -24,11 +24,11 @@
 #include <QMainWindow>
 #include <QDomDocument>
 
-#include <XMLSomaDef.h>
-#include <XMLSomaDefManager.h>
+#include <libs/libQtNeuroUtils/XMLSomaDef.h>
+#include <libs/libQtNeuroUtils/XMLSomaDefManager.h>
 
-#include <SWCImporter.h>
-#include <BaseMesh.h>
+#include <libs/libNeuroUtils/SWCImporter.h>
+#include <libs/libNeuroUtils/BaseMesh.h>
 
 #include "ui_SomaCreatorWidget.h"
 
