@@ -40,6 +40,7 @@ common_find_package(Qt5Core REQUIRED)
 common_find_package(Qt5Gui REQUIRED)
 common_find_package(Qt5OpenGL REQUIRED)
 common_find_package(Qt5Xml REQUIRED)
+common_find_package(Eigen3 SYSTEM REQUIRED)
 common_find_package(SkelGenerator REQUIRED )
 common_find_package_post( )
 

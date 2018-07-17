@@ -19,6 +19,7 @@
  */
 
 #include "SomaCreatorWidget.h"
+#include "LoadFileDialog.h"
 
 #include <string>
 #include <fstream>
@@ -623,13 +624,17 @@ void SomaCreatorWidget::generateMatLabScritp()
 
 void SomaCreatorWidget::generateXMLSoma ( )
 {
+
   QFileInfo info1;
   QString fileName = "";
   if ( ui.checkBox_loadSWC->isChecked ( ))
   {
-    fileName =
-      QFileDialog::getOpenFileName ( this, tr ( "Open File" ), "./", tr ( "NeuroMorpho(*.swc);;Neurolucida(*.asc)" ));
+    /*fileName =
+      QFileDialog::getOpenFileName ( this, tr ( "Open File" ), "./", tr ( "NeuroMorpho(*.swc);;Neurolucida(*.asc)" )); */
 
+    LoadFileDialog dialog;
+    dialog.exec();
+    fileName = QString::fromStdString(dialog.getFile());
     if ( !fileName.isNull ( ))
     {
       if ( mSWCImporter != NULL )
