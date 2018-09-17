@@ -457,7 +457,10 @@ void NeuroGeneratorWidget::generateSpines ( )
   unsigned int lNumOfGroups = ui.spinBox_NumOfGroupsModeledSpines->value ( );
   unsigned int lGenerateOption = 0;
 
-  if ( ui.radioButton_ProceduralSpines->isChecked ( ))
+
+  if (this->neuron!= nullptr)
+      lGenerateOption = 5;
+  else if ( ui.radioButton_ProceduralSpines->isChecked ( ))
     lGenerateOption = 0;
   else if ( ui.radioButton_ModelSpines->isChecked ( ))
     lGenerateOption = 1;
@@ -467,6 +470,7 @@ void NeuroGeneratorWidget::generateSpines ( )
     lGenerateOption = 3;
   else if ( ui.radioButton_SegmentSpines->isChecked ( ))
     lGenerateOption = 4;
+
 
 //  lGenerateOption = 0;
 //  viewer->SetSpinesType(lGenerateOption);
@@ -525,6 +529,16 @@ void NeuroGeneratorWidget::generateSpines ( )
                                               lMinRadio,
                                               lMaxRadio );
       break;
+
+      case 5:
+        QDir dir ("tmpSpines");
+        if (dir.exists()) {
+          dir.removeRecursively();
+          QDir().mkdir("tmpSpines");
+        } else {
+          QDir().mkdir("tmpSpines");
+        }
+
   }
 }
 
@@ -1085,7 +1099,13 @@ void NeuroGeneratorWidget::RebuildWithAdvancedOptions ( )
 
 void NeuroGeneratorWidget::goAdvencedSpinesOptions ( )
 {
-  ui.tabWidget_RenderControl->setCurrentIndex ( 1 );
+  if (this->neuron == nullptr) {
+    ui.tabWidget_RenderControl->setCurrentIndex(1);
+  } else {
+    //TODO build spines with neuron object.
+      this->neuron->spines_to_obj("tmpSpines");
+      viewer->generateSpinesVrml("tmpSpines");
+  }
 }
 
 void NeuroGeneratorWidget::showMsjDendritesGeneration ( )
@@ -1127,5 +1147,9 @@ void NeuroGeneratorWidget::importSpinesInfo ( )
   {
     viewer->importSpinesInfo ( fileName );
   }
+}
+
+void NeuroGeneratorWidget::setNeuron(skelgenerator::Neuron *neuron) {
+  NeuroGeneratorWidget::neuron = neuron;
 }
 

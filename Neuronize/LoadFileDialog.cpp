@@ -7,9 +7,13 @@
 #include <QHBoxLayout>
 #include <QFileDialog>
 #include <QFile>
-#include <SkelGenerator/SkelGeneratorUtil/Neuron.h>
 #include <iostream>
 #include <fstream>
+#include <QtConcurrent/QtConcurrent>
+#include <QMessageBox>
+#include <QInputDialog>
+#include <QProgressDialog>
+#include <QFutureWatcher>
 
 
 LoadFileDialog::LoadFileDialog(QWidget *parent): QDialog(parent) {
@@ -29,14 +33,16 @@ LoadFileDialog::LoadFileDialog(QWidget *parent): QDialog(parent) {
     basalPath->setPlaceholderText("Basal/s VRML file/s");
     basalPath->setEnabled(false);
 
-    okButton = new QPushButton("Ok",this);
-    cancelButton = new QPushButton("Cancel",this);
+    buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
     tracePathButton = new QPushButton("Select File...",this);
     basalPathButton = new QPushButton("Select File...",this);
     basalPathButton->setEnabled(false);
     apiPathButton = new QPushButton("Select File...",this);
     apiPathButton->setEnabled(false);
+
+    futureWatcher = new QFutureWatcher<void>();
+    neuron = nullptr;
 
     auto grid = new QGridLayout();
     grid->setSpacing(6);
@@ -51,16 +57,10 @@ LoadFileDialog::LoadFileDialog(QWidget *parent): QDialog(parent) {
     grid->addWidget(basalPathButton,2,1);
     grid->addWidget(basalPath,2,2);
 
-    auto buttonLayout = new QHBoxLayout();
-    buttonLayout->setSpacing(10);
-    buttonLayout->addSpacerItem(new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Fixed));
-    buttonLayout->addWidget(okButton,0,Qt::AlignRight);
-    buttonLayout->addWidget(cancelButton,0,Qt::AlignRight);
-
 
     auto mainLayout = new QVBoxLayout();
     mainLayout->addItem(grid);
-    mainLayout->addItem(buttonLayout);
+    mainLayout->addWidget(buttonBox);
 
 
     connect(traces,&QRadioButton::toggled,this,&LoadFileDialog::onRadioChanged);
@@ -74,8 +74,10 @@ LoadFileDialog::LoadFileDialog(QWidget *parent): QDialog(parent) {
         openSelectFileDialog(basalPath,"Select basal file","Imaris VRML (*.vrml *.wrl)",true);
     });
 
-    connect(okButton,&QPushButton::released,this,&LoadFileDialog::onOkPressed);
-    connect(cancelButton,&QPushButton::released,[=](){this->close();});
+    connect(buttonBox,&QDialogButtonBox::accepted,this,&LoadFileDialog::onOkPressed);
+    connect(buttonBox,&QDialogButtonBox::rejected,[=](){this->close();});
+
+    connect(futureWatcher,&QFutureWatcher<void>::finished,this,&LoadFileDialog::onProcessFinish);
 
 
     setLayout(mainLayout);
@@ -111,26 +113,134 @@ void LoadFileDialog::openSelectFileDialog(QLineEdit *target,const QString& title
 void LoadFileDialog::onOkPressed() {
     if (traces->isChecked()) {
         this->file = tracePath->text().toStdString();
+        accept();
     } else {
-        auto basalFiles = basalPath->text().split(";");
-        auto apiFile = apiPath->text().toStdString();
-        std::vector<std::string> basalFilesStd;
-        for (const auto& string: basalFiles) {
-            basalFilesStd.push_back(string.toStdString());
-        }
-        skelgenerator::Neuron neuron (apiFile,basalFilesStd);
-        std::ofstream file;
-        file.open("temp.swc",std::ios::out);
-        file <<neuron.to_swc();
-        file.close();
-        this->file = "temp.swc";
+        QFuture<void> future = QtConcurrent::run([=]() { processSkel("temp.swc"); });
+        futureWatcher->setFuture(future);
+        progresDialog = new QProgressDialog("Operation in progress", "Cancel", 0, 0, this);
+        progresDialog->setValue(0);
+        progresDialog->setCancelButton(0);
+        progresDialog->setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
+        progresDialog->exec();
     }
-
-    accept();
-
-
 }
 
 const std::string &LoadFileDialog::getFile() const {
     return file;
+}
+
+void LoadFileDialog::processSkel(const std::string &fileName){
+    auto basalFiles = basalPath->text().split(";");
+    auto apiFile = apiPath->text().toStdString();
+    std::vector<std::string> basalFilesStd;
+    for (const auto& string: basalFiles) {
+        basalFilesStd.push_back(string.toStdString());
+    }
+    auto neuron = new skelgenerator::Neuron (apiFile,basalFilesStd);
+    bool ignore = false;
+    while (neuron->isIncorrectConecctions() || neuron->getReamingSegments() >0 && !ignore) {
+        int newThreshold;
+        if (neuron->isIncorrectConecctions()) {
+            QMetaObject::invokeMethod(this, "showWarningDialogIncorrectConnections", Qt::BlockingQueuedConnection,
+                                      Q_ARG(int &, newThreshold));
+
+        } else {
+            if ( neuron->getReamingSegments() > 0 ){
+                QMetaObject::invokeMethod(this, "showWarningDialogReaminingSegments", Qt::BlockingQueuedConnection,
+                                          Q_ARG(int, neuron->getReamingSegments()),
+                                          Q_ARG(int & , newThreshold));
+            }
+        }
+
+        ignore = newThreshold < 0;
+        if (!ignore) {
+            delete(neuron);
+            neuron = new skelgenerator::Neuron(apiFile, basalFilesStd, newThreshold);
+        }
+
+    }
+
+
+    std::ofstream file;
+    file.open(fileName,std::ios::out);
+    file << neuron->to_swc();
+    file.close();
+    this->file = fileName;
+    this->neuron = neuron;
+
+}
+
+void LoadFileDialog::onProcessFinish() {
+    progresDialog->setMaximum(1);
+    progresDialog->setValue(1);
+    QMessageBox msgBox(this);
+    msgBox.setText("Task Finished");
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.exec();
+    this->accept();
+}
+
+void LoadFileDialog::showWarningDialogIncorrectConnections(int &newThreshold) {
+    auto *msgBox = new QMessageBox(this);;
+    std::string msg = "The neuron maybe has incorrect connections.\t";
+    msgBox->setIcon(QMessageBox::Warning);
+    msgBox->setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
+    msgBox->setInformativeText(
+            "Do you want to process the neuron again changing the \"Connection Threshold\" or ignore the maybe incorrect conections?");
+    msgBox->setText(QString::fromStdString(msg));
+    QPushButton *changeButton = msgBox->addButton(tr(" Change Threshold "), QMessageBox::NoRole);
+    QPushButton *ignoreButton = msgBox->addButton(tr("Ignore"), QMessageBox::NoRole);
+    msgBox->setDefaultButton(changeButton);
+    msgBox->exec();
+
+    if (msgBox->clickedButton() == changeButton) {
+        QInputDialog inputDialog(this);
+        inputDialog.setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
+        inputDialog.setLabelText("New Connection Threshold");
+        inputDialog.setTextValue("Insert new value");
+        inputDialog.setInputMode(QInputDialog::IntInput);
+        inputDialog.setIntRange(0, 40);
+        inputDialog.setIntStep(1);
+        inputDialog.setIntValue(newThreshold);
+        inputDialog.exec();
+        newThreshold = inputDialog.intValue();
+    } else {
+        newThreshold = -1;
+    }
+}
+
+void LoadFileDialog::showWarningDialogReaminingSegments(int sobrantes, int &newThreshold) {
+    QMessageBox *msgBox = new QMessageBox(this);;
+    std::string msg = "This neuron has " + std::to_string(sobrantes) +
+                      " segments that have not been connected and therefore will be ignored.";
+    msgBox->setIcon(QMessageBox::Warning);
+    msgBox->setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
+    msgBox->setInformativeText(
+            "Do you want to process the neuron again changing the \"Connection Threshold\" or ignore the missing segments?");
+    msgBox->setText(QString::fromStdString(msg));
+    QPushButton *changeButton = msgBox->addButton(tr(" Change Threshold "), QMessageBox::NoRole);
+    QPushButton *ignoreButton = msgBox->addButton(tr("Ignore"), QMessageBox::NoRole);
+    msgBox->setDefaultButton(changeButton);
+    msgBox->exec();
+
+    if (msgBox->clickedButton() == changeButton) {
+        QInputDialog inputDialog;
+        inputDialog.setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
+        inputDialog.setLabelText("New Connection Threshold");
+        inputDialog.setTextValue("Insert new value");
+        inputDialog.setInputMode(QInputDialog::IntInput);
+        inputDialog.setIntRange(0, 40);
+        inputDialog.setIntStep(1);
+        inputDialog.setIntValue(newThreshold);
+        inputDialog.exec();
+        newThreshold = inputDialog.intValue();
+
+
+    } else {
+        newThreshold = -1;
+    }
+}
+
+skelgenerator::Neuron *LoadFileDialog::getNeuron() const {
+    return neuron;
 }

@@ -20,6 +20,8 @@
 
 #include "NeuroGeneratorWidgetViewer.h"
 #include <math.h>
+#include <SkelGenerator/SkelGeneratorUtil/Neuron.h>
+#include <QtCore/QDirIterator>
 //#include <QtGui>
 
 // Constructor must call the base class constructor.
@@ -845,6 +847,7 @@ void NeuroGeneratorWidgetViewer::generateSpinesInSegment ( unsigned int pNumSpin
 
   mSpinesSynthContainers.addElement ( new BaseMesh ( ));
   mSpinesSynthContainers.getElementAt ( i )->JoinBaseMesh ( meshSpines );
+
 
   MeshDef::ConstVertexIter iniLimit = mSpinesSynthContainers.getElementAt ( i )->getMesh ( )->vertices_begin ( );
   MeshDef::ConstVertexIter finLimit = mSpinesSynthContainers.getElementAt ( i )->getMesh ( )->vertices_end ( );
@@ -1693,5 +1696,47 @@ void NeuroGeneratorWidgetViewer::importSpinesInfo ( QString fileName )
   updateGL ( );
 
 }
+
+void NeuroGeneratorWidgetViewer::generateSpinesVrml(QString dirPath) {
+    if ( mesh == NULL )
+        return;
+
+    if ( meshSpines != NULL )
+    {
+        delete meshSpines;
+        meshSpines == NULL;
+    }
+
+    meshSpines = new SpinesSWC();
+
+    std::cout << dirPath.toStdString() << std::endl;
+    QDirIterator it (dirPath,QDir::Files | QDir::NoDotAndDotDot);
+    int i = 0;
+    while (it.hasNext() && i < 10) {
+        auto filename = it.next();
+        auto auxMesh = new BaseMesh();
+        auxMesh->loadModel(filename.toStdString());
+        meshSpines->JoinBaseMesh(auxMesh);
+        i++;
+    }
+    meshSpines->exportMesh("mesh.obj");
+
+
+    if ( spineMeshRend != NULL )
+    {
+        delete spineMeshRend;
+    }
+
+    spineMeshRend = new MeshRenderer ( );
+
+    spineMeshRend->setMeshToRender ( meshSpines );
+
+    spineMeshRend->setRenderOptions ( renderMask );
+
+    updateGL();
+
+
+}
+
 
 

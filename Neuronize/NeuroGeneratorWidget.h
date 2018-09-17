@@ -25,6 +25,7 @@
 #include <QFileDialog>
 #include <QDir>
 #include <QMessageBox>
+#include <SkelGenerator/SkelGeneratorUtil/Neuron.h>
 
 #include "ui_NeuroGeneratorWidget.h"
 #include "NeuroGeneratorWidgetViewer.h"
@@ -38,7 +39,11 @@ class NeuroGeneratorWidget: public QWidget, public Ui::NeuroGeneratorWidget
 
     QMessageBox *msgBox;
 
-  public slots:
+    skelgenerator::Neuron* neuron;
+public:
+    void setNeuron(skelgenerator::Neuron *neuron);
+
+public slots:
 
     void destroyAllGroupsSpines ( ) { viewer->destroyAllGroupsSpines ( ); }
 

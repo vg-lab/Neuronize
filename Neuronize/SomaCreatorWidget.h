@@ -24,6 +24,8 @@
 #include <QMainWindow>
 #include <QDomDocument>
 
+#include <SkelGenerator/SkelGeneratorUtil/Neuron.h>
+
 #include <libs/libQtNeuroUtils/XMLSomaDef.h>
 #include <libs/libQtNeuroUtils/XMLSomaDefManager.h>
 
@@ -44,6 +46,7 @@ class SomaCreatorWidget: public QWidget, public Ui::SomaCreatorWidget
   Q_OBJECT
 
     //!!!Engine *m_pEngine;
+
 
   public slots:
 
@@ -101,7 +104,12 @@ class SomaCreatorWidget: public QWidget, public Ui::SomaCreatorWidget
 
     void loadSWCFile ( QString pFileToLoad );
 
-  private:
+    skelgenerator::Neuron *getNeuron() const;
+
+    void setNeuron(skelgenerator::Neuron *neuron);
+
+
+private:
 
     Ui::SomaCreatorWidget ui;
 
@@ -120,6 +128,9 @@ class SomaCreatorWidget: public QWidget, public Ui::SomaCreatorWidget
     QString mExitDirectory;
 
     std::vector < unsigned int > mNearestVertex;
+    skelgenerator::Neuron* neuron;
+
+private:
 
     bool isIdInContainer ( unsigned int pId, std::vector < unsigned int > pVector );
 

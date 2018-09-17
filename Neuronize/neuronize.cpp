@@ -223,6 +223,7 @@ void Neuronize::showSpinesGenerator ( )
   ////Pasar la malla y la definicion al spines generator
   //ui.tabWidget_MainContainer->removeTab(0);
   //ui.tabWidget_MainContainer->insertTab(1,ui.tab_SpinesGenerator,"Spines generator");
+          mNeuroGeneratorWidget->setNeuron(mSomaCreatorWidget->getNeuron());
 
   //Noise options
   mNeuroGeneratorWidget->getUI ( ).checkBox_NoiseSoma->setVisible ( false );

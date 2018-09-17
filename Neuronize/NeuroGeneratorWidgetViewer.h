@@ -37,6 +37,8 @@
 #include <libs/libGLNeuroUtils/MeshRenderer.h>
 #include <libs/libGLNeuroUtils/LightManager.h>
 
+#include <SkelGenerator/SkelGeneratorUtil/Neuron.h>
+
 using namespace NSBaseMesh;
 using namespace NSBaseMeshContainer;
 using namespace NSNeuroSWC;
@@ -260,7 +262,9 @@ class NeuroGeneratorWidgetViewer: public QGLViewer
 
     void importSpinesInfo ( QString fileName );
 
-  protected:
+    void generateSpinesVrml(QString dirPath);
+
+protected:
 
     virtual void draw ( );
 
