@@ -187,6 +187,8 @@ namespace NSSWCImporter
 
     lNodeAux = preProcessNodeCollection[1];
 
+    displacement = preProcessNodeCollection[1].position;
+
     //Solo se centra si es necesario centrarlo, si no peta :(
     for ( unsigned int i = 1; i < lNumNodes; ++i )
     {
@@ -1168,6 +1170,11 @@ namespace NSSWCImporter
     }
     return false;
   }
+
+    OpenMesh::Vec3f SWCImporter::getDisplacement() const {
+      return displacement;
+    }
+
 
 }
 

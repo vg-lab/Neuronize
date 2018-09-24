@@ -12,6 +12,7 @@ set (NEURONIZELIB_SOURCES
 		SomaDeformerWidget.cpp
 		SomaDeformerWidgetViewer.cpp
 		LoadFileDialog.cpp
+		MeshVCG.cpp
 		)
 
 set(NEURONIZELIB_HEADERS
@@ -34,6 +35,7 @@ set(NEURONIZELIB_HEADERS
 		xneuron.ui
 		xneuron.qrc
 		neuronize.qrc
+		MeshVCG.h
 		)
 
 set(NEURONIZELIB_LINK_LIBRARIES
@@ -55,6 +57,7 @@ set(NEURONIZELIB_LINK_LIBRARIES
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR}/src)
+include_directories(VCG_INCLUDE_DIR)
 
 add_definitions("-w")
 

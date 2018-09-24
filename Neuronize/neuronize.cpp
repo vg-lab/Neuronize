@@ -151,7 +151,7 @@ void Neuronize::showSomaDeformer ( )
   ui.tabWidget_MainContainer->removeTab ( 0 );
   ui.tabWidget_MainContainer->insertTab ( 0, ui.tab_SomaGenerator, "Soma builder" );
 
-  mSomaDeformerWidget->loadPredefinedXMLSomaDef ( );
+  mSomaDeformerWidget->loadPredefinedXMLSomaDef();
   //mSomaDeformerWidget->startDeformation();
 }
 

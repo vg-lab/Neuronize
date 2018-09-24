@@ -135,6 +135,8 @@ namespace NSSWCImporter
       //branches of the neuron
       std::vector <SWCBranch> mBranches;
 
+      OpenMesh::Vec3f displacement;
+
       //Load the file
       void loadFile ( string fileName, bool pApplyStdDims, bool pApplyReplicantNodeTest );
 
@@ -182,6 +184,8 @@ namespace NSSWCImporter
 
       //Get number of nodes
       unsigned int getNumNodes ( ) const;
+
+      OpenMesh::Vec3f getDisplacement() const;
 
       //Get number of connection
       unsigned int getNumConnection ( );

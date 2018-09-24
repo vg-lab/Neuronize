@@ -31,6 +31,10 @@ set( COMMON_PROJECT_DOMAIN gmrv.es )
 
 include( Common )
 
+set( VCG_ROOT "/home/ivelascog/programas/vcglib/")
+include_directories(VCG_INCLUDE_DIR)
+
+common_find_package( VCG REQUIRED )
 common_find_package(Boost REQUIRED)
 common_find_package(GLEW REQUIRED)
 common_find_package(OpenGL REQUIRED)
@@ -44,7 +48,7 @@ common_find_package(Eigen3 SYSTEM REQUIRED)
 common_find_package(SkelGenerator REQUIRED )
 common_find_package_post( )
 
-list( APPEND DATACOOKING_DEPENDENT_LIBRARIES
+list( APPEND NEURONIZE_DEPENDENT_LIBRARIES
         Qt5::Core
         Qt5::Widgets
         Qt5::Gui
@@ -53,14 +57,18 @@ list( APPEND DATACOOKING_DEPENDENT_LIBRARIES
         GLEW
         GLUT
         OpenGL
+        ${Boost_LIBRARIES}
+        SkelGenerator
         )
 
-
+include_directories(VCG_INCLUDE_DIR)
 add_subdirectory( libs/libSysNeuroUtils )
 add_subdirectory( libs/libNeuroUtils )
 add_subdirectory( libs/libGLNeuroUtils )
 add_subdirectory( libs/libQtNeuroUtils )
 add_subdirectory( Neuronize )
+include_directories(VCG_INCLUDE_DIR)
+
 
 
 if( MSVC )

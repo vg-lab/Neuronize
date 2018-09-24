@@ -22,6 +22,7 @@
 #include <math.h>
 #include <SkelGenerator/SkelGeneratorUtil/Neuron.h>
 #include <QtCore/QDirIterator>
+#include "../libs/libSysNeuroUtils/MathUtils.h"
 //#include <QtGui>
 
 // Constructor must call the base class constructor.
@@ -1711,15 +1712,43 @@ void NeuroGeneratorWidgetViewer::generateSpinesVrml(QString dirPath) {
 
     std::cout << dirPath.toStdString() << std::endl;
     QDirIterator it (dirPath,QDir::Files | QDir::NoDotAndDotDot);
+    boost::numeric::ublas::matrix<float> translationMatrix (4,4);
+    boost::numeric::ublas::matrix<float> scaleMatrix (4,4);
+
+    auto displacement = mSWCImporter->getDisplacement();
+
+    generateSquareTraslationMatrix(translationMatrix,-displacement[0],-displacement[1],-displacement[2]);
+
+
     int i = 0;
-    while (it.hasNext() && i < 10) {
+    while (it.hasNext() && i < 1000) {
         auto filename = it.next();
         auto auxMesh = new BaseMesh();
-        auxMesh->loadModel(filename.toStdString());
+      auto begin = chrono::high_resolution_clock::now();
+      auxMesh->loadModel(filename.toStdString());
+      auto end = chrono::high_resolution_clock::now();
+      auto dur = end - begin;
+      auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(dur).count();
+      cout << "load Time: " <<  ms << endl;
+      auxMesh->applyMatrixTransform(translationMatrix,4);
+        auxMesh->updateBaseMesh();
+      begin = chrono::high_resolution_clock::now();
         meshSpines->JoinBaseMesh(auxMesh);
+      end = chrono::high_resolution_clock::now();
+      dur = end - begin;
+      ms = std::chrono::duration_cast<std::chrono::milliseconds>(dur).count();
+      cout << "Fusion time: " << ms << endl;
+
         i++;
+        std::cout << i << std::endl;
     }
-    meshSpines->exportMesh("mesh.obj");
+
+    MeshDef::ConstVertexIter iniLimit = meshSpines->getMesh ( )->vertices_begin ( );
+    MeshDef::ConstVertexIter finLimit = meshSpines->getMesh ( )->vertices_end ( );
+
+    meshSpines->setVertexColor ( iniLimit, finLimit, MeshDef::Color ( 0.5, 0.5, 1.0, 1.0 ));
+
+
 
 
     if ( spineMeshRend != NULL )

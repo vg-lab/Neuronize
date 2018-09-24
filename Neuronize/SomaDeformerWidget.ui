@@ -269,9 +269,9 @@
           <property name="geometry">
            <rect>
             <x>0</x>
-            <y>0</y>
-            <width>229</width>
-            <height>922</height>
+            <y>-84</y>
+            <width>256</width>
+            <height>1027</height>
            </rect>
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -364,7 +364,7 @@
                     <string>Procedural Soma</string>
                    </property>
                    <property name="checked">
-                    <bool>true</bool>
+                    <bool>false</bool>
                    </property>
                   </widget>
                  </item>
@@ -408,7 +408,7 @@
                     <string>XMLSoma</string>
                    </property>
                    <property name="checked">
-                    <bool>false</bool>
+                    <bool>true</bool>
                    </property>
                   </widget>
                  </item>

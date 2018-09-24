@@ -29,7 +29,7 @@ SomaDeformerWidget::SomaDeformerWidget ( QWidget *parent )
 
   viewer = new SomaDeformerWidgetViewer ( this );
 
-  mXMLFile = "";
+  mXMLFile = "tmp/Definition.xml";
 
   //Add the viewer component to the interface
   ui.verticalLayout_Viewer->addWidget ( viewer );
@@ -419,6 +419,7 @@ void SomaDeformerWidget::finalSomaOptimization ( )
 
 void SomaDeformerWidget::finalizeSoma ( )
 {
+  exportModelWithSTDName();
   emit finishSoma ( );
 }
 

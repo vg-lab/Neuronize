@@ -20,6 +20,8 @@
 
 #include "SomaCreatorWidget.h"
 #include "LoadFileDialog.h"
+#include "MeshVCG.h"
+
 
 #include <string>
 #include <fstream>
@@ -31,6 +33,7 @@
 #include <QDebug>
 
 #include <libs/libNeuroUtils/ASC2SWC.h>
+
 
 using namespace std;
 
@@ -685,14 +688,12 @@ void SomaCreatorWidget::generateXMLSoma ( ) {
     lBaseMesh->JoinBaseMesh(mBaseMesh);
     //Escalamos al radio del soma
     lBaseMesh->scaleBaseMesh(mSWCImporter->getElementAt(1).radius);
-
-//---  lBaseMesh->exportMesh (
-//---    mExitDirectory.toStdString ( ) + "\\" + sourceInfoModel.baseName ( ).toStdString ( ) + "_RadioReal.off" );
-//---  delete lBaseMesh;
+    lBaseMesh->exportMesh (mExitDirectory.toStdString ( ) + "/" + sourceInfoModel.baseName ( ).toStdString ( ) + "_RadioReal.off" );
+    delete lBaseMesh;
 
     int lNumDendrites = mSWCImporter->getNumDendritics();
 
-    /*
+
     QFileInfo lMeshNameWIthoutExtension(mMehsFileName);
     //lMeshNameWIthoutExtension.baseName();
 
@@ -729,14 +730,19 @@ void SomaCreatorWidget::generateXMLSoma ( ) {
 
     //Construir cada dendrita
     calcNearestVertex();
+    std::vector<int> vertexs;
 
     for (int i=0;i<lNumDendrites;++i)
     {
-      lMatLAbScriptFile+="\nidVertex="+  QString::number(mNearestVertex.at(i)+1)+ "; \n";
-      lMatLAbScriptFile+="start_points = idVertex; \n";
-      lMatLAbScriptFile+="[D,S,Q] = perform_fast_marching_mesh(vertex, faces, start_points); \n";
-      lMatLAbScriptFile+="save " + mDefaultGeoDistFileName + QString::number(i) + ".dat D -ASCII \n";
+      vertexs.push_back(mNearestVertex.at(i));
     }
+    MeshVCG mesh("tmp/IcoSphera4Subdiv1Radio_RadioReal.off");
+    std::string path = mExitDirectory.toStdString() + "/";
+    path+=mDefaultGeoDistFileName.toStdString();
+
+    mesh.calcGeodesicDistance(vertexs,path);
+
+
 
     //Clean files
     //Exportaci�n de los vIds
@@ -757,9 +763,8 @@ void SomaCreatorWidget::generateXMLSoma ( ) {
 
     //Call MatLab to generate the files
 
-    engEvalString(m_pEngine, lMatLAbScriptFile.toAscii() );
     //engClose(m_pEngine);
-    */
+
 
 
     //Exportaci�n de los vIds
@@ -772,29 +777,12 @@ void SomaCreatorWidget::generateXMLSoma ( ) {
     //GeoCalcInitialize();
 
 
-    /*---
-      mwArray out(0);
 
-      double * rdata;
-      rdata = new double[lNumDendrites];
-      for (int i=0;i<lNumDendrites;++i)
-      {
-          rdata[i]= mNearestVertex.at(i)+1;
-      }
 
-      mwArray a(1, lNumDendrites, mxDOUBLE_CLASS);
-      a.SetData(rdata, lNumDendrites);
-
-      delete rdata;
 
       //mwArray lPathName("E:\\WorkSpace\\VisualStudio\\CPP\\Produccion\\Puppeteer Engine\\tutorials\\Qt\\XNeuron");
       QString lPathDoubleBackSlah =  QDir::currentPath();
       //lPathDoubleBackSlah.replace("/","\\\\");
-      mwArray lPathName(lPathDoubleBackSlah.toStdString().c_str());
-
-      mwArray lModelName("IcoSphera4Subdiv1Radio_RadioReal");
-
-      GeoCalc(1,out,lPathName, a, lModelName);
 
       //GeoCalcTerminate();
 
@@ -808,7 +796,7 @@ void SomaCreatorWidget::generateXMLSoma ( ) {
           //Lectura del fichero
           //Abrir el fichero
           std::ifstream vIdsInputFileTXT;
-          QString vIdsFileTXT = mExitDirectory + "\\" + mDefaultGeoDistFileName + QString::number(k)+".dat";
+          QString vIdsFileTXT = mExitDirectory + "/" + mDefaultGeoDistFileName + QString::number(k)+".dat";
           vIdsInputFileTXT.open(vIdsFileTXT.toStdString().c_str(), std::ios::in);
 
           if (!vIdsInputFileTXT)
@@ -823,7 +811,7 @@ void SomaCreatorWidget::generateXMLSoma ( ) {
           }
 
           //QString fileName = QFileDialog::getSaveFileName(this);
-          QString fileName = mExitDirectory + "\\" + mDefaultVidsFileName + QString::number(k)+".vid";
+          QString fileName = mExitDirectory + "/" + mDefaultVidsFileName + QString::number(k)+".vid";
 
           //if (!fileName.isEmpty())
           {
@@ -895,7 +883,7 @@ void SomaCreatorWidget::generateXMLSoma ( ) {
 
           mXMLSomaDefManager->exportDomToFile(fileName.toStdString());
       }
-  */
+
     //ui.label_SomaGeneratedName->setText("Soma to build = "+ sourceInfo.fileName());
     ui.label_SomaGeneratedName->setText("Soma to build = " + info1.fileName());
 
@@ -989,11 +977,8 @@ void SomaCreatorWidget::generateXMLSoma ( QString fileName )
   //Store current dir (Matlab will change this)
   fileName = QDir::currentPath ( );
 
-
-  //GeoCalcInitialize();
-  /*---
-  mwArray out(0);
-
+  ///  MATLAB
+  /*
   double * rdata;
   rdata = new double[lNumDendrites];
   for (int i=0;i<lNumDendrites;++i)
@@ -1013,12 +998,15 @@ void SomaCreatorWidget::generateXMLSoma ( QString fileName )
 
   mwArray lModelName("IcoSphera4Subdiv1Radio_RadioReal");
 
-  GeoCalc(1,out,lPathName, a, lModelName);
+  Geocalc(1,out,lPathName, a, lModelName);
 
   //GeoCalcTerminate();
 
   //Restore current dir, Matlab change this
   QDir::setCurrent(fileName);
+ */
+  ///VCGLIB geodesic distance
+
 
   //Generacion de los ficheros con los identificadores de los vertices que pertenecen a cada dendrita
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1114,7 +1102,7 @@ void SomaCreatorWidget::generateXMLSoma ( QString fileName )
 
     mXMLSomaDefManager->exportDomToFile(fileName.toStdString());
   }
-  */
+
   //ui.label_SomaGeneratedName->setText("Soma to build = "+ sourceInfo.fileName());
   ui.label_SomaGeneratedName->setText ( "Soma to build = " + info1.fileName ( ));
 
