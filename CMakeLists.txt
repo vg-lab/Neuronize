@@ -61,13 +61,11 @@ list( APPEND NEURONIZE_DEPENDENT_LIBRARIES
         SkelGenerator
         )
 
-include_directories(VCG_INCLUDE_DIR)
 add_subdirectory( libs/libSysNeuroUtils )
 add_subdirectory( libs/libNeuroUtils )
 add_subdirectory( libs/libGLNeuroUtils )
 add_subdirectory( libs/libQtNeuroUtils )
 add_subdirectory( Neuronize )
-include_directories(VCG_INCLUDE_DIR)
 
 
 
