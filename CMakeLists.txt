@@ -31,8 +31,6 @@ set( COMMON_PROJECT_DOMAIN gmrv.es )
 
 include( Common )
 
-set( VCG_ROOT "/home/ivelascog/programas/vcglib/")
-include_directories(VCG_INCLUDE_DIR)
 
 common_find_package( VCG REQUIRED )
 common_find_package(Boost REQUIRED)
@@ -59,6 +57,7 @@ list( APPEND NEURONIZE_DEPENDENT_LIBRARIES
         OpenGL
         ${Boost_LIBRARIES}
         SkelGenerator
+        VCG
         )
 
 add_subdirectory( libs/libSysNeuroUtils )
