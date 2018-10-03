@@ -991,7 +991,7 @@ void SomaDeformerWidgetViewer::setSWCDendriticConstraints ( )
         unsigned int nextContourVertexId = 0;
 
         //Atacamos cada vertice adyacente.
-        for ( CVVIter = mBaseMesh->getMesh ( )->cvv_iter ( vhandle ); CVVIter->is_valid ( ); ++CVVIter )
+        for ( CVVIter = mBaseMesh->getMesh ( )->cvv_iter ( vhandle ); CVVIter; ++CVVIter )
         {
           lAuxVertexHandle = mBaseMesh->getMesh ( )->vertex_handle ( CVVIter->idx ( ));
           nextContourVertexId = CVVIter->idx ( );
@@ -1292,7 +1292,7 @@ void SomaDeformerWidgetViewer::optimizateDendriticRadius ( )
 
       MeshDef::ConstVertexVertexIter CVVIter;
 
-      for ( CVVIter = mBaseMesh->getMesh ( )->cvv_iter ( vhandle ); CVVIter->is_valid ( ); ++CVVIter )
+      for ( CVVIter = mBaseMesh->getMesh ( )->cvv_iter ( vhandle ); CVVIter; ++CVVIter )
       {
         ltmpVetexId = mBaseMesh->getMesh ( )->vertex_handle ( CVVIter->idx ( )).idx ( );
 
@@ -1404,7 +1404,7 @@ void SomaDeformerWidgetViewer::optimizateDendriticTesellation ( )
         //recorremos el contorno del vertice actual
         vhandle = mBaseMesh->getMesh ( )->vertex_handle ( lIdVertex );
 
-        for ( CVVIter = mBaseMesh->getMesh ( )->cvv_iter ( vhandle ); CVVIter->is_valid ( ); ++CVVIter )
+        for ( CVVIter = mBaseMesh->getMesh ( )->cvv_iter ( vhandle ); CVVIter; ++CVVIter )
         {
           ltmpVetexId = mBaseMesh->getMesh ( )->vertex_handle ( CVVIter->idx ( )).idx ( );
 
@@ -1449,7 +1449,7 @@ void SomaDeformerWidgetViewer::optimizateDendriticTesellation ( )
         //recorremos el controno del vertice actual
         vhandle = mBaseMesh->getMesh ( )->vertex_handle ( lIdsCentralVertex.at ( k ));
 
-        for ( CVFIter = mBaseMesh->getMesh ( )->cvf_iter ( vhandle ); CVFIter->is_valid ( ); ++CVFIter )
+        for ( CVFIter = mBaseMesh->getMesh ( )->cvf_iter ( vhandle ); CVFIter; ++CVFIter )
         {
           lAuxFaceHandle = mBaseMesh->getMesh ( )->face_handle ( CVFIter->idx ( ));
 
@@ -1483,7 +1483,7 @@ void SomaDeformerWidgetViewer::optimizateDendriticTesellation ( )
       {
         vhandle = mBaseMesh->getMesh ( )->vertex_handle ( lIdsContourVertex.at ( k ));
 
-        for ( CVVIter = mBaseMesh->getMesh ( )->cvv_iter ( vhandle ); CVVIter->is_valid ( ); ++CVVIter )
+        for ( CVVIter = mBaseMesh->getMesh ( )->cvv_iter ( vhandle ); CVVIter; ++CVVIter )
         {
           ltmpVetexId = mBaseMesh->getMesh ( )->vertex_handle ( CVVIter->idx ( )).idx ( );
 

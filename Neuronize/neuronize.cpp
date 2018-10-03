@@ -160,9 +160,9 @@ void Neuronize::showDendriteGenerator ( )
   mActiveTab = 2;
 
   ////Esto solohay que hacerse al terminar la deformaci�n (no en cada rebuild)
-  //mSomaDeformerWidget->finalSomaOptimization();
-  //mSomaDeformerWidget->exportModelWithSTDName();
-  //mSomaDeformerWidget->stopDeformation();
+  mSomaDeformerWidget->finalSomaOptimization();
+  mSomaDeformerWidget->exportModelWithSTDName();
+  mSomaDeformerWidget->stopDeformation();
 
   ui.tabWidget_MainContainer->removeTab ( 0 );
   ui.tabWidget_MainContainer->insertTab ( 0, ui.tab_DendritesGenerator, "Dendrites/Spines builder" );

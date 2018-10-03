@@ -419,7 +419,6 @@ void SomaDeformerWidget::finalSomaOptimization ( )
 
 void SomaDeformerWidget::finalizeSoma ( )
 {
-  exportModelWithSTDName();
   emit finishSoma ( );
 }
 
