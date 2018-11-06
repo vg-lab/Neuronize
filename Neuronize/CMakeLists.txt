@@ -12,7 +12,6 @@ set (NEURONIZELIB_SOURCES
 		SomaDeformerWidget.cpp
 		SomaDeformerWidgetViewer.cpp
 		LoadFileDialog.cpp
-		MeshVCG.cpp
 		)
 
 set(NEURONIZELIB_HEADERS
@@ -35,7 +34,6 @@ set(NEURONIZELIB_HEADERS
 		xneuron.ui
 		xneuron.qrc
 		neuronize.qrc
-		MeshVCG.h
 		)
 
 set(NEURONIZELIB_LINK_LIBRARIES

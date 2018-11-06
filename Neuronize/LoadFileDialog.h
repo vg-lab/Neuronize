@@ -33,6 +33,8 @@ private:
     QLineEdit* tracePath;
     QLineEdit* apiPath;
     QLineEdit* basalPath;
+    QLineEdit* ascPath;
+    QPushButton* ascButton;
     QPushButton* tracePathButton;
     QPushButton* apiPathButton;
     QPushButton* basalPathButton;
@@ -45,6 +47,7 @@ private:
 
 private slots:
     void openSelectFileDialog(QLineEdit* target,const QString& title,const QString &types,bool multiFile);
+    void openSaveFileDialog(QLineEdit *target,const QString& title, const QString &types);
     void onRadioChanged(bool b);
     void onOkPressed();
 

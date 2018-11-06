@@ -35,7 +35,7 @@
       <enum>QTabWidget::West</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="tab_SomaDeformer">
       <attribute name="title">
@@ -269,7 +269,7 @@
           <property name="geometry">
            <rect>
             <x>0</x>
-            <y>-84</y>
+            <y>0</y>
             <width>256</width>
             <height>1027</height>
            </rect>
@@ -352,6 +352,9 @@
                   <widget class="QRadioButton" name="radioButton_ModelledSomas">
                    <property name="text">
                     <string>Modelled Soma</string>
+                   </property>
+                   <property name="checked">
+                    <bool>false</bool>
                    </property>
                   </widget>
                  </item>

@@ -67,7 +67,7 @@ public slots:
 
     void loadMorphologyFile ( QString lSWCFile );
 
-    void loadSTDSoma ( );
+    void loadSTDSoma(bool b);
 
     void showDendirtesTab ( );
 

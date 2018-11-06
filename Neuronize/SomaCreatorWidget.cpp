@@ -20,7 +20,6 @@
 
 #include "SomaCreatorWidget.h"
 #include "LoadFileDialog.h"
-#include "MeshVCG.h"
 
 
 #include <string>
@@ -32,8 +31,8 @@
 
 #include <QDebug>
 
+#include <libs/libNeuroUtils/AS2SWCV2.h>
 #include <libs/libNeuroUtils/ASC2SWC.h>
-
 
 using namespace std;
 
@@ -42,6 +41,8 @@ SomaCreatorWidget::SomaCreatorWidget ( QWidget *parent )
   : QWidget ( parent )
 {
   ui.setupUi ( this );
+
+  somaContours = false;
 
   //---mXMLSomaDefTree		=	NULL;
   mXMLSomaDefManager = NULL;
@@ -627,7 +628,7 @@ void SomaCreatorWidget::generateMatLabScritp()
 */
 
 void SomaCreatorWidget::generateXMLSoma ( ) {
-
+    MeshVCG* somaMesh = nullptr;
   QFileInfo info1;
   QString fileName = "";
   if (ui.checkBox_loadSWC->isChecked()) {
@@ -650,8 +651,12 @@ void SomaCreatorWidget::generateXMLSoma ( ) {
         QString lLocalFilePath = info1.absolutePath();
 
         if ((ext == "asc") || (ext == "ASC")) {
-          ASC2SWC::convierteASWC(lLocalFilePath.toStdString(), info1.fileName().toStdString());
+          auto ascPath = lLocalFilePath.toStdString() + "/" + info1.fileName().toStdString();
           fileName = lLocalFilePath + "/" + info1.fileName() + ".swc";
+           somaMesh = AS2SWCV2::asc2swc(ascPath, fileName.toStdString());
+          // PREVIOUS VERSION
+          //ASC2SWC::convierteASWC(lLocalFilePath.toStdString(), info1.fileName().toStdString());
+          //fileName = lLocalFilePath + "/" + info1.fileName() + ".swc";
         }
 
         mSWCImporter = new SWCImporter(fileName.toStdString());
@@ -682,14 +687,25 @@ void SomaCreatorWidget::generateXMLSoma ( ) {
     }
 
     //Transformar el .off base a las dimensiones del soma real (necesitamos crear uno nuevo)
-    loadModel(destination);
+   if (somaMesh == nullptr) {
+       loadModel(destination);
 
-    BaseMesh *lBaseMesh = new BaseMesh();
-    lBaseMesh->JoinBaseMesh(mBaseMesh);
-    //Escalamos al radio del soma
-    lBaseMesh->scaleBaseMesh(mSWCImporter->getElementAt(1).radius);
-    lBaseMesh->exportMesh (mExitDirectory.toStdString ( ) + "/" + sourceInfoModel.baseName ( ).toStdString ( ) + "_RadioReal.off" );
-    delete lBaseMesh;
+       BaseMesh *lBaseMesh = new BaseMesh();
+       lBaseMesh->JoinBaseMesh(mBaseMesh);
+       //Escalamos al radio del soma
+       lBaseMesh->scaleBaseMesh(mSWCImporter->getElementAt(1).radius);
+       lBaseMesh->exportMesh(
+               mExitDirectory.toStdString() + "/" + sourceInfoModel.baseName().toStdString() + "_RadioReal.off");
+       delete lBaseMesh;
+   } else {
+     somaContours = true;
+       QFile::remove(destination);
+       QFile::remove(mExitDirectory + "/" "somaConvex.off");
+       somaMesh->toOff(mExitDirectory.toStdString() + "/" + "somaConvex.off");
+       somaMesh->toOff(mExitDirectory.toStdString() + "/" + sourceInfoModel.baseName().toStdString() + "_RadioReal.off"); //Necesario para deformar
+       loadModel(mExitDirectory + "/" + "somaConvex.off");
+
+   }
 
     int lNumDendrites = mSWCImporter->getNumDendritics();
 
@@ -736,7 +752,8 @@ void SomaCreatorWidget::generateXMLSoma ( ) {
     {
       vertexs.push_back(mNearestVertex.at(i));
     }
-    MeshVCG mesh("tmp/IcoSphera4Subdiv1Radio_RadioReal.off");
+    auto somaPath = somaContours ? mExitDirectory.toStdString() + "/" + "somaConvex.off" : "tmp/IcoSphera4Subdiv1Radio_RadioReal.off";
+    MeshVCG mesh(somaPath);
     std::string path = mExitDirectory.toStdString() + "/";
     path+=mDefaultGeoDistFileName.toStdString();
 
@@ -1116,6 +1133,10 @@ void SomaCreatorWidget::setNeuron(skelgenerator::Neuron *neuron) {
 
 skelgenerator::Neuron *SomaCreatorWidget::getNeuron() const {
   return neuron;
+}
+
+bool SomaCreatorWidget::isSomaContours() {
+  return somaContours;
 }
 
 

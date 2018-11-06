@@ -41,6 +41,14 @@ LoadFileDialog::LoadFileDialog(QWidget *parent): QDialog(parent) {
     apiPathButton = new QPushButton("Select File...",this);
     apiPathButton->setEnabled(false);
 
+    ascButton = new QPushButton("Select File...",this);
+    ascButton->setEnabled(false);
+
+    ascPath = new QLineEdit(this);
+    ascPath->setPlaceholderText("Trace Export Path (ASC)");
+    ascPath->setEnabled(false);
+
+
     futureWatcher = new QFutureWatcher<void>();
     neuron = nullptr;
 
@@ -57,6 +65,9 @@ LoadFileDialog::LoadFileDialog(QWidget *parent): QDialog(parent) {
     grid->addWidget(basalPathButton,2,1);
     grid->addWidget(basalPath,2,2);
 
+    grid->addWidget(ascButton,3,1);
+    grid->addWidget(ascPath,3,2);
+
 
     auto mainLayout = new QVBoxLayout();
     mainLayout->addItem(grid);
@@ -72,6 +83,10 @@ LoadFileDialog::LoadFileDialog(QWidget *parent): QDialog(parent) {
     });
     connect(basalPathButton, &QPushButton::released,[=](){
         openSelectFileDialog(basalPath,"Select basal file","Imaris VRML (*.vrml *.wrl)",true);
+    });
+
+    connect(ascButton, &QPushButton::released,[=](){
+        openSaveFileDialog(ascPath,"Select ASC file","Neurolucida (*.asc *.ASC)");
     });
 
     connect(buttonBox,&QDialogButtonBox::accepted,this,&LoadFileDialog::onOkPressed);
@@ -91,6 +106,8 @@ void LoadFileDialog::onRadioChanged(bool b) {
     apiPathButton->setDisabled(b);
     basalPath->setDisabled(b);
     basalPathButton->setDisabled(b);
+    ascPath->setDisabled(b);
+    ascButton->setDisabled(b);
 }
 
 void LoadFileDialog::openSelectFileDialog(QLineEdit *target,const QString& title, const QString &types,bool multiFile) {
@@ -107,6 +124,12 @@ void LoadFileDialog::openSelectFileDialog(QLineEdit *target,const QString& title
         auto file = QFileDialog::getOpenFileName(this,title,QString(),types);
         target->setText(file);
     }
+
+}
+
+void LoadFileDialog::openSaveFileDialog(QLineEdit *target,const QString& title, const QString &types) {
+        auto file = QFileDialog::getSaveFileName(this,title,QString(),types);
+        target->setText(file);
 
 }
 
@@ -174,6 +197,12 @@ void LoadFileDialog::onProcessFinish() {
     progresDialog->setMaximum(1);
     progresDialog->setValue(1);
     QMessageBox msgBox(this);
+    if (ascPath->text() != nullptr && ascPath->text() != "") {
+        std::ofstream file;
+        file.open(ascPath->text().toStdString());
+        file << this->neuron->to_asc();
+        file.close();
+    }
     msgBox.setText("Task Finished");
     msgBox.setIcon(QMessageBox::Information);
     msgBox.exec();

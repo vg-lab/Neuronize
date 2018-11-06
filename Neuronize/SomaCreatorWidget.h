@@ -108,6 +108,8 @@ class SomaCreatorWidget: public QWidget, public Ui::SomaCreatorWidget
 
     void setNeuron(skelgenerator::Neuron *neuron);
 
+    bool isSomaContours();
+
 
 private:
 
@@ -129,6 +131,7 @@ private:
 
     std::vector < unsigned int > mNearestVertex;
     skelgenerator::Neuron* neuron;
+    bool somaContours;
 
 private:
 

@@ -294,12 +294,14 @@ void NeuroGeneratorWidget::loadNeuronModel ( )
   }
 }
 
-void NeuroGeneratorWidget::loadSTDSoma ( )
+void NeuroGeneratorWidget::loadSTDSoma(bool scale)
 {
   viewer->loadNeuronModel ( QDir::currentPath ( ) + "/tmp/SomaGenerated/SomaDeformed.obj" );
 
   viewer->loadSWCFile ( mSWCFleName );
-  viewer->adaptSomaMOdelWithSWCInfo ( );
+  if (scale) {
+    viewer->adaptSomaMOdelWithSWCInfo();
+  }
 }
 
 void NeuroGeneratorWidget::loadSpinesModel ( )
@@ -1088,7 +1090,7 @@ void NeuroGeneratorWidget::showSpinesTab ( )
 
 void NeuroGeneratorWidget::RebuildWithAdvancedOptions ( )
 {
-  loadSTDSoma ( );
+  loadSTDSoma(false);
 
   ui.tabWidget_RenderControl->setCurrentIndex ( 1 );
 
@@ -1103,7 +1105,7 @@ void NeuroGeneratorWidget::goAdvencedSpinesOptions ( )
     ui.tabWidget_RenderControl->setCurrentIndex(1);
   } else {
     //TODO build spines with neuron object.
-      this->neuron->spines_to_obj("tmpSpines");
+      this->neuron->spines_to_obj_without_base("tmpSpines");
       viewer->generateSpinesVrml("tmpSpines");
   }
 }

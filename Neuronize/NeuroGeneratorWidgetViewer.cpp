@@ -23,6 +23,8 @@
 #include <SkelGenerator/SkelGeneratorUtil/Neuron.h>
 #include <QtCore/QDirIterator>
 #include "../libs/libSysNeuroUtils/MathUtils.h"
+#include <QtConcurrent/QtConcurrent>
+#include <queue>
 //#include <QtGui>
 
 // Constructor must call the base class constructor.
@@ -1711,6 +1713,10 @@ void NeuroGeneratorWidgetViewer::generateSpinesVrml(QString dirPath) {
     meshSpines = new SpinesSWC();
 
     std::cout << dirPath.toStdString() << std::endl;
+    QDir dir( dirPath );
+    dir.setFilter( QDir::AllEntries | QDir::NoDotAndDotDot );
+    int total_files = dir.count();
+
     QDirIterator it (dirPath,QDir::Files | QDir::NoDotAndDotDot);
     boost::numeric::ublas::matrix<float> translationMatrix (4,4);
     boost::numeric::ublas::matrix<float> scaleMatrix (4,4);
@@ -1719,36 +1725,31 @@ void NeuroGeneratorWidgetViewer::generateSpinesVrml(QString dirPath) {
 
     generateSquareTraslationMatrix(translationMatrix,-displacement[0],-displacement[1],-displacement[2]);
 
-
+    std::vector<SpinesSWC*> spinesMeshes(static_cast<unsigned long>(total_files), nullptr);
+    QThreadPool pool;
     int i = 0;
-    while (it.hasNext() && i < 1000) {
+    while (it.hasNext() && i < 100000000) {
         auto filename = it.next();
-        auto auxMesh = new BaseMesh();
-      auto begin = chrono::high_resolution_clock::now();
-      auxMesh->loadModel(filename.toStdString());
-      auto end = chrono::high_resolution_clock::now();
-      auto dur = end - begin;
-      auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(dur).count();
-      cout << "load Time: " <<  ms << endl;
-      auxMesh->applyMatrixTransform(translationMatrix,4);
-        auxMesh->updateBaseMesh();
-      begin = chrono::high_resolution_clock::now();
-        meshSpines->JoinBaseMesh(auxMesh);
-      end = chrono::high_resolution_clock::now();
-      dur = end - begin;
-      ms = std::chrono::duration_cast<std::chrono::milliseconds>(dur).count();
-      cout << "Fusion time: " << ms << endl;
-
+        QtConcurrent::run(&pool,[=,&spinesMeshes](){
+            auto auxMesh = new SpinesSWC();
+            auxMesh->loadModel(filename.toStdString());
+            auxMesh->applyMatrixTransform(translationMatrix,4);
+            auxMesh->updateBaseMesh();
+            spinesMeshes[i] = auxMesh;
+        });
         i++;
-        std::cout << i << std::endl;
+
     }
+
+    pool.waitForDone();
+
+    meshSpines = fusionAllSpines(spinesMeshes);
+
 
     MeshDef::ConstVertexIter iniLimit = meshSpines->getMesh ( )->vertices_begin ( );
     MeshDef::ConstVertexIter finLimit = meshSpines->getMesh ( )->vertices_end ( );
 
-    meshSpines->setVertexColor ( iniLimit, finLimit, MeshDef::Color ( 0.5, 0.5, 1.0, 1.0 ));
-
-
+    meshSpines->setVertexColor ( iniLimit, finLimit, MeshDef::Color ( 1.0, 0.0, 0.0, 1.0 ));
 
 
     if ( spineMeshRend != NULL )
@@ -1763,9 +1764,42 @@ void NeuroGeneratorWidgetViewer::generateSpinesVrml(QString dirPath) {
     spineMeshRend->setRenderOptions ( renderMask );
 
     updateGL();
-
-
 }
+
+SpinesSWC* NeuroGeneratorWidgetViewer::fusionAllSpines(vector<SpinesSWC *> &spineMeshes) {
+    QThreadPool pool;
+    std::queue<QFuture<SpinesSWC*>> futures;
+    for (int i = 1; i < spineMeshes.size(); i += 2) {
+        QFuture<SpinesSWC*> future  = QtConcurrent::run(&pool, [=]() {
+            return fusionSpines(spineMeshes[i-1], spineMeshes[i]);
+        });
+
+        futures.push(future);
+    }
+
+    if (spineMeshes.size()%2 == 1) {
+      auto future = QtConcurrent::run(&pool,[=](){ return spineMeshes[spineMeshes.size()-1];});
+      futures.push(future);
+    }
+
+    while (futures.size() >1) {
+        auto mesh1 = futures.front().result();
+        futures.pop();
+        auto mesh2 = futures.front().result();
+        futures.pop();
+        auto future = QtConcurrent::run(&pool,[=](){ return fusionSpines(mesh1,mesh2);});
+        futures.push(future);
+    }
+    return futures.front().result();
+                                                                                                                        }
+
+SpinesSWC* NeuroGeneratorWidgetViewer::fusionSpines(SpinesSWC* mesh1, SpinesSWC* mesh2) {
+    mesh1->JoinBaseMesh(mesh2);
+    mesh1->updateBaseMesh();
+    return mesh1;
+}
+
+
 
 
 

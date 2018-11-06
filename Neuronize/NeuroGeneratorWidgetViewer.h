@@ -345,6 +345,11 @@ protected:
 
     void drawSphereList ( );
 
+private slots:
+
+    SpinesSWC* fusionAllSpines(vector<SpinesSWC *> &spineMeshes);
+
+    SpinesSWC* fusionSpines(SpinesSWC* mesh1, SpinesSWC* mesh2);
 };
 
 #endif

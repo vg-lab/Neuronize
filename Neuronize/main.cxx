@@ -20,11 +20,21 @@
 
 #include <QApplication>
 #include "neuronize.h"
+#include <vcg/complex/algorithms/clean.h>
+#include <libs/libNeuroUtils/AS2SWCV2.h>
 
 int main ( int argc, char *argv[] )
 {
+
   QApplication a ( argc, argv );
   Neuronize w;
   w.show ( );
   return a.exec ( );
+
+/*
+  MeshVCG regularMesh;
+  auto somaMesh = AS2SWCV2::asc2swc("prueba.asc","prueba.swc");
+  somaMesh->toOff("somaConvex.off");
+  somaMesh->remesh(regularMesh); */
+
 }

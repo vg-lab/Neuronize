@@ -344,6 +344,7 @@ void SomaDeformerWidgetViewer::removeIdFromSelection ( int id )
 
 void SomaDeformerWidgetViewer::generateSomaModel ( unsigned int pModelId, float pScaleFactor )
 {
+
   if ( mBaseMesh == NULL )
   {
     mBaseMesh = new ProceduralMesh ( );
@@ -706,10 +707,11 @@ QString SomaDeformerWidgetViewer::configurationToString ( )
   result += "\n--------------------------------";
   result += "\nPendiente aun.";
   //result+="\nSWCPathFile: " + mXMLSomaDefManager->getXMLDomDocument().	mSWCPathFile;
-
-  result += "\n\nParams associated with SWCImporter";
-  result += "\n--------------------------------";
-  result += "\nSWCNumDendritics: " + QString::number ( mSWCImporter->getNumDendritics ( ));
+  if (mSWCImporter != NULL) {
+    result += "\n\nParams associated with SWCImporter";
+    result += "\n--------------------------------";
+    result += "\nSWCNumDendritics: " + QString::number(mSWCImporter->getNumDendritics());
+  }
 
   return result;
 }
@@ -1512,5 +1514,12 @@ void SomaDeformerWidgetViewer::optimizateDendriticTesellation ( )
     }
   }
 }
+
+void SomaDeformerWidgetViewer::addSomaModel(string path) {
+    auto auxBaseMesh = new BaseMesh ( path );
+    mSomaModelsContainers.addElement ( auxBaseMesh );
+    mNormalizeModel = true;
+}
+
 
 

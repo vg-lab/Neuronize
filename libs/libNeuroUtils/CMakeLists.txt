@@ -21,6 +21,8 @@ set (NEUROUTILS_SOURCES
 		SpinesSWC.cpp
 		SWCImporter.cpp
 		SWCSpinesDistributor.cpp
+		AS2SWCV2.cpp
+		MeshVCG.cpp
 		)
 
 set(NEUROUTILS_HEADERS
@@ -51,6 +53,8 @@ set(NEUROUTILS_HEADERS
 		Subdivider.hpp
 		SWCImporter.h
 		SWCSpinesDistributor.h
+		ASC2SWC.h
+		MeshVCG.h
 		)
 
 set(NEUROUTILS_LINK_LIBRARIES

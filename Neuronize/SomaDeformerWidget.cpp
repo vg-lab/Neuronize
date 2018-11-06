@@ -456,4 +456,15 @@ void SomaDeformerWidget::showContinueMsg ( )
   ui.pushButton_NextStep->setEnabled ( true );
 }
 
+void SomaDeformerWidget::setModeledSoma(std::string path) {
+    viewer->addSomaModel( path );
+    ui.comboBox_ModelledSomas->addItem(QString::fromStdString(path));
+    ui.radioButton_ModelledSomas->setChecked(true);
+
+}
+
+void SomaDeformerWidget::setSWCFile(std::string path) {
+    viewer->loadSWCFile(QString::fromStdString(path));
+}
+
 

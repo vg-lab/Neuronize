@@ -45,6 +45,8 @@ class SomaDeformerWidget: public QWidget, public Ui::SomaDeformerWidget
     void deformDuringNSteps ( int pSteps );
     void finalSomaOptimization ( );
     void stopDeformation ( );
+    void setModeledSoma(std::string path);
+    void setSWCFile (std::string path);
 
     //const
     SomaDeformerWidgetViewer *getViewer ( ) { return viewer; }
@@ -71,6 +73,7 @@ class SomaDeformerWidget: public QWidget, public Ui::SomaDeformerWidget
     void loadPredefinedXMLSomaDefAndSimulate ( );
 
     void finalizeSoma ( );
+    
 
   private slots:
 

@@ -151,6 +151,11 @@ void Neuronize::showSomaDeformer ( )
   ui.tabWidget_MainContainer->removeTab ( 0 );
   ui.tabWidget_MainContainer->insertTab ( 0, ui.tab_SomaGenerator, "Soma builder" );
 
+  if (mSomaCreatorWidget->isSomaContours()) {
+    //mSomaDeformerWidget->setModeledSoma("tmp/somaConvex.off");
+
+  }
+
   mSomaDeformerWidget->loadPredefinedXMLSomaDef();
   //mSomaDeformerWidget->startDeformation();
 }
@@ -159,7 +164,8 @@ void Neuronize::showDendriteGenerator ( )
 {
   mActiveTab = 2;
 
-  ////Esto solohay que hacerse al terminar la deformaci�n (no en cada rebuild)
+
+  ////Esto solohay que hacerse al terminar la deformaci�n (no en cada rebuild
   mSomaDeformerWidget->finalSomaOptimization();
   mSomaDeformerWidget->exportModelWithSTDName();
   mSomaDeformerWidget->stopDeformation();
@@ -193,7 +199,8 @@ void Neuronize::showDendriteGenerator ( )
   mNeuroGeneratorWidget->setMorphologyFile ( mFullSWCFilePath );
 
   //Load the deformed soma
-  mNeuroGeneratorWidget->loadSTDSoma ( );
+  mNeuroGeneratorWidget->loadSTDSoma(!mSomaCreatorWidget->isSomaContours());
+
 
   //mNeuroGeneratorWidget->getUI().checkBox_SmoothNeuron->setChecked(true);
   //mNeuroGeneratorWidget->getUI().checkBox_SmoothSpines->setChecked(false);

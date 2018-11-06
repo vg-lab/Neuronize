@@ -114,7 +114,9 @@ class SomaDeformerWidgetViewer: public QGLViewer
     //Redefinido
     virtual void animate ( );
 
-  protected :
+    void addSomaModel(std::string path);
+
+protected :
 
     virtual void draw ( );
 
