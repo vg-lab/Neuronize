@@ -44,7 +44,7 @@ public:
 private:
     static void procesSomaPart(std::ifstream &file,std::vector<std::vector<OpenMesh::Vec3d>> &countours);
 
-    static Dendrite processDendrite(std::ifstream &inputStream, int &counter, int type);
+    static Dendrite processDendrite(std::ifstream &inputStream, int &counter, int type, std::vector<int>& parentsCount);
 
     static void toSWC(const std::string &filename,std::vector<Dendrite> &dendrites, SimplePoint* &soma);
 

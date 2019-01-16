@@ -5,6 +5,7 @@
 #include <fstream>
 #include <stack>
 #include <iomanip>
+#include <unordered_set>
 #include "AS2SWCV2.h"
 #include "MeshVCG.h"
 
@@ -15,6 +16,8 @@ MeshVCG* AS2SWCV2::asc2swc(const std::string &inputFile, const std::string &outF
         std::ifstream inputStream;
         inputStream.open(inputFile,std::ios::in);
         std::vector<Dendrite > dentrites;
+        std::vector<int> parentsCount;
+        parentsCount.push_back(0); // el soma no importa pero se rellena para simplificar el acceso.
 
         std::string line;
         while (inputStream >> line) {
@@ -23,14 +26,16 @@ MeshVCG* AS2SWCV2::asc2swc(const std::string &inputFile, const std::string &outF
                 procesSomaPart(inputStream,contours);
             }
             if (line.find("Dendrite") !=  std::string::npos) {
-               dentrites.push_back(processDendrite(inputStream, counter, 3));
+               dentrites.push_back(processDendrite(inputStream, counter, 3, parentsCount));
             }
             if (line.find("Apical") != std::string::npos) {
-                dentrites.push_back(processDendrite(inputStream, counter, 4));
+                dentrites.push_back(processDendrite(inputStream, counter, 4, parentsCount));
 
             }
         }
         inputStream.close();
+
+
         OpenMesh::Vec3d center;
         MeshVCG* finalSoma = nullptr;
         SimplePoint* soma;
@@ -44,22 +49,34 @@ MeshVCG* AS2SWCV2::asc2swc(const std::string &inputFile, const std::string &outF
 
             //Desplazar los puntos fuera del soma
 
-            
+
             float offset = 0.0;
             for (auto &dendrite: dentrites) {
                 double dist= std::numeric_limits<double>::max();
-                auto v = dendrite[0].point - center;
+                OpenMesh::Vec3d v = dendrite[0].point - center;
                 v.normalize();
                 std::vector<OpenMesh::Vec3d> intersectPoints;
-                somaConvex.RayIntersects(center,v,intersectPoints);
-                for (const auto &intersectPoint: intersectPoints) {
-                    auto distAux = (intersectPoint - dendrite[0].point).norm();
-                    dist = std::min(dist, distAux);
-                }
-                if (dist > 0 ) {
-                    auto desp = v * (dist + offset);
-                    for (auto &point :dendrite) {
-                        point.point += desp;
+                std::vector<MyMesh::FacePointer > trianglesIntersect;
+                somaConvex.RayIntersects(center,v,intersectPoints,trianglesIntersect);
+
+                OpenMesh::Vec3d normal1 (trianglesIntersect[0]->N()[0],trianglesIntersect[0]->N()[1],trianglesIntersect[0]->N()[2]);
+                OpenMesh::Vec3d normal2 (trianglesIntersect[1]->N()[0],trianglesIntersect[1]->N()[1],trianglesIntersect[1]->N()[2]);
+                auto pointToIntersect1 =  dendrite[0].point - intersectPoints[0];
+                auto pointToInsertect2 = dendrite[0].point - intersectPoints[1];
+
+
+                // El punto se encuentra dentro del soma
+                if (OpenMesh::dot(pointToIntersect1, normal1) < 0 && OpenMesh::dot(pointToInsertect2, normal2) < 0) {
+
+                    for (const auto &intersectPoint: intersectPoints) {
+                        auto distAux = (intersectPoint - dendrite[0].point).norm();
+                        dist = std::min(dist, distAux);
+                    }
+                    if (dist > 0) {
+                        auto desp = v * (dist + offset);
+                        for (auto &point :dendrite) {
+                            point.point += desp;
+                        }
                     }
                 }
             }
@@ -107,8 +124,9 @@ void AS2SWCV2::procesSomaPart(std::ifstream &file,std::vector<std::vector<OpenMe
 }
 
 // TODO Problema con dendritas apicales construidas a trozos. Buscar forma de unir dendritas  en una sola.
-Dendrite AS2SWCV2::processDendrite(std::ifstream &inputStream, int &counter,int type) {
+Dendrite AS2SWCV2::processDendrite(std::ifstream &inputStream, int &counter, int type, std::vector<int>& parentsCount) {
     Dendrite dendrite;
+    std::unordered_set<int> usedParents;
     int parent = 1;
     std::stack<int> parents;
     int brachs = 1;
@@ -141,9 +159,12 @@ Dendrite AS2SWCV2::processDendrite(std::ifstream &inputStream, int &counter,int 
 
         } else if (line == "|") {
             parent = parents.top();
+            while (usedParents.find(parent) != usedParents.end()) { // buscamos un punto libre para relizar la conexion
+                parent -=1;
+            }
+            usedParents.emplace(parent);
         } else if (line == ")") {
             if (!parents.empty()){
-                parent = parents.top();
                 parents.pop();
             }
             brachs--;
@@ -154,6 +175,7 @@ Dendrite AS2SWCV2::processDendrite(std::ifstream &inputStream, int &counter,int 
     }
     return dendrite;
 }
+
 
 void AS2SWCV2::toSWC(const std::string &filename,std::vector<Dendrite> &dendrites, SimplePoint* &soma) {
     std::ofstream outputStream;

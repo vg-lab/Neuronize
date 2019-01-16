@@ -18,6 +18,7 @@
 #include <vcg/complex/algorithms/inertia.h>
 #include <vcg/complex/algorithms/isotropic_remeshing.h>
 #include <vcg/complex/algorithms/voronoi_remesher.h>
+#include <vcg/complex/algorithms/stat.h>
 
 
 
@@ -66,6 +67,7 @@ void MeshVCG::convexHull(MeshVCG& destination) {
     vcg::tri::ConvexHull<MyMesh,MyMesh>::ComputeConvexHull(this->mesh,destination.mesh);
     vcg::tri::UpdateTopology<MyMesh>::FaceFace(destination.mesh);
     vcg::tri::UpdateTopology<MyMesh>::VertexFace(destination.mesh);
+    vcg::tri::UpdateNormal<MyMesh>::PerFaceNormalized(destination.mesh);
 }
 
 MeshVCG::MeshVCG(const std::vector<std::vector<OpenMesh::Vec3d>> &contours) {
@@ -166,7 +168,7 @@ bool MeshVCG::RayIntersectsTriangle(OpenMesh::Vec3d rayOrigin,
 }
 
 bool
-MeshVCG::RayIntersects(OpenMesh::Vec3d rayOrigin, OpenMesh::Vec3d rayVector, std::vector<OpenMesh::Vec3d> &outIntersectionPoint) {
+MeshVCG::RayIntersects(OpenMesh::Vec3d rayOrigin, OpenMesh::Vec3d rayVector, std::vector<OpenMesh::Vec3d> &outIntersectionPoint, std::vector<MyMesh::FacePointer> &intersectTriangles) {
     OpenMesh::Vec3d intersectPointAux;
     auto center = getCenter();
     bool intersect = false;
@@ -175,6 +177,7 @@ MeshVCG::RayIntersects(OpenMesh::Vec3d rayOrigin, OpenMesh::Vec3d rayVector, std
         intersect = RayIntersectsTriangle(center, rayVector, fp, intersectPointAux);
         if (intersect) {
            outIntersectionPoint.push_back(intersectPointAux);
+           intersectTriangles.push_back(fp);
         }
     }
     return intersect;
@@ -206,6 +209,14 @@ void MeshVCG::remesh(MeshVCG &outMesh) {
        params.iter=iterNum;
        vcg::tri::IsotropicRemeshing<MyMesh>::Do(outMesh.mesh, mesh, params);
 
+}
+
+double MeshVCG::getVolume() {
+    return vcg::tri::Stat<MyMesh>::ComputeMeshVolume(mesh);
+}
+
+double MeshVCG::getArea() {
+    return vcg::tri::Stat<MyMesh>::ComputeMeshArea(mesh);
 }
 
 

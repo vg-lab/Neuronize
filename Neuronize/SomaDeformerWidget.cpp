@@ -405,7 +405,9 @@ void SomaDeformerWidget::finalSomaOptimization ( )
   if ( viewer->isDeformating ( ))
   {
     optimizateDendriticBase ( );
-    deformDuringNSteps ( 25 );
+    //deformDuringNSteps ( 25 );
+
+
     viewer->setDeleteRedundantVertex ( true );
   }
   else

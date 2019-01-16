@@ -298,6 +298,7 @@ void NeuroGeneratorWidget::loadSTDSoma(bool scale)
 {
   viewer->loadNeuronModel ( QDir::currentPath ( ) + "/tmp/SomaGenerated/SomaDeformed.obj" );
 
+
   viewer->loadSWCFile ( mSWCFleName );
   if (scale) {
     viewer->adaptSomaMOdelWithSWCInfo();

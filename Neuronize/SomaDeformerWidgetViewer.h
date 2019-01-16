@@ -101,6 +101,8 @@ class SomaDeformerWidgetViewer: public QGLViewer
 
     void optimizateDendriticTesellation ( );
 
+    void optimizateDendriticTesellation2 ( );
+
     void optimizateDendriticRadius ( );
 
     void setExportOBJSecuence ( bool pExportOBJSecuence ) { mExportOBJSecuence = pExportOBJSecuence; };
@@ -137,6 +139,10 @@ protected :
   private:
 
     ProceduralMesh *mBaseMesh;
+public:
+    ProceduralMesh *getMBaseMesh() const;
+
+private:
     MSObject *mMSDeformator;
     MeshRenderer *meshRenderer;
     SWCImporter *mSWCImporter;

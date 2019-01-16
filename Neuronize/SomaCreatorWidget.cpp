@@ -653,7 +653,7 @@ void SomaCreatorWidget::generateXMLSoma ( ) {
         if ((ext == "asc") || (ext == "ASC")) {
           auto ascPath = lLocalFilePath.toStdString() + "/" + info1.fileName().toStdString();
           fileName = lLocalFilePath + "/" + info1.fileName() + ".swc";
-           somaMesh = AS2SWCV2::asc2swc(ascPath, fileName.toStdString());
+          somaMesh = AS2SWCV2::asc2swc(ascPath, fileName.toStdString());
           // PREVIOUS VERSION
           //ASC2SWC::convierteASWC(lLocalFilePath.toStdString(), info1.fileName().toStdString());
           //fileName = lLocalFilePath + "/" + info1.fileName() + ".swc";

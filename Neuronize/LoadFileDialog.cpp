@@ -76,7 +76,7 @@ LoadFileDialog::LoadFileDialog(QWidget *parent): QDialog(parent) {
 
     connect(traces,&QRadioButton::toggled,this,&LoadFileDialog::onRadioChanged);
     connect(tracePathButton, &QPushButton::released,[=](){
-        openSelectFileDialog(tracePath,"Select trace file","NeuroMorpho(*.swc);;Neurolucida ASC(*.asc)",false);
+        openSelectFileDialog(tracePath,"Select trace file","NeuroMorpho(*.swc *.SWC);;Neurolucida ASC(*.asc *.ASC)",false);
     });
     connect(apiPathButton, &QPushButton::released,[=](){
         openSelectFileDialog(apiPath,"Select apical file","Imaris VRML (*.vrml *.wrl)",false);

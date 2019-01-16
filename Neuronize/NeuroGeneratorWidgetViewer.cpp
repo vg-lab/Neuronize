@@ -155,6 +155,7 @@ void NeuroGeneratorWidgetViewer::loadNeuronModel ( QString pModel )
                          mesh->getMesh ( )->vertices_end ( ),
                          MeshDef::Color ( 0.5, 0.5, 1.0, 1.0 ));
 
+
   if ( meshRend == NULL )
   {
     meshRend = new MeshRenderer ( );

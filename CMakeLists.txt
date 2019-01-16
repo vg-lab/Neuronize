@@ -32,7 +32,7 @@ set( COMMON_PROJECT_DOMAIN gmrv.es )
 include( Common )
 
 
-common_find_package( VCG REQUIRED )
+common_find_package(VCG REQUIRED)
 common_find_package(Boost REQUIRED)
 common_find_package(GLEW REQUIRED)
 common_find_package(OpenGL REQUIRED)
