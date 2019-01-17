@@ -169,7 +169,7 @@ namespace NSSWCImporter
       /**
        * Default constructor
        */
-      SWCImporter ( string fileName, bool pApplyStdDims = false, bool pApplyReplicantNodeTest = false );
+      SWCImporter ( string fileName, bool pApplyStdDims = false, bool pApplyReplicantNodeTest = true );
 
       /**
        * Destructor

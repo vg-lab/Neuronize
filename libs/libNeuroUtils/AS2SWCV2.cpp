@@ -75,7 +75,7 @@ MeshVCG* AS2SWCV2::asc2swc(const std::string &inputFile, const std::string &outF
                     if (dist > 0) {
                         auto desp = v * (dist + offset);
                         for (auto &point :dendrite) {
-                            point.point += desp;
+                            //point.point += desp;
                         }
                     }
                 }
@@ -126,12 +126,30 @@ void AS2SWCV2::procesSomaPart(std::ifstream &file,std::vector<std::vector<OpenMe
 // TODO Problema con dendritas apicales construidas a trozos. Buscar forma de unir dendritas  en una sola.
 Dendrite AS2SWCV2::processDendrite(std::ifstream &inputStream, int &counter, int type, std::vector<int>& parentsCount) {
     Dendrite dendrite;
+    double minDistance = 0.5;
+    int initCounter = counter;
     std::unordered_set<int> usedParents;
+    Eigen::Vector3d lastPoint;
+
     int parent = 1;
     std::stack<int> parents;
     int brachs = 1;
     double x, y, z, d;
+    Eigen::Vector3d actualPoint;
     std::string line;
+
+    // Rellenamos el primer punto
+    inputStream >> line;
+    inputStream >> x;
+    inputStream >> y;
+    inputStream >> z;
+    inputStream >> d;
+    lastPoint = {x,y,z};
+    inputStream >> line;
+    dendrite.emplace_back(x, y, z, d, parent, type);
+    parent = counter;
+    counter++;
+
     while (inputStream >> line) {
         if (line.find('<') != std::string::npos) {  //Estamos ante una espina de momento las ignoramos
             while (line.find('>') == std::string::npos){
@@ -152,15 +170,23 @@ Dendrite AS2SWCV2::processDendrite(std::ifstream &inputStream, int &counter, int
                 inputStream >> z;
                 inputStream >> d;
             }
+            actualPoint = {x,y,z};
+            double dist  = (lastPoint - actualPoint).norm();
             inputStream >> line; //saltamos parentesis final
-            dendrite.emplace_back(x,y,z,d,parent,type);
-            parent = counter;
-            counter++;
-
+            if ( (lastPoint - actualPoint).norm() > minDistance ) { // comprobamos que el punto anterior no sea igual a este
+                dendrite.emplace_back(x, y, z, d, parent, type);
+                parent = counter;
+                counter++;
+                lastPoint  = actualPoint;
+            } else {
+                std::cout << "Punto eliminado" << std::endl;
+            }
         } else if (line == "|") {
             parent = parents.top();
+            auto point = dendrite[(parent - initCounter) -1].point;
+            lastPoint = {point[0],point[1],point[2]};
             while (usedParents.find(parent) != usedParents.end()) { // buscamos un punto libre para relizar la conexion
-                parent -=1;
+                parent -= 1;
             }
             usedParents.emplace(parent);
         } else if (line == ")") {
