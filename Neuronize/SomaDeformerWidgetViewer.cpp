@@ -629,11 +629,8 @@ void SomaDeformerWidgetViewer::exportModel ( QString pFile )
 {
   if ( meshRenderer != NULL )
   {
-    auto v = mBaseMesh->getMesh()->point(meshRenderer->getBaseMesh()->getUnprotectedMesh()->vertex_handle(11116));
     ProceduralMesh *lPBaseMesh = new ProceduralMesh ( );
-    //lPBaseMesh->JoinBaseMesh ( meshRenderer->getBaseMesh ( ));
-    lPBaseMesh->JoinBaseMesh(mBaseMesh);
-    auto v2 = mBaseMesh->getMesh()->point(meshRenderer->getBaseMesh()->getUnprotectedMesh()->vertex_handle(11116));
+    lPBaseMesh->JoinBaseMesh ( meshRenderer->getBaseMesh ( ));
 
     MeshDef::VertexHandle lVertexHandle;
 
@@ -1179,7 +1176,8 @@ void SomaDeformerWidgetViewer::setNodesInCustomSphere ( )
 void SomaDeformerWidgetViewer::optimizateDendriticBase ( )
 {
   setVertexIdsforDendritics ( );
-  optimizateDendriticTesellation2 ( );
+  optimizateDendriticTesellation ();
+  //optimizateDendriticTesellation2 ( );
   optimizateDendriticRadius ( );
 
 }

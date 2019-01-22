@@ -75,7 +75,7 @@ MeshVCG* AS2SWCV2::asc2swc(const std::string &inputFile, const std::string &outF
                     if (dist > 0) {
                         auto desp = v * (dist + offset);
                         for (auto &point :dendrite) {
-                            //point.point += desp;
+                            point.point += desp;
                         }
                     }
                 }
@@ -85,21 +85,10 @@ MeshVCG* AS2SWCV2::asc2swc(const std::string &inputFile, const std::string &outF
 
             finalSoma = new MeshVCG();
             somaConvex.remesh(*finalSoma);
-
-
-
-
         }else {
             soma = calcSoma(dentrites);
         }
-
-
-
         toSWC(outFile,dentrites,soma);
-
-
-
-
     return finalSoma;
 
 }

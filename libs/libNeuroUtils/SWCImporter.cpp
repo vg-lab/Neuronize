@@ -27,7 +27,11 @@
 
 #include "SWCImporter.h"
 
+
 #include <iostream>
+#include <unordered_map>
+#include <stack>
+#include <Eigen/Dense>
 
 using namespace std;
 
@@ -69,6 +73,8 @@ namespace NSSWCImporter
     generateConnectios ( );
     generateBifurcations ( );
     generateBranches ( );
+    restructIdentifiers ( );
+    exportToFile("test.swc");
 
     //if (pApplyStdDims)	applyUniformModifiers(AXONRADIUSMODIF,DENDRITICRADIUSMODIF,APICALRADIUSMODIFSTD,BASERADIUSMODIF);
   }
@@ -1174,6 +1180,114 @@ namespace NSSWCImporter
     OpenMesh::Vec3f SWCImporter::getDisplacement() const {
       return displacement;
     }
+
+    void SWCImporter::restructIdentifiers() {
+        std::vector<SWCNode> nodeColletionAux;
+        nodeColletionAux.reserve(this->nodeCollection.size());
+        std::unordered_map<int,int> translateMap;
+        translateMap.reserve(nodeCollection.size());
+        nodeColletionAux.push_back(this->nodeCollection[0]);
+        nodeColletionAux.push_back(this->nodeCollection[1]);
+        translateMap.emplace(0,0);
+        translateMap.emplace(1,1);
+
+        std::stack<SWCNode> nodesToProcess;
+        nodesToProcess.push(this->nodeCollection[2]);
+        int counter = 2;
+
+        while(!nodesToProcess.empty()) {
+           SWCNode node = nodesToProcess.top();
+           nodesToProcess.pop();
+           translateMap[node.id] = counter;
+           auto bifurcation = findBifurcations(node.id);
+           if (bifurcation != nullptr) {
+             OpenMesh::Vec3f segmentPreBif = node.position - nodeCollection[node.id -1].position;
+             OpenMesh::Vec3f segmentPostBif1 = nodeCollection[node.id +1].position - node.position;
+             OpenMesh::Vec3f segmentPostBif2 = nodeCollection[bifurcation->fin + 1].position - nodeCollection[bifurcation->fin].position;
+             double angle1 = computeAngle(segmentPreBif,segmentPostBif1);
+             double angle2 = computeAngle(segmentPreBif,segmentPostBif2);
+
+             if ( angle1 < angle2 ) {
+               nodesToProcess.push(this->nodeCollection[bifurcation->fin]);
+                 translateMap.emplace(bifurcation->fin,-1); // La marcamos como que se va a procesar para evitar repetir nodos
+               if (translateMap.find(node.id + 1) == translateMap.end() && node.id + 1 < nodeCollection.size())  {
+                 nodesToProcess.push(nodeCollection[node.id + 1]);
+               }
+             } else {
+               if (translateMap.find(node.id + 1) == translateMap.end() && node.id + 1 < nodeCollection.size()) {
+                 nodesToProcess.push(nodeCollection[node.id + 1]);
+               }
+               nodesToProcess.push(this->nodeCollection[bifurcation->fin]);
+                 translateMap.emplace(bifurcation->fin,-1);
+             }
+           } else {
+             if (translateMap.find(node.id + 1) == translateMap.end() && node.id + 1 < nodeCollection.size()) {
+               nodesToProcess.push(nodeCollection[node.id + 1]);
+             }
+           }
+
+           node.id = counter;
+           nodeColletionAux.push_back(node);
+           counter++;
+
+        }
+
+        //Traducimos todos los identificadores anteriores a los nuevos identificadores.
+
+        for (size_t i = 2; i < nodeColletionAux.size(); i++) {
+          auto* node = &nodeColletionAux[i];
+          node->parent = translateMap.at(node->parent);;
+        }
+
+        for ( auto &node : nodeConnections) {
+          node.ini = translateMap.at(node.ini);
+          node.fin = translateMap.at(node.fin);
+        }
+
+        for ( auto &dentriticBif : dendriticBifurcations) {
+          dentriticBif = translateMap.at(dentriticBif);
+        }
+
+        for (auto &dendriticTer : dendriticTermination) {
+          dendriticTer = translateMap.at(dendriticTer);
+        }
+
+        for (auto &dendriticSomaCon : dendriticSomaConnection) {
+          dendriticSomaCon = translateMap.at(dendriticSomaCon);
+        }
+
+        for (auto &dendritic: dendritics) {
+          dendritic.initialNode = translateMap.at(dendritic.initialNode);
+          dendritic.finalNode = translateMap.at(dendritic.finalNode);
+        }
+
+        for (auto &branch: mBranches) {
+          branch.initialNode = translateMap.at(branch.initialNode);
+          branch.finalNode = translateMap.at(branch.finalNode);
+        }
+        nodeCollection = nodeColletionAux;
+    }
+
+    const SWCConnection* SWCImporter::findBifurcations(int id) {
+      auto it =  std::find (dendriticBifurcations.begin(), dendriticBifurcations.end(), id);
+      if ( it != dendriticBifurcations.end()) {
+        for (size_t i = 0; i < nodeConnections.size(); i++) {
+          auto connection = nodeConnections[i];
+          if (connection.ini == id ) {
+            if (connection.fin - connection.ini >1) {
+              return &nodeConnections[i];
+            }
+          }
+        }
+      }
+      return nullptr;
+  }
+
+  double SWCImporter::computeAngle(OpenMesh::Vec3f v1,OpenMesh::Vec3f v2) {
+    double v1_v2 = sqrt(OpenMesh::dot(v1, v1) * OpenMesh::dot(v2,v2) );
+    return acos( (OpenMesh::dot(v1,v2)/v1_v2) );
+
+  }
 
 
 }

@@ -162,6 +162,12 @@ namespace NSSWCImporter
 
       void calcDendritics ( );
 
+      void restructIdentifiers ( );
+
+      const SWCConnection* findBifurcations(int id);
+
+      double computeAngle(OpenMesh::Vec3f v1 , OpenMesh::Vec3f v2);
+
       bool isIdInContainer ( SWCNode pId, const std::vector <SWCNode> &pVector );
 
     public:
@@ -169,7 +175,7 @@ namespace NSSWCImporter
       /**
        * Default constructor
        */
-      SWCImporter ( string fileName, bool pApplyStdDims = false, bool pApplyReplicantNodeTest = true );
+      SWCImporter ( string fileName, bool pApplyStdDims = false, bool pApplyReplicantNodeTest = false );
 
       /**
        * Destructor
