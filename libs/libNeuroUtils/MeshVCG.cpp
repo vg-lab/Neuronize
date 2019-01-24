@@ -183,6 +183,7 @@ MeshVCG::RayIntersects(OpenMesh::Vec3d rayOrigin, OpenMesh::Vec3d rayVector, std
     return intersect;
 }
 
+
 void MeshVCG::remesh(MeshVCG &outMesh) {
        float targetLenPerc=.6f;
        int iterNum=5;

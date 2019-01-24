@@ -50,7 +50,6 @@ MeshVCG* AS2SWCV2::asc2swc(const std::string &inputFile, const std::string &outF
             //Desplazar los puntos fuera del soma
 
 
-            float offset = 0.0;
             for (auto &dendrite: dentrites) {
                 double dist= std::numeric_limits<double>::max();
                 OpenMesh::Vec3d v = dendrite[0].point - center;
@@ -61,7 +60,7 @@ MeshVCG* AS2SWCV2::asc2swc(const std::string &inputFile, const std::string &outF
 
                 OpenMesh::Vec3d normal1 (trianglesIntersect[0]->N()[0],trianglesIntersect[0]->N()[1],trianglesIntersect[0]->N()[2]);
                 OpenMesh::Vec3d normal2 (trianglesIntersect[1]->N()[0],trianglesIntersect[1]->N()[1],trianglesIntersect[1]->N()[2]);
-                auto pointToIntersect1 =  dendrite[0].point - intersectPoints[0];
+                auto pointToIntersect1 = dendrite[0].point - intersectPoints[0];
                 auto pointToInsertect2 = dendrite[0].point - intersectPoints[1];
 
 
@@ -73,7 +72,7 @@ MeshVCG* AS2SWCV2::asc2swc(const std::string &inputFile, const std::string &outF
                         dist = std::min(dist, distAux);
                     }
                     if (dist > 0) {
-                        auto desp = v * (dist + offset);
+                        auto desp = v * dist;
                         for (auto &point :dendrite) {
                             point.point += desp;
                         }

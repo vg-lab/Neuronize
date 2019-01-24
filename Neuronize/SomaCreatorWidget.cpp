@@ -666,6 +666,8 @@ void SomaCreatorWidget::generateXMLSoma ( ) {
         mSWCFileName = file.fileName();
       } else
         return;
+    } else {
+      return;
     }
 
     //Copiar el swc y copiar el .off

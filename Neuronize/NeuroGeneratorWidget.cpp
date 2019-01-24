@@ -446,7 +446,6 @@ void NeuroGeneratorWidget::generateSpines ( )
     ui.tabWidget_RenderControl->setCurrentIndex ( 0 );
     return;
   }
-
   unsigned int lNumSpines = ui.spinBox_NumSpines->value ( );
   unsigned int lHorResol = ui.spinBox_SpinesHorResolution->value ( );
   unsigned int lVerResol = ui.spinBox_SpinesVerResolution->value ( );
@@ -460,10 +459,7 @@ void NeuroGeneratorWidget::generateSpines ( )
   unsigned int lNumOfGroups = ui.spinBox_NumOfGroupsModeledSpines->value ( );
   unsigned int lGenerateOption = 0;
 
-
-  if (this->neuron!= nullptr)
-      lGenerateOption = 5;
-  else if ( ui.radioButton_ProceduralSpines->isChecked ( ))
+  if ( ui.radioButton_ProceduralSpines->isChecked ( ))
     lGenerateOption = 0;
   else if ( ui.radioButton_ModelSpines->isChecked ( ))
     lGenerateOption = 1;
@@ -473,11 +469,13 @@ void NeuroGeneratorWidget::generateSpines ( )
     lGenerateOption = 3;
   else if ( ui.radioButton_SegmentSpines->isChecked ( ))
     lGenerateOption = 4;
+  else if (ui.radioButton_VrmlSpines->isChecked ( ))
+    lGenerateOption = 5;
 
 
 //  lGenerateOption = 0;
 //  viewer->SetSpinesType(lGenerateOption);
-//  std::cout<<"-->> Opcion elegida:"<<lGenerateOption<<std::endl;
+  std::cout<<"-->> Opcion elegida:"<<lGenerateOption<<std::endl;
   switch ( lGenerateOption )
   {
     //Rand Procedurales
@@ -534,14 +532,9 @@ void NeuroGeneratorWidget::generateSpines ( )
       break;
 
       case 5:
-        QDir dir ("tmpSpines");
-        if (dir.exists()) {
-          dir.removeRecursively();
-          QDir().mkdir("tmpSpines");
-        } else {
-          QDir().mkdir("tmpSpines");
-        }
-
+          std::cout << "vrmlSpines" << std::endl;
+          this->neuron->spines_to_obj_without_base("tmpSpines");
+          viewer->generateSpinesVrml("tmpSpines");
   }
 }
 
@@ -1103,13 +1096,14 @@ void NeuroGeneratorWidget::RebuildWithAdvancedOptions ( )
 void NeuroGeneratorWidget::goAdvencedSpinesOptions ( )
 {
   if (this->neuron == nullptr) {
-    ui.tabWidget_RenderControl->setCurrentIndex(1);
+    ui.radioButton_VrmlSpines->setCheckable(false);
+    ui.radioButton_VrmlSpines->setEnabled(false);
   } else {
-    //TODO build spines with neuron object.
-      this->neuron->spines_to_obj_without_base("tmpSpines");
-      viewer->generateSpinesVrml("tmpSpines");
+    ui.radioButton_VrmlSpines->setChecked(true);
   }
+  ui.tabWidget_RenderControl->setCurrentIndex(1);
 }
+
 
 void NeuroGeneratorWidget::showMsjDendritesGeneration ( )
 {

@@ -1729,7 +1729,7 @@ void NeuroGeneratorWidgetViewer::generateSpinesVrml(QString dirPath) {
     std::vector<SpinesSWC*> spinesMeshes(static_cast<unsigned long>(total_files), nullptr);
     QThreadPool pool;
     int i = 0;
-    while (it.hasNext() && i < 100000000) {
+    while (it.hasNext()) {
         auto filename = it.next();
         QtConcurrent::run(&pool,[=,&spinesMeshes](){
             auto auxMesh = new SpinesSWC();
