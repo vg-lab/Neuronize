@@ -44,8 +44,6 @@ class MyFace    : public vcg::Face<   MyUsedTypes, vcg::face::Mark ,vcg::face::F
 
         bool isRegular();
 
-        MeshVCG::getCenterOfMass();
-
         void remesh(MeshVCG &outMesh);
 
         OpenMesh::Vec3d getCenter();

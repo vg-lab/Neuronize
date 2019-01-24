@@ -31,8 +31,8 @@ set( COMMON_PROJECT_DOMAIN gmrv.es )
 
 include( Common )
 
-
 common_find_package(VCG REQUIRED)
+common_find_package(OpenMesh REQUIRED)
 common_find_package(Boost REQUIRED)
 common_find_package(GLEW REQUIRED)
 common_find_package(OpenGL REQUIRED)
@@ -58,6 +58,8 @@ list( APPEND NEURONIZE_DEPENDENT_LIBRARIES
         ${Boost_LIBRARIES}
         SkelGenerator
         VCG
+        ${OPENMESH_CORE_LIBRARY}
+        ${OPENMESH_TOOLS_LIBRARY}
         )
 
 add_subdirectory( libs/libSysNeuroUtils )

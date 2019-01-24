@@ -41,8 +41,8 @@ set(NEURONIZELIB_LINK_LIBRARIES
 		NeuroUtils
 		GLNeuroUtils
 		QtNeuroUtils
-		OpenMeshCore
-		OpenMeshTools
+		${OPENMESH_CORE_LIBRARY}
+		${OPENMESH_TOOLS_LIBRARY}
 		${OPENGL_LIBRARIES}
 		${GLUT_LIBRARY}
 		QGLViewer
