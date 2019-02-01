@@ -115,7 +115,7 @@ void AS2SWCV2::procesSomaPart(std::ifstream &file,std::vector<std::vector<OpenMe
 // TODO Problema con dendritas apicales construidas a trozos. Buscar forma de unir dendritas  en una sola.
 Dendrite AS2SWCV2::processDendrite(std::ifstream &inputStream, int &counter, int type, std::vector<int>& parentsCount,std::vector<Spine>& spines) {
     Dendrite dendrite;
-    double minDistance = 0;
+    double minDistance = 0.5;
     int initCounter = counter;
     std::unordered_set<int> usedParents;
     Eigen::Vector3d lastPoint;
@@ -165,7 +165,7 @@ Dendrite AS2SWCV2::processDendrite(std::ifstream &inputStream, int &counter, int
                 inputStream >> z;
                 inputStream >> d;
             }
-            if (counter == 382 || counter == 517) {
+            if (parent == 382) {
                 std::cout << "test";
             }
             actualPoint = {x,y,z};
@@ -181,7 +181,7 @@ Dendrite AS2SWCV2::processDendrite(std::ifstream &inputStream, int &counter, int
             }
         } else if (line == "|") {
             parent = parents.top();
-            auto point = dendrite[(parent - initCounter) -1].point;
+            auto point = dendrite[(parent - initCounter)].point;
             lastPoint = {point[0],point[1],point[2]};
             while (usedParents.find(parent) != usedParents.end()) { // buscamos un punto libre para relizar la conexion
                 parent -= 1;

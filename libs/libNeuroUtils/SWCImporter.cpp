@@ -73,8 +73,8 @@ namespace NSSWCImporter
     generateConnectios ( );
     generateBifurcations ( );
     generateBranches ( );
-    //restructIdentifiers ( );
-    exportToFile("test.swc");
+    restructIdentifiers ( );
+    //exportToFile("test.swc");
 
     //if (pApplyStdDims)	applyUniformModifiers(AXONRADIUSMODIF,DENDRITICRADIUSMODIF,APICALRADIUSMODIFSTD,BASERADIUSMODIF);
   }
