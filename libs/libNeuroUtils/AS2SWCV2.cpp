@@ -165,9 +165,7 @@ Dendrite AS2SWCV2::processDendrite(std::ifstream &inputStream, int &counter, int
                 inputStream >> z;
                 inputStream >> d;
             }
-            if (parent == 382) {
-                std::cout << "test";
-            }
+
             actualPoint = {x,y,z};
             double dist  = (lastPoint - actualPoint).norm();
             inputStream >> line; //saltamos parentesis final
