@@ -441,7 +441,20 @@
            </widget>
           </item>
           <item>
+           <widget class="QRadioButton" name="radioButton_RealAscPos">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Real Positions of ASC file</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QRadioButton" name="radioButton_VrmlSpines">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Real Spines in VRML</string>
             </property>

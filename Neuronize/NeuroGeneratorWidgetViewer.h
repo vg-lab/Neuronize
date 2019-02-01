@@ -49,6 +49,7 @@ using namespace NSLightManager;
 using namespace NSSWCImporter;
 
 #include "ui_NeuroGeneratorWidget.h"
+#include "../libs/libNeuroUtils/AS2SWCV2.h"
 
 class NeuroGeneratorWidgetViewer: public QGLViewer
 {
@@ -263,6 +264,10 @@ class NeuroGeneratorWidgetViewer: public QGLViewer
     void importSpinesInfo ( QString fileName );
 
     void generateSpinesVrml(QString dirPath);
+
+
+    void generateSpinesASC(std::vector<Spine>& spines,unsigned int pHorResol, unsigned int pVerResol, float pMinLongSpine,
+                           float pMaxLongDistance, float pMinRadio, float pMaxRadio);
 
 protected:
 

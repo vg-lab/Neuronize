@@ -31,6 +31,7 @@
 
 #include <libs/libNeuroUtils/SWCImporter.h>
 #include <libs/libNeuroUtils/BaseMesh.h>
+#include <libs/libNeuroUtils/AS2SWCV2.h>
 
 #include "ui_SomaCreatorWidget.h"
 
@@ -128,10 +129,18 @@ private:
     QString mFullPathSWCFileName;
     QString mMehsFileName;
     QString mExitDirectory;
+    QString mInputFile;
+public:
+    const QString &getInputFile() const;
+
+private:
 
     std::vector < unsigned int > mNearestVertex;
     skelgenerator::Neuron* neuron;
     bool somaContours;
+    std::vector<Spine> spines;
+public:
+    const vector<Spine> &getSpines() const;
 
 private:
 

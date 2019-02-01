@@ -1768,37 +1768,120 @@ void NeuroGeneratorWidgetViewer::generateSpinesVrml(QString dirPath) {
 }
 
 SpinesSWC* NeuroGeneratorWidgetViewer::fusionAllSpines(vector<SpinesSWC *> &spineMeshes) {
-    QThreadPool pool;
-    std::queue<QFuture<SpinesSWC*>> futures;
-    for (int i = 1; i < spineMeshes.size(); i += 2) {
-        QFuture<SpinesSWC*> future  = QtConcurrent::run(&pool, [=]() {
-            return fusionSpines(spineMeshes[i-1], spineMeshes[i]);
-        });
+  QThreadPool pool;
+  std::queue<QFuture<SpinesSWC *>> futures;
+  for (int i = 1; i < spineMeshes.size(); i += 2) {
+    QFuture<SpinesSWC *> future = QtConcurrent::run(&pool, [=]() {
+        return fusionSpines(spineMeshes[i - 1], spineMeshes[i]);
+    });
 
-        futures.push(future);
-    }
+    futures.push(future);
+  }
 
-    if (spineMeshes.size()%2 == 1) {
-      auto future = QtConcurrent::run(&pool,[=](){ return spineMeshes[spineMeshes.size()-1];});
-      futures.push(future);
-    }
+  if (spineMeshes.size() % 2 == 1) {
+    auto future = QtConcurrent::run(&pool, [=]() { return spineMeshes[spineMeshes.size() - 1]; });
+    futures.push(future);
+  }
 
-    while (futures.size() >1) {
-        auto mesh1 = futures.front().result();
-        futures.pop();
-        auto mesh2 = futures.front().result();
-        futures.pop();
-        auto future = QtConcurrent::run(&pool,[=](){ return fusionSpines(mesh1,mesh2);});
-        futures.push(future);
-    }
-    return futures.front().result();
-                                                                                                                        }
+  while (futures.size() > 1) {
+    auto mesh1 = futures.front().result();
+    futures.pop();
+    auto mesh2 = futures.front().result();
+    futures.pop();
+    auto future = QtConcurrent::run(&pool, [=]() { return fusionSpines(mesh1, mesh2); });
+    futures.push(future);
+  }
+  return futures.front().result();
+}
 
 SpinesSWC* NeuroGeneratorWidgetViewer::fusionSpines(SpinesSWC* mesh1, SpinesSWC* mesh2) {
     mesh1->JoinBaseMesh(mesh2);
     mesh1->updateBaseMesh();
     return mesh1;
 }
+
+void
+NeuroGeneratorWidgetViewer::generateSpinesASC(std::vector<Spine>& spines,unsigned int pHorResol, unsigned int pVerResol,
+                                              float pMinLongSpine, float pMaxLongSpine, float pMinRadio,
+                                              float pMaxRadio) {
+    unsigned int lNumMeshes = mSpinesSynthContainers.getContainer ( ).size ( );
+    unsigned int lTotalNumSpines = 0;
+    float lDendriticModificator = 0;
+    float lNumGroupsOfSpines = 0;
+    BaseMesh *tmpMesh = NULL;
+
+    if ( mesh == NULL )
+        return;
+
+    if ( meshSpines != NULL )
+    {
+        delete meshSpines;
+        meshSpines == NULL;
+    }
+
+    if ( spineMeshRend != NULL )
+    {
+        delete spineMeshRend;
+    }
+
+    spineMeshRend = new MeshRenderer ( );
+
+    if ( lNumMeshes != 0 )
+    {
+        for ( int i = 0; i < lNumMeshes; ++i )
+        {
+            delete mSpinesSynthContainers.getElementAt ( i );
+        }
+
+        mSpinesSynthContainers.getContainer ( ).clear ( );
+    }
+
+    meshSpines =
+            new SpinesSWC (mesh, static_cast<unsigned int>(spines.size()), pHorResol, pVerResol, pMinLongSpine, pMaxLongSpine, pMinRadio, pMaxRadio );
+
+    meshSpines->setSpinesContainer ( &mSpinesModelsContainers );
+
+    meshSpines->distributeSpines (spines);
+
+    int i = 0;
+
+    mSpinesSynthContainers.addElement ( new BaseMesh ( ));
+    mSpinesSynthContainers.getElementAt ( i )->JoinBaseMesh ( meshSpines );
+
+
+    MeshDef::ConstVertexIter iniLimit = mSpinesSynthContainers.getElementAt ( i )->getMesh ( )->vertices_begin ( );
+    MeshDef::ConstVertexIter finLimit = mSpinesSynthContainers.getElementAt ( i )->getMesh ( )->vertices_end ( );
+
+    mSpinesSynthContainers.getElementAt ( i )->setVertexColor ( iniLimit, finLimit, MeshDef::Color ( 0.6, 0.0, 0.0, 1.0 )
+    );
+
+    mLastSpinesInfo.clear ( );
+    mLastSpinesInfo = meshSpines->getSpinesInfo ( );
+    mNumVertesSpineIndexation = meshSpines->getNumVerticesEnSpina ( );
+
+    delete meshSpines;
+    meshSpines = NULL;
+
+    if ( spineMeshRend != NULL )
+    {
+        delete spineMeshRend;
+    }
+
+    spineMeshRend = new MeshRenderer ( );
+
+    spineMeshRend->setMeshToRender ( mSpinesSynthContainers.getElementAt ( 0 ));
+
+    spineMeshRend->setRenderOptions ( renderMask );
+
+    boost::numeric::ublas::matrix<float> translationMatrix (4,4);
+    auto displacement = mSWCImporter->getDisplacement();
+    generateSquareTraslationMatrix(translationMatrix,-displacement[0],-displacement[1],-displacement[2]);
+    spineMeshRend->getBaseMesh()->applyMatrixTransform(translationMatrix,4);
+
+    updateGL ( );
+}
+
+
 
 
 

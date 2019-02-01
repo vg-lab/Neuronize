@@ -24,6 +24,7 @@
 #include "NeuroSWC.h"
 #include "BaseMeshContainer.h"
 #include "SWCSpinesDistributor.h"
+#include "AS2SWCV2.h"
 
 using namespace std;
 using namespace NSNeuroSWC;
@@ -219,6 +220,8 @@ namespace NSSpinesSWC
       void vectorizeSpineDesp ( );
 
       const std::vector < unsigned int > &getSpineDesp ( ) const { return mSpineDesp; };
+
+      void distributeSpines(const vector<Spine> &spines);
   };
 }
 

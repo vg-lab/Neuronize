@@ -19,7 +19,7 @@
 #include <vcg/complex/algorithms/isotropic_remeshing.h>
 #include <vcg/complex/algorithms/voronoi_remesher.h>
 #include <vcg/complex/algorithms/stat.h>
-
+#include <QtCore/QFile>
 
 
 MeshVCG::MeshVCG(const std::string &filename) {
@@ -53,6 +53,8 @@ void MeshVCG::calcGeodesicDistance(const std::vector<int> &vertexs, const std::s
         seed.push_back(vp);
         vcg::tri::Geodesic<MyMesh>::Compute(mesh,seed);
 
+        QFile file1 (QString::fromStdString(exportPath+std::to_string(i)+".dat"));
+        file1.remove();
         std::ofstream file (exportPath+std::to_string(i)+".dat",std::ofstream::out);
 
         for (vi = mesh.vert.begin(); vi != mesh.vert.end(); ++vi) {

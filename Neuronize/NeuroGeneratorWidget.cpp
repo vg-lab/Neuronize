@@ -471,11 +471,14 @@ void NeuroGeneratorWidget::generateSpines ( )
     lGenerateOption = 4;
   else if (ui.radioButton_VrmlSpines->isChecked ( ))
     lGenerateOption = 5;
+  else if (ui.radioButton_RealAscPos->isChecked ( )){
+    lGenerateOption = 6;
+  }
 
 
 //  lGenerateOption = 0;
 //  viewer->SetSpinesType(lGenerateOption);
-  std::cout<<"-->> Opcion elegida:"<<lGenerateOption<<std::endl;
+ std::cout<<"-->> Opcion elegida:"<<lGenerateOption<<std::endl;
   switch ( lGenerateOption )
   {
     //Rand Procedurales
@@ -530,11 +533,17 @@ void NeuroGeneratorWidget::generateSpines ( )
                                               lMinRadio,
                                               lMaxRadio );
       break;
-
       case 5:
           std::cout << "vrmlSpines" << std::endl;
           this->neuron->spines_to_obj_without_base("tmpSpines");
           viewer->generateSpinesVrml("tmpSpines");
+    case 6:
+      viewer->generateSpinesASC(this->spines,lHorResol,
+                                lVerResol,
+                                lMinLongSpine,
+                                lMaxLongSpine,
+                                lMinRadio,
+                                lMaxRadio );
   }
 }
 
@@ -1095,12 +1104,16 @@ void NeuroGeneratorWidget::RebuildWithAdvancedOptions ( )
 
 void NeuroGeneratorWidget::goAdvencedSpinesOptions ( )
 {
-  if (this->neuron == nullptr) {
-    ui.radioButton_VrmlSpines->setCheckable(false);
-    ui.radioButton_VrmlSpines->setEnabled(false);
-  } else {
+  if (!this->spines.empty()) {
+    ui.radioButton_RealAscPos->setEnabled(true);
+    ui.radioButton_RealAscPos->setChecked(true);
+  }
+
+  if (this->neuron != nullptr) {
+    ui.radioButton_VrmlSpines->setEnabled(true);
     ui.radioButton_VrmlSpines->setChecked(true);
   }
+
   ui.tabWidget_RenderControl->setCurrentIndex(1);
 }
 
@@ -1148,5 +1161,9 @@ void NeuroGeneratorWidget::importSpinesInfo ( )
 
 void NeuroGeneratorWidget::setNeuron(skelgenerator::Neuron *neuron) {
   NeuroGeneratorWidget::neuron = neuron;
+}
+
+void NeuroGeneratorWidget::setSpines(const vector<Spine> &spines) {
+  NeuroGeneratorWidget::spines = spines;
 }
 

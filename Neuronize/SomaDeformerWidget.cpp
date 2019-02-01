@@ -19,6 +19,7 @@
  */
 
 #include "SomaDeformerWidget.h"
+#include "SomaCreatorWidget.h"
 
 #include <QMessageBox>
 
@@ -118,6 +119,7 @@ SomaDeformerWidget::SomaDeformerWidget ( QWidget *parent )
   QObject::connect ( ui.pushButton_FinalizeSoma, SIGNAL( clicked ( )), this, SLOT( finalizeSoma ( )) );
   QObject::connect ( ui.pushButton_NextStep, SIGNAL( clicked ( )), this, SLOT( finalizeSoma ( )) );
   QObject::connect ( ui.pushButton_restoreDefaults, SIGNAL( clicked ( )), this, SLOT( restoreDefaultValues ( )) );
+  QObject::connect ( ui.pushButton_SphericalSoma, SIGNAL( clicked ( )), this, SLOT( useSphericalSoma() ));
 
   mMsgTimer = NULL;
   mMiSecsSimulation = 5000;
@@ -468,5 +470,16 @@ void SomaDeformerWidget::setModeledSoma(std::string path) {
 void SomaDeformerWidget::setSWCFile(std::string path) {
     viewer->loadSWCFile(QString::fromStdString(path));
 }
+
+void SomaDeformerWidget::useSphericalSoma() {
+  somaCreator->generateXMLSoma(somaCreator->getInputFile());
+  loadPredefinedXMLSomaDef();
+}
+
+void SomaDeformerWidget::setSomaCreator(SomaCreatorWidget *somaCreator) {
+  this->somaCreator = somaCreator;
+}
+
+
 
 

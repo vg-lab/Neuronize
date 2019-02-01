@@ -22,6 +22,21 @@ public:
         point[2] = z;
         this->d = d;
     }
+    SimplePoint (double x, double y, double z){
+        point[0] = x;
+        point[1] = y;
+        point[2] = z;
+        this->d = -1;
+    }
+};
+
+class Spine {
+public:
+    SimplePoint initPoint;
+    SimplePoint finalPoint;
+    double d;
+
+    Spine(SimplePoint initPoint, SimplePoint finalPoint, double d) : initPoint(initPoint) ,finalPoint(finalPoint),d(d){}
 };
 
 class SWCPoint: public SimplePoint {
@@ -39,12 +54,12 @@ using Dendrite = std::vector<SWCPoint>;
 
 class AS2SWCV2 {
 public:
-    static MeshVCG* asc2swc(const std::string& inputFile, const std::string& outFile);
+    static std::tuple<MeshVCG*,std::vector<Spine>> asc2swc(const std::string& inputFile, const std::string& outFile, bool useSoma);
 
 private:
     static void procesSomaPart(std::ifstream &file,std::vector<std::vector<OpenMesh::Vec3d>> &countours);
 
-    static Dendrite processDendrite(std::ifstream &inputStream, int &counter, int type, std::vector<int>& parentsCount);
+    static Dendrite processDendrite(std::ifstream &inputStream, int &counter, int type, std::vector<int>& parentsCount,std::vector<Spine>& spines);
 
     static void toSWC(const std::string &filename,std::vector<Dendrite> &dendrites, SimplePoint* &soma);
 

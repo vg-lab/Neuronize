@@ -9,9 +9,10 @@
 #include "AS2SWCV2.h"
 #include "MeshVCG.h"
 
-MeshVCG* AS2SWCV2::asc2swc(const std::string &inputFile, const std::string &outFile) {
+std::tuple<MeshVCG*,std::vector<Spine>> AS2SWCV2::asc2swc(const std::string &inputFile, const std::string &outFile, bool useSoma) {
         std::setlocale(LC_ALL, "en_US.UTF-8");
         std::vector<std::vector<OpenMesh::Vec3d>> contours;
+        std::vector<Spine> spines;
         int counter = 2; //Saltamos el soma
         std::ifstream inputStream;
         inputStream.open(inputFile,std::ios::in);
@@ -26,10 +27,10 @@ MeshVCG* AS2SWCV2::asc2swc(const std::string &inputFile, const std::string &outF
                 procesSomaPart(inputStream,contours);
             }
             if (line.find("Dendrite") !=  std::string::npos) {
-               dentrites.push_back(processDendrite(inputStream, counter, 3, parentsCount));
+               dentrites.push_back(processDendrite(inputStream, counter, 3, parentsCount,spines));
             }
             if (line.find("Apical") != std::string::npos) {
-                dentrites.push_back(processDendrite(inputStream, counter, 4, parentsCount));
+                dentrites.push_back(processDendrite(inputStream, counter, 4, parentsCount,spines));
 
             }
         }
@@ -39,7 +40,7 @@ MeshVCG* AS2SWCV2::asc2swc(const std::string &inputFile, const std::string &outF
         OpenMesh::Vec3d center;
         MeshVCG* finalSoma = nullptr;
         SimplePoint* soma;
-        if (contours.size() >1) {
+        if (contours.size() >1 && useSoma) {
             MeshVCG  somaMesh (contours);
             MeshVCG somaConvex;
             somaMesh.convexHull(somaConvex);
@@ -88,7 +89,7 @@ MeshVCG* AS2SWCV2::asc2swc(const std::string &inputFile, const std::string &outF
             soma = calcSoma(dentrites);
         }
         toSWC(outFile,dentrites,soma);
-    return finalSoma;
+    return std::make_tuple(finalSoma,spines);
 
 }
 
@@ -112,9 +113,9 @@ void AS2SWCV2::procesSomaPart(std::ifstream &file,std::vector<std::vector<OpenMe
 }
 
 // TODO Problema con dendritas apicales construidas a trozos. Buscar forma de unir dendritas  en una sola.
-Dendrite AS2SWCV2::processDendrite(std::ifstream &inputStream, int &counter, int type, std::vector<int>& parentsCount) {
+Dendrite AS2SWCV2::processDendrite(std::ifstream &inputStream, int &counter, int type, std::vector<int>& parentsCount,std::vector<Spine>& spines) {
     Dendrite dendrite;
-    double minDistance = 0.5;
+    double minDistance = 0;
     int initCounter = counter;
     std::unordered_set<int> usedParents;
     Eigen::Vector3d lastPoint;
@@ -139,10 +140,16 @@ Dendrite AS2SWCV2::processDendrite(std::ifstream &inputStream, int &counter, int
     counter++;
 
     while (inputStream >> line) {
-        if (line.find('<') != std::string::npos) {  //Estamos ante una espina de momento las ignoramos
-            while (line.find('>') == std::string::npos){
-                inputStream >> line;
-            }
+        if (line.find('<') != std::string::npos) {//Espina
+            inputStream >> line >> line >> line >> line >> line >> line >> line >> line;
+            inputStream >> x;
+            inputStream >> y;
+            inputStream >> z;
+            inputStream >> d;
+            inputStream >> line;
+            SimplePoint initPoint (lastPoint[0], lastPoint[1], lastPoint[2]);
+            Spine spine (initPoint, SimplePoint(x,y,z), d);
+            spines.push_back(spine);
         } else if (line == "(") {
             inputStream >> line;
             if (line == "(") { //Nueva SubDendrita
@@ -157,6 +164,9 @@ Dendrite AS2SWCV2::processDendrite(std::ifstream &inputStream, int &counter, int
                 inputStream >> y;
                 inputStream >> z;
                 inputStream >> d;
+            }
+            if (counter == 382 || counter == 517) {
+                std::cout << "test";
             }
             actualPoint = {x,y,z};
             double dist  = (lastPoint - actualPoint).norm();
@@ -225,6 +235,9 @@ double AS2SWCV2::calcSommaRadius(OpenMesh::Vec3d center,std::vector<Dendrite> &d
     for (int i = 1 ; i < dentrites.size();i++) {
         auto dist = (center - dentrites[i][0].point).norm();
         minDist = minDist > dist ? dist : minDist;
+    }
+    if (minDist == 0) {
+        minDist++;
     }
     return minDist;
 

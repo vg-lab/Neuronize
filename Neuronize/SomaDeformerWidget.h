@@ -29,6 +29,7 @@
 #include "ui_SomaDeformerWidget.h"
 
 #include "SomaDeformerWidgetViewer.h"
+#include "SomaCreatorWidget.h"
 #include <libs/libSysNeuroUtils/SystemUtils.h>
 
 class SomaDeformerWidget: public QWidget, public Ui::SomaDeformerWidget
@@ -39,7 +40,7 @@ class SomaDeformerWidget: public QWidget, public Ui::SomaDeformerWidget
     unsigned int mMiSecsSimulation;
 
   public:
-    SomaDeformerWidget ( QWidget *parent = 0 );
+    SomaDeformerWidget ( QWidget *parent = 0);
     ~SomaDeformerWidget ( );
 
     void deformDuringNSteps ( int pSteps );
@@ -58,6 +59,12 @@ class SomaDeformerWidget: public QWidget, public Ui::SomaDeformerWidget
   private:
 
     Ui::SomaDeformerWidget ui;
+
+    SomaCreatorWidget* somaCreator;
+public:
+    void setSomaCreator(SomaCreatorWidget *somaCreator);
+
+private:
 
     SomaDeformerWidgetViewer *viewer;
 
@@ -84,6 +91,7 @@ class SomaDeformerWidget: public QWidget, public Ui::SomaDeformerWidget
 
     void generateSoma ( );
     void singleStepDeformation ( );
+    void useSphericalSoma ();
 
     void setAnimationPeriod ( );
 

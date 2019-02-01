@@ -145,6 +145,7 @@ void Neuronize::showSomaCreator ( )
 void Neuronize::showSomaDeformer ( )
 {
   mActiveTab = 1;
+  mSomaDeformerWidget->setSomaCreator(mSomaCreatorWidget);
 
   mFullSWCFilePath = mSomaCreatorWidget->getFullPathToSWCFile ( );
 
@@ -172,6 +173,8 @@ void Neuronize::showDendriteGenerator ( )
 
   ui.tabWidget_MainContainer->removeTab ( 0 );
   ui.tabWidget_MainContainer->insertTab ( 0, ui.tab_DendritesGenerator, "Dendrites/Spines builder" );
+
+  mNeuroGeneratorWidget->setSpines(mSomaCreatorWidget->getSpines());
 
   //Noise options
   mNeuroGeneratorWidget->getUI ( ).checkBox_NoiseSoma->setVisible ( true );

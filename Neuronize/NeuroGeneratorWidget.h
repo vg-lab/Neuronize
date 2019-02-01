@@ -27,8 +27,10 @@
 #include <QMessageBox>
 #include <SkelGenerator/SkelGeneratorUtil/Neuron.h>
 
+
 #include "ui_NeuroGeneratorWidget.h"
 #include "NeuroGeneratorWidgetViewer.h"
+#include "../libs/libNeuroUtils/AS2SWCV2.h"
 
 class NeuroGeneratorWidget: public QWidget, public Ui::NeuroGeneratorWidget
 {
@@ -40,6 +42,10 @@ class NeuroGeneratorWidget: public QWidget, public Ui::NeuroGeneratorWidget
     QMessageBox *msgBox;
 
     skelgenerator::Neuron* neuron;
+    std::vector<Spine> spines;
+public:
+    void setSpines(const vector<Spine> &spines);
+
 public:
     void setNeuron(skelgenerator::Neuron *neuron);
 

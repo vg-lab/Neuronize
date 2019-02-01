@@ -2914,6 +2914,295 @@ namespace NSSpinesSWC
       }
     }
   }
+
+    void SpinesSWC::distributeSpines(const vector<Spine> &spines) {
+      mNumVerticesEnSpina = mSpinesModeledContainer->getContainer ( ).at ( 0 )->getNumVertex ( );
+
+      SpineInfo lSpineInfo;
+      mSpinesInfo.clear ( );
+
+      //delete lpSWCSpinesDistributor;
+
+      ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+      ///######
+
+      unsigned int lNumSegmentsWithSpines = 0;
+      unsigned int lNumSpinesInSegment = 0;
+
+      BaseMesh *tmpMesh;
+      unsigned int lSpineModelSelected;
+
+      unsigned int idVCandidate = 0;
+      unsigned int idFCandidate = 0;
+
+      std::vector < VertexDistances >::iterator lItV;
+      std::vector < FacesDistances >::iterator lItF;
+
+      unsigned int lNumVertAtached = 0;
+      unsigned int lNumFacesAtached = 0;
+
+      //Selection for vertex
+      unsigned int numVertices = NeuronMesh->getNumVertex ( );
+      unsigned int somaNumVertices = NeuronMesh->getSomaNumVertex ( );
+
+      //Selection for faces
+      unsigned int numFaces = NeuronMesh->calcNumFaces ( );
+      unsigned int somaNumFaces = NeuronMesh->getSomaNumFaces ( );
+
+      //Incremet for dispose ramdomly the spines
+      float lTmpCalc = ( float ) ( numVertices - somaNumVertices )/( float ) totalNumSpines;
+      unsigned int lIncRand = ( int ) lTmpCalc;
+      if (( lTmpCalc - lIncRand ) > 0.49 )
+        ++lIncRand;
+      unsigned int lInfLimit = somaNumVertices;
+
+      initrand ( );
+
+      unsigned int index = 0;
+
+      unsigned int i, j, k;
+
+      OpenMesh::Vec3f auxPoint;
+      OpenMesh::Vec3f auxNormal;
+
+      //MeshDef::VertexHandle vhandle;
+
+      namespace ublas = boost::numeric::ublas;
+
+      ublas::vector < float > glb_AuxVec;
+      glb_AuxVec.resize ( 4 );
+
+      ublas::vector < float > XVector;
+      XVector.resize ( 3 );
+      XVector[0] = 1;
+      XVector[1] = 0;
+      XVector[2] = 0;
+
+      ublas::vector < float > YVector;
+      YVector.resize ( 3 );
+      YVector[0] = 0;
+      YVector[1] = 1;
+      YVector[2] = 0;
+
+      ublas::vector < float > glb_ZeroVec;
+      glb_ZeroVec.resize ( 3 );
+      glb_ZeroVec[0] = glb_ZeroVec[1] = glb_ZeroVec[2] = 0;
+
+      boost::numeric::ublas::matrix < float > glb_mat;
+      glb_mat.resize ( 4, 4 );
+
+      boost::numeric::ublas::vector < float > glb_forwardVec;
+      glb_forwardVec.resize ( 3 );
+
+      boost::numeric::ublas::vector < float > glb_DespVec;
+      glb_DespVec.resize ( 3 );
+
+      //Auxiliar forwardvector
+      boost::numeric::ublas::vector < float > glb_TransVectorAux;
+      glb_TransVectorAux.resize ( 3 );
+
+      //Right vector
+      boost::numeric::ublas::vector < float > glb_RightVector;
+      glb_RightVector.resize ( 3 );
+
+      //Up vector
+      boost::numeric::ublas::vector < float > glb_UpVector;
+      glb_UpVector.resize ( 3 );
+
+      //NeuronMesh->freeFaceFusionCandidates();
+
+      initrand ( );
+
+
+      //Auxiliar vectors
+        for ( i = 0; i < spines.size(); ++i ) {
+
+          //Select the spine modelled
+          lSpineModelSelected = (int) randfloat(0, mSpinesModeledContainer->getContainer().size());
+
+
+          //New version
+          //////!!!!!!
+          tmpMesh = new BaseMesh();
+          tmpMesh->JoinBaseMesh(mSpinesModeledContainer->getElementAt(lSpineModelSelected));
+          //tmpMesh->scaleBaseMesh(lSpineScale);
+
+          MeshDef::ConstVertexFaceIter CVFIter;
+          MeshDef::FaceHandle lAuxFaceHandle;
+          std::vector<MeshDef::FaceHandle> vecFaceCands;
+          int lFaceCand;
+          float lLenght;
+          OpenMesh::Vec3f lVecAB;
+          float lSegPercetn;
+          unsigned int lNumVertexToChoose = 0;
+
+          //Colocaci�n de las espinas en los centros de las facetas
+          //From vertex candidate, we choose his incident face
+          MeshDef::VertexHandle vhandle;
+          MeshDef::HalfedgeHandle hehandle;
+          MeshDef::FaceHandle fhandle;
+
+          //Selection by vertices
+
+          MeshDef::Point lTmpVertex(0, 0, 0);
+
+          unsigned int lIniOpt;
+          unsigned int lFinOpt;
+
+          auxPoint = spines[i].initPoint.point;
+          //auxNormal = NeuronMesh->getMesh()->calc_face_normal(fhandle);
+          auxNormal = spines[i].finalPoint.point - spines[i].initPoint.point;
+
+          lSpineInfo.mSpineId = lSpineModelSelected;
+          lSpineInfo.mSpinePosition = auxPoint;
+          lSpineInfo.mSpineDirection = auxNormal;
+          mSpinesInfo.push_back(lSpineInfo);
+
+          //lNumVertexToChoose	=	(unsigned int)randfloat(0,mVertexDistancesContainer.size()-1);
+          //idVCandidate		= (int)randfloat(0,lNumVertexToChoose);
+          ////idVCandidate		= mVertexDistancesContainer.at(lNumVertexToChoose);
+
+          ////Eliminamos el marcador para no volver a seleccionarlo
+          //lItV = mVertexDistancesContainer.begin() + idVCandidate;
+
+          //////!!!!!!
+          //tmpMesh->scaleBaseMesh(mVertexDistancesContainer.at(idVCandidate).lDendriticRadiusFactor);
+
+
+          //idVCandidate = lItV->lId;
+
+          ////mVertexDistancesContainer.at(lItV).lUsed	=	true;
+
+          ////Consecutive Vertex selection
+          ////idVCandidate    = (int)randfloat(lInfLimit,(lInfLimit+lIncRand));
+          ////lInfLimit+=lIncRand;
+
+          /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+          ////Aki va la disposici�n aleatoria sobre las facetas
+          ////Store all the incidente vertex handles
+
+          //vhandle		=	NeuronMesh->getMesh()->vertex_handle(idVCandidate);
+
+          //for (CVFIter=NeuronMesh->getMesh()->cvf_iter(vhandle);CVFIter.is_valid();++CVFIter)
+          //{
+          //	lAuxFaceHandle = NeuronMesh->getMesh()->face_handle(CVFIter->idx());
+          //	vecFaceCands.push_back(lAuxFaceHandle);
+          //}
+
+          //lFaceCand = (int)randfloat(0,vecFaceCands.size()-1);
+          //fhandle	= vecFaceCands.at(lFaceCand);
+
+          ////Selecci�n de la normal de la faceta
+          //auxNormal = NeuronMesh->getMesh()->calc_face_normal(fhandle);
+
+          ////Calculo del punto sobre el que poner la espina
+
+          //NeuronMesh->getMesh()->calc_face_centroid(fhandle,lTmpVertex);
+          //auxPoint		= NeuronMesh->getMesh()->points()[idVCandidate];
+
+          //lVecAB	=	OpenMesh::Vec3f(
+          //							lTmpVertex
+          //							- auxPoint
+          //							);
+          ////Longitud desde el vertice hasta el centro de la faceta
+          //lLenght=lVecAB.length();
+          //lVecAB.normalize();
+
+          //////Colcaci�n de la espina en la mitad del segmento
+          ////auxPoint		= auxPoint + lVecAB*(lLenght/2.0);
+
+          ////COlcaci�n de la espina en la mitad del segmento
+
+          //lSegPercetn	=	(lLenght*DESP_PERCENT)/100.0;
+          //lLenght		-=	lSegPercetn;
+          //lLenght		= randfloat(lSegPercetn,lLenght);
+
+          //auxPoint		= auxPoint + lVecAB*(lLenght);
+
+          //mVertexDistancesContainer.erase(lItV);
+
+
+          /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+          //Codigo comun para posicionamiento por vertice y por faceta
+          /////////////////////////////////////////////////////////////////////////////////////////////////////////
+          glb_direction = (auxPoint + auxNormal * mMaxLongSpine) - auxPoint;
+
+
+
+
+
+
+
+          //Orientaci�n seg�n la normal
+          glb_forwardVec[0] = glb_direction[0];
+          glb_forwardVec[1] = glb_direction[1];
+          glb_forwardVec[2] = glb_direction[2];
+
+          //Giro de la dendrita para no alinearla exatamente con la normal
+          //glb_forwardVec[0] = glb_direction[0]+randfloat(-mMaxLongSpine, mMaxLongSpine);
+          //glb_forwardVec[1] = glb_direction[1];
+          //glb_forwardVec[2] = glb_direction[2]+randfloat(-mMaxLongSpine, mMaxLongSpine);
+
+          //Montaje de la matriz
+          generateTransformationMatrix(glb_mat,
+                                       glb_DespVec,
+                                       glb_forwardVec,
+                                       glb_TransVectorAux,
+                                       glb_RightVector,
+                                       glb_UpVector,
+                                       XVector,
+                                       YVector
+          );
+
+          //Unimos la malla y calculamos los vertices antes y despues
+          unsigned int lIniLimit = this->getNumVertex();
+          JoinBaseMesh(tmpMesh);
+          unsigned int lFinLimit = this->getNumVertex();
+
+          //All the vertices are ready now
+          for (j = (lIniLimit); j < (lFinLimit); ++j) {
+
+            //Hay q coger el precomputado
+            glb_AuxVec[0] = Mesh->points()[j][0];
+            glb_AuxVec[1] = Mesh->points()[j][1];
+            glb_AuxVec[2] = Mesh->points()[j][2];
+            glb_AuxVec[3] = 1.0;
+
+            //Matrix operations
+            glb_AuxVec = prod(glb_mat, glb_AuxVec);
+
+            //Explicit translate
+            //Muchmore faster than apply the translate matrix
+            glb_AuxVec[0] += auxPoint[0];
+            glb_AuxVec[1] += auxPoint[1];
+            glb_AuxVec[2] += auxPoint[2];
+
+            //Mesh->points()[j] = (MeshDef::Point(glb_AuxVec[0]
+            //									,glb_AuxVec[1]
+            //									,glb_AuxVec[2]
+            //								  )
+            //					);
+
+            MeshDef::VertexHandle vhandle = Mesh->vertex_handle(j);
+            Mesh->set_point(vhandle, (MeshDef::Point(glb_AuxVec[0], glb_AuxVec[1], glb_AuxVec[2]
+                            )
+                            )
+            );
+          }
+
+          //NeuronMesh->addFaceFusionCandidate(fhandle);
+          ////!!!!!!
+          delete tmpMesh;
+
+        }
+      updateBaseMesh ( );
+
+      ///####
+      ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    }
 }
 
 
