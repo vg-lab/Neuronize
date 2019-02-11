@@ -64,8 +64,10 @@ private:
     static void toSWC(const std::string &filename,std::vector<Dendrite> &dendrites, SimplePoint* &soma);
 
     static SimplePoint* calcSoma(std::vector<Dendrite> &vector1);
+    static SimplePoint* calcSoma2(std::vector<Dendrite> &dendrites);
 
     static double calcSommaRadius(OpenMesh::Vec3d center,std::vector<Dendrite> &dentrites);
+
 };
 
 
