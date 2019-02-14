@@ -115,7 +115,8 @@ void AS2SWCV2::procesSomaPart(std::ifstream &file,std::vector<std::vector<OpenMe
 // TODO Problema con dendritas apicales construidas a trozos. Buscar forma de unir dendritas  en una sola.
 Dendrite AS2SWCV2::processDendrite(std::ifstream &inputStream, int &counter, int type, std::vector<int>& parentsCount,std::vector<Spine>& spines) {
     Dendrite dendrite;
-    double minDistance = 0.5;
+    char name[256];
+    double minDistance = 0.0;
     int initCounter = counter;
     std::unordered_set<int> usedParents;
     Eigen::Vector3d lastPoint;
@@ -128,16 +129,8 @@ Dendrite AS2SWCV2::processDendrite(std::ifstream &inputStream, int &counter, int
     std::string line;
 
     // Rellenamos el primer punto
-    inputStream >> line;
-    inputStream >> x;
-    inputStream >> y;
-    inputStream >> z;
-    inputStream >> d;
-    lastPoint = {x,y,z};
-    inputStream >> line;
-    dendrite.emplace_back(x, y, z, d, parent, type);
-    parent = counter;
-    counter++;
+    lastPoint = {std::numeric_limits<double>::max(),std::numeric_limits<double>::max(),std::numeric_limits<double>::max()};
+
 
     while (inputStream >> line) {
         if (line.find('<') != std::string::npos) {//Espina
@@ -152,6 +145,10 @@ Dendrite AS2SWCV2::processDendrite(std::ifstream &inputStream, int &counter, int
             spines.push_back(spine);
         } else if (line == "(") {
             inputStream >> line;
+            while (line == ";") {
+                inputStream.getline(name,256);
+                inputStream >> line;
+            }
             if (line == "(") { //Nueva SubDendrita
                 parents.push(counter - 1);
                 brachs++;
@@ -193,6 +190,8 @@ Dendrite AS2SWCV2::processDendrite(std::ifstream &inputStream, int &counter, int
             if (brachs == 0) {
                 break;
             }
+        } else if (line ==";") {
+            inputStream.getline(name,256);
         }
     }
     return dendrite;
