@@ -86,7 +86,7 @@ std::tuple<MeshVCG*,std::vector<Spine>> AS2SWCV2::asc2swc(const std::string &inp
             finalSoma = new MeshVCG();
             somaConvex.remesh(*finalSoma);
         }else {
-            soma = calcSoma(dentrites);
+            soma = calcSoma2(dentrites);
         }
         toSWC(outFile,dentrites,soma);
     return std::make_tuple(finalSoma,spines);
@@ -162,7 +162,6 @@ Dendrite AS2SWCV2::processDendrite(std::ifstream &inputStream, int &counter, int
                 inputStream >> z;
                 inputStream >> d;
             }
-
             actualPoint = {x,y,z};
             double dist  = (lastPoint - actualPoint).norm();
             inputStream >> line; //saltamos parentesis final
@@ -225,6 +224,27 @@ SimplePoint* AS2SWCV2::calcSoma(std::vector<Dendrite> &dentrites) {
     auto radius = calcSommaRadius(center,dentrites);
 
     return new SimplePoint(center[0], center[1], center[2], radius);
+}
+
+SimplePoint* AS2SWCV2::calcSoma2(std::vector<Dendrite> &dendrites) {
+    OpenMesh::Vec3d maxPoint {-std::numeric_limits<double >::max(),-std::numeric_limits<double >::max(),-std::numeric_limits<double >::max()};
+    OpenMesh::Vec3d minPoint = -maxPoint;
+    for (const auto &dendrite:dendrites){
+        maxPoint[0] = std::max(maxPoint[0],dendrite[0].point[0]);
+        maxPoint[1] = std::max(maxPoint[1],dendrite[0].point[1]);
+        maxPoint[2] = std::max(maxPoint[2],dendrite[0].point[2]);
+
+        minPoint[0] = std::min(minPoint[0],dendrite[0].point[0]);
+        minPoint[1] = std::min(minPoint[1],dendrite[0].point[1]);
+        minPoint[2] = std::min(minPoint[2],dendrite[0].point[2]);
+    }
+
+    OpenMesh::Vec3d center = minPoint + (maxPoint-minPoint)/2;
+
+    double radius = calcSommaRadius(center,dendrites);
+    return new SimplePoint(center[0],center[1],center[2], radius);
+
+
 }
 
 double AS2SWCV2::calcSommaRadius(OpenMesh::Vec3d center,std::vector<Dendrite> &dentrites){
