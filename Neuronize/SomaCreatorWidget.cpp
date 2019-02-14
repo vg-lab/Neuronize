@@ -870,6 +870,8 @@ void SomaCreatorWidget::generateXMLSoma ( ) {
 
               float lMinDistance	= mSWCImporter->getElementAt(lNodeSomaId).radius;
 
+              //lMinDistance = lMinDistance < 1.3f ? 1.3f : lMinDistance;
+
               QString lFileExport("");
               lFileExport += "# Contour distance applied:"+ QString::number(lMinDistance);
 

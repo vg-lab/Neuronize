@@ -116,7 +116,7 @@ void AS2SWCV2::procesSomaPart(std::ifstream &file,std::vector<std::vector<OpenMe
 Dendrite AS2SWCV2::processDendrite(std::ifstream &inputStream, int &counter, int type, std::vector<int>& parentsCount,std::vector<Spine>& spines) {
     Dendrite dendrite;
     char name[256];
-    double minDistance = 0.0;
+    double minDistance = 0.5;
     int initCounter = counter;
     std::unordered_set<int> usedParents;
     Eigen::Vector3d lastPoint;

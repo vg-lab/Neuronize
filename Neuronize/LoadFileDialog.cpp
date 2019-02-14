@@ -138,7 +138,7 @@ void LoadFileDialog::onOkPressed() {
         this->file = tracePath->text().toStdString();
         accept();
     } else {
-        QFuture<void> future = QtConcurrent::run([=]() { processSkel("temp.swc"); });
+        QFuture<void> future = QtConcurrent::run([=]() { processSkel("temp.asc"); });
         futureWatcher->setFuture(future);
         progresDialog = new QProgressDialog("Operation in progress", "Cancel", 0, 0, this);
         progresDialog->setValue(0);
@@ -186,7 +186,7 @@ void LoadFileDialog::processSkel(const std::string &fileName){
 
     std::ofstream file;
     file.open(fileName,std::ios::out);
-    file << neuron->to_swc();
+    file << neuron->to_asc();
     file.close();
     this->file = fileName;
     this->neuron = neuron;
