@@ -1,0 +1,47 @@
+stages:
+  - build
+
+Ubuntu-subproject:
+  stage: build
+  script:
+  - module load Qt-5.10.0
+  - module load Eigen-3.1.2
+  - module load OpenMesh-6.3
+  - module load libQGLViewer-2.6.3
+  - export CMAKE_EXTRA_ARGS="-DCLONE_SUBPROJECTS=ON"
+  - bash .gitlab-ci.sh
+  tags:
+  - ubuntu
+  except:
+  - tags
+
+OSX-subproject:
+  stage: build
+  script:
+  - module load Qt-5.10.0
+  - module load Eigen-3.1.2
+  - module load OpenMesh-6.3
+  - module load libQGLViewer-2.6.3
+  - export CMAKE_EXTRA_ARGS="-DCLONE_SUBPROJECTS=ON"
+  - bash .gitlab-ci.sh
+  tags:
+  - osx-sierra
+  except:
+  - tags
+
+Win7-VS14-x64-subproject:
+  stage: build
+  script:
+  - call %ENVFILESDIR%\Qt-5.10.0-vs14.bat
+  - call %ENVFILESDIR%\Eigen-3.1.2-vs14.bat
+  - call %ENVFILESDIR%\OpenMesh-6.3-vs14.bat
+  - call %ENVFILESDIR%\libQGLViewer-2.6.3-vs14.bat
+  - call %ENVFILESDIR%\Boost-1.64-vs14-x64.bat
+  - set PATH=%PATH%;"c:\Program Files\Git\bin"
+  - set BUILD_GENERATOR=Visual Studio 14 Win64
+  - set CMAKE_EXTRA_ARGS=-DCLONE_SUBPROJECTS=ON
+  - bash --login .gitlab-ci.sh
+  tags:
+  - win7
+  except:
+  - tags

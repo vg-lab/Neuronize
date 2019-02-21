@@ -20,7 +20,7 @@
 class LoadFileDialog: public QDialog {
      Q_OBJECT
 
-    void showWarningDialogReaminingSegments(int sobrantes, int &newThreshold);
+
 
 public:
     explicit LoadFileDialog(QWidget* parent = 0);
@@ -55,6 +55,7 @@ private slots:
     void processSkel(const std::string &fileName);
 
     void showWarningDialogIncorrectConnections(int &newThreshold);
+    void showWarningDialogReaminingSegments(int sobrantes, int &newThreshold);
 
 
 

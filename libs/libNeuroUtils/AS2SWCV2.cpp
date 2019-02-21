@@ -170,8 +170,6 @@ Dendrite AS2SWCV2::processDendrite(std::ifstream &inputStream, int &counter, int
                 parent = counter;
                 counter++;
                 lastPoint  = actualPoint;
-            } else {
-                std::cout << "Punto eliminado" << std::endl;
             }
         } else if (line == "|") {
             parent = parents.top();
