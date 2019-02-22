@@ -84,7 +84,7 @@ class SomaCreatorWidget: public QWidget, public Ui::SomaCreatorWidget
 
     void generateXMLSoma ( );
 
-    void generateXMLSoma ( QString fileName );
+    void generateXMLSoma ( QString fileName, bool useSoma );
 
     void calcNearestVertex ( );
 

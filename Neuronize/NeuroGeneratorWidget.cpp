@@ -534,10 +534,10 @@ void NeuroGeneratorWidget::generateSpines ( )
                                               lMaxRadio );
       break;
       case 5:
-          std::cout << "vrmlSpines" << std::endl;
           this->neuron->spines_to_obj_without_base("tmpSpines");
           viewer->generateSpinesVrml("tmpSpines");
-    case 6:
+          break;
+      case 6:
       viewer->generateSpinesASC(this->spines,lHorResol,
                                 lVerResol,
                                 lMinLongSpine,
@@ -547,32 +547,47 @@ void NeuroGeneratorWidget::generateSpines ( )
   }
 }
 
-void NeuroGeneratorWidget::batchSpinesGeneration ( )
-{
+void NeuroGeneratorWidget::batchSpinesGeneration(skelgenerator::Neuron *pNeuron, vector<Spine> spines) {
+  unsigned int lNumSpines = ui.spinBox_NumSpines->value();
+  unsigned int lHorResol = ui.spinBox_SpinesHorResolution->value();
+  unsigned int lVerResol = ui.spinBox_SpinesVerResolution->value();
 
-  unsigned int lNumSpines = ui.spinBox_NumSpines->value ( );
-  unsigned int lHorResol = ui.spinBox_SpinesHorResolution->value ( );
-  unsigned int lVerResol = ui.spinBox_SpinesVerResolution->value ( );
+  float lMinLongSpine = ui.doubleSpinBox_MinLongSpine->value();
+  float lMaxLongSpine = ui.doubleSpinBox_MaxLongSpine->value();
 
-  float lMinLongSpine = ui.doubleSpinBox_MinLongSpine->value ( );
-  float lMaxLongSpine = ui.doubleSpinBox_MaxLongSpine->value ( );
+  float lMinRadio = ui.doubleSpinBox_MinRadioSpine->value();
+  float lMaxRadio = ui.doubleSpinBox_MaxRadioSpine->value();
 
-  float lMinRadio = ui.doubleSpinBox_MinRadioSpine->value ( );
-  float lMaxRadio = ui.doubleSpinBox_MaxRadioSpine->value ( );
-
-  unsigned int lNumOfGroups = ui.spinBox_NumOfGroupsModeledSpines->value ( );
+  unsigned int lNumOfGroups = ui.spinBox_NumOfGroupsModeledSpines->value();
   unsigned int lGenerateOption = 0;
 
-  if ( ui.radioButton_ProceduralSpines->isChecked ( ))
-    lGenerateOption = 0;
-  else if ( ui.radioButton_ModelSpines->isChecked ( ))
-    lGenerateOption = 1;
-  else if ( ui.radioButton_SemiRealSpines->isChecked ( ))
-    lGenerateOption = 2;
-  else if ( ui.radioButton_RealSpines->isChecked ( ))
-    lGenerateOption = 3;
-  else if ( ui.radioButton_SegmentSpines->isChecked ( ))
-    lGenerateOption = 4;
+  if (pNeuron != nullptr) {
+    std::cout<<"---------------------------------------------->> Opcion elegida: 5"<<"----------------------------------" <<std::endl << std::flush;
+    this->neuron->spines_to_obj_without_base("tmpSpines");
+    viewer->generateSpinesVrml("tmpSpines");
+  } else if (!spines.empty()) {
+    std::cout<<"---------------------------------------------->> Opcion elegida: 6"<<"----------------------------------" <<std::endl << std::flush;
+    viewer->generateSpinesASC(this->spines, lHorResol,
+                              lVerResol,
+                              lMinLongSpine,
+                              lMaxLongSpine,
+                              lMinRadio,
+                              lMaxRadio);
+  } else {
+
+    if (ui.radioButton_ProceduralSpines->isChecked())
+      lGenerateOption = 0;
+    else if (ui.radioButton_ModelSpines->isChecked())
+      lGenerateOption = 1;
+    else if (ui.radioButton_SemiRealSpines->isChecked())
+      lGenerateOption = 2;
+    else if (ui.radioButton_RealSpines->isChecked())
+      lGenerateOption = 3;
+    else if (ui.radioButton_SegmentSpines->isChecked())
+      lGenerateOption = 4;
+  }
+
+  std::cout<<"---------------------------------------------->> Opcion elegida:"<<lGenerateOption<<"<<----------------------------------" <<std::endl << std::flush;
 
   switch ( lGenerateOption )
   {
@@ -629,6 +644,8 @@ void NeuroGeneratorWidget::batchSpinesGeneration ( )
                                               lMinRadio,
                                               lMaxRadio );
       break;
+
+
   }
 }
 

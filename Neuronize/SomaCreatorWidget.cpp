@@ -937,7 +937,7 @@ void SomaCreatorWidget::resetInterface ( )
   ui.pushButton_GoToSomaDeformer->setEnabled ( false );
 }
 
-void SomaCreatorWidget::generateXMLSoma ( QString fileName ) {
+void SomaCreatorWidget::generateXMLSoma ( QString fileName, bool useSoma ) {
     MeshVCG *somaMesh = nullptr;
     QFileInfo info1;
     if (ui.checkBox_loadSWC->isChecked()) {
@@ -960,7 +960,7 @@ void SomaCreatorWidget::generateXMLSoma ( QString fileName ) {
                 if ((ext == "asc") || (ext == "ASC")) {
                   auto ascPath = lLocalFilePath.toStdString() + "/" + info1.fileName().toStdString();
                   fileName = lLocalFilePath + "/" + info1.fileName() + ".swc";
-                  auto result = AS2SWCV2::asc2swc(ascPath, fileName.toStdString(), false);
+                  auto result = AS2SWCV2::asc2swc(ascPath, fileName.toStdString(), useSoma);
                   somaMesh = std::get<0>(result);
                   this->spines = std::get<1>(result);                    // PREVIOUS VERSION
                   //ASC2SWC::convierteASWC(lLocalFilePath.toStdString(), info1.fileName().toStdString());

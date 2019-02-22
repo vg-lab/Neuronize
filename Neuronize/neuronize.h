@@ -42,7 +42,7 @@ class Neuronize: public QMainWindow
     QString mInputFilePath;
     QString mOuputFilePath;
 
-    std::vector < QString > mFilesContainer;
+    std::vector < std::tuple<QString,skelgenerator::Neuron* >> mFilesContainer;
 
   public:
 

@@ -79,7 +79,7 @@ public slots:
 
     void showSpinesTab ( );
 
-    void batchSpinesGeneration ( );
+    void batchSpinesGeneration(skelgenerator::Neuron *pNeuron, vector<Spine> vector1);
 
     void exportSpinesInmediatly ( QString fileName );
 

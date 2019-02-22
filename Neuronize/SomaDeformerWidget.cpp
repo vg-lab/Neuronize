@@ -472,7 +472,7 @@ void SomaDeformerWidget::setSWCFile(std::string path) {
 }
 
 void SomaDeformerWidget::useSphericalSoma() {
-  somaCreator->generateXMLSoma(somaCreator->getInputFile());
+  somaCreator->generateXMLSoma(somaCreator->getInputFile(), false);
   loadPredefinedXMLSomaDef();
 }
 
