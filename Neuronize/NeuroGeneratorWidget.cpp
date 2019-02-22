@@ -563,11 +563,11 @@ void NeuroGeneratorWidget::batchSpinesGeneration(skelgenerator::Neuron *pNeuron,
 
   if (pNeuron != nullptr) {
     std::cout<<"---------------------------------------------->> Opcion elegida: 5"<<"----------------------------------" <<std::endl << std::flush;
-    this->neuron->spines_to_obj_without_base("tmpSpines");
+    pNeuron->spines_to_obj_without_base("tmpSpines");
     viewer->generateSpinesVrml("tmpSpines");
   } else if (!spines.empty()) {
     std::cout<<"---------------------------------------------->> Opcion elegida: 6"<<"----------------------------------" <<std::endl << std::flush;
-    viewer->generateSpinesASC(this->spines, lHorResol,
+    viewer->generateSpinesASC(spines, lHorResol,
                               lVerResol,
                               lMinLongSpine,
                               lMaxLongSpine,
@@ -575,77 +575,83 @@ void NeuroGeneratorWidget::batchSpinesGeneration(skelgenerator::Neuron *pNeuron,
                               lMaxRadio);
   } else {
 
-    if (ui.radioButton_ProceduralSpines->isChecked())
-      lGenerateOption = 0;
-    else if (ui.radioButton_ModelSpines->isChecked())
-      lGenerateOption = 1;
-    else if (ui.radioButton_SemiRealSpines->isChecked())
-      lGenerateOption = 2;
-    else if (ui.radioButton_RealSpines->isChecked())
-      lGenerateOption = 3;
-    else if (ui.radioButton_SegmentSpines->isChecked())
-      lGenerateOption = 4;
-  }
+      if (ui.radioButton_ProceduralSpines->isChecked())
+          lGenerateOption = 0;
+      else if (ui.radioButton_ModelSpines->isChecked())
+          lGenerateOption = 1;
+      else if (ui.radioButton_SemiRealSpines->isChecked())
+          lGenerateOption = 2;
+      else if (ui.radioButton_RealSpines->isChecked())
+          lGenerateOption = 3;
+      else if (ui.radioButton_SegmentSpines->isChecked())
+          lGenerateOption = 4;
 
-  std::cout<<"---------------------------------------------->> Opcion elegida:"<<lGenerateOption<<"<<----------------------------------" <<std::endl << std::flush;
 
-  switch ( lGenerateOption )
-  {
-    //Rand Procedurales
-    case 0: viewer->SetSpinesType ( 0 );
-      viewer->generateSomeSpinesGroup ( lNumSpines,
-                                        lNumOfGroups,
-                                        lHorResol,
-                                        lVerResol,
-                                        lMinLongSpine,
-                                        lMaxLongSpine,
-                                        lMinRadio,
-                                        lMaxRadio );
-      break;
+      std::cout << "---------------------------------------------->> Opcion elegida:" << lGenerateOption
+                << "<<----------------------------------" << std::endl << std::flush;
 
-      //Rand Modeled
-    case 1: viewer->SetSpinesType ( 1 );
-      viewer->generateSomeSpinesGroup ( lNumSpines,
-                                        lNumOfGroups,
-                                        lHorResol,
-                                        lVerResol,
-                                        lMinLongSpine,
-                                        lMaxLongSpine,
-                                        lMinRadio,
-                                        lMaxRadio );
-      break;
+      switch (lGenerateOption) {
+          //Rand Procedurales
+          case 0:
+              viewer->SetSpinesType(0);
+              viewer->generateSomeSpinesGroup(lNumSpines,
+                                              lNumOfGroups,
+                                              lHorResol,
+                                              lVerResol,
+                                              lMinLongSpine,
+                                              lMaxLongSpine,
+                                              lMinRadio,
+                                              lMaxRadio);
+              break;
 
-      //???
-    case 2: viewer->generateSemiRealSpinesGroup ( lNumSpines,
+              //Rand Modeled
+          case 1:
+              viewer->SetSpinesType(1);
+              viewer->generateSomeSpinesGroup(lNumSpines,
+                                              lNumOfGroups,
+                                              lHorResol,
+                                              lVerResol,
+                                              lMinLongSpine,
+                                              lMaxLongSpine,
+                                              lMinRadio,
+                                              lMaxRadio);
+              break;
+
+              //???
+          case 2:
+              viewer->generateSemiRealSpinesGroup(lNumSpines,
                                                   lHorResol,
                                                   lVerResol,
                                                   lMinLongSpine,
                                                   lMaxLongSpine,
                                                   lMinRadio,
-                                                  lMaxRadio );
-      break;
+                                                  lMaxRadio);
+              break;
 
-      //Real distrig, using the distribution functiones
-    case 3: viewer->generateRealSpinesGroup ( lNumSpines,
+              //Real distrig, using the distribution functiones
+          case 3:
+              viewer->generateRealSpinesGroup(lNumSpines,
                                               lHorResol,
                                               lVerResol,
                                               lMinLongSpine,
                                               lMaxLongSpine,
                                               lMinRadio,
-                                              lMaxRadio );
-      break;
+                                              lMaxRadio);
+              break;
 
-      //Simply real distribution (gived by Ruth)
-    case 4: viewer->generateSpinesInSegment ( lNumSpines,
+              //Simply real distribution (gived by Ruth)
+          case 4:
+              viewer->generateSpinesInSegment(lNumSpines,
                                               lHorResol,
                                               lVerResol,
                                               lMinLongSpine,
                                               lMaxLongSpine,
                                               lMinRadio,
-                                              lMaxRadio );
-      break;
+                                              lMaxRadio);
+              break;
 
 
+      }
   }
 }
 
