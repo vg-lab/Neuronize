@@ -47,6 +47,7 @@ namespace NSSpinesSWC
     mDistributorModificator = 1.0;
 
     mSpinesSynthContainer = new BaseMeshContainer ( );
+    glb_GlobalSpinesVHandle = nullptr;
     //glb_GlobalSpinesVHandle = new MeshDef::VertexHandle[100];
   }
 

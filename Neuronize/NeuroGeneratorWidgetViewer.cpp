@@ -769,7 +769,7 @@ void NeuroGeneratorWidgetViewer::destroyAllGroupsSpines ( )
   if ( meshSpines != NULL )
   {
     delete meshSpines;
-    meshSpines == NULL;
+    meshSpines = nullptr;
   }
 
   unsigned int lNumMeshes = mSpinesSynthContainers.getContainer ( ).size ( );
@@ -1711,8 +1711,6 @@ void NeuroGeneratorWidgetViewer::generateSpinesVrml(QString dirPath) {
         meshSpines == NULL;
     }
 
-    meshSpines = new SpinesSWC();
-
     std::cout << dirPath.toStdString() << std::endl;
     QDir dir( dirPath );
     dir.setFilter( QDir::AllEntries | QDir::NoDotAndDotDot );
@@ -1726,13 +1724,13 @@ void NeuroGeneratorWidgetViewer::generateSpinesVrml(QString dirPath) {
 
     generateSquareTraslationMatrix(translationMatrix,-displacement[0],-displacement[1],-displacement[2]);
 
-    std::vector<SpinesSWC*> spinesMeshes(static_cast<unsigned long>(total_files), nullptr);
+    std::vector<SpinesSWC*> spinesMeshes(static_cast<size_t>(total_files), nullptr);
     QThreadPool pool;
     int i = 0;
     while (it.hasNext()) {
         auto filename = it.next();
         QtConcurrent::run(&pool,[=,&spinesMeshes](){
-            auto auxMesh = new SpinesSWC();
+            SpinesSWC* auxMesh = new SpinesSWC();
             auxMesh->loadModel(filename.toStdString());
             auxMesh->applyMatrixTransform(translationMatrix,4);
             auxMesh->updateBaseMesh();
@@ -1745,6 +1743,13 @@ void NeuroGeneratorWidgetViewer::generateSpinesVrml(QString dirPath) {
     pool.waitForDone();
 
     meshSpines = fusionAllSpines(spinesMeshes);
+    for(int i = 0; i < spinesMeshes.size();i++) {
+        if (spinesMeshes[i] != meshSpines) {
+            delete spinesMeshes[i];
+        } else {
+            std::cout << i << ":"<< spinesMeshes.size() <<std::endl;
+        }
+    }
 
 
     MeshDef::ConstVertexIter iniLimit = meshSpines->getMesh ( )->vertices_begin ( );
@@ -1816,7 +1821,7 @@ NeuroGeneratorWidgetViewer::generateSpinesASC(std::vector<Spine>& spines,unsigne
     if ( meshSpines != NULL )
     {
         delete meshSpines;
-        meshSpines == NULL;
+        meshSpines = nullptr;
     }
 
     if ( spineMeshRend != NULL )
