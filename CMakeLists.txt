@@ -32,8 +32,6 @@ set( COMMON_PROJECT_DOMAIN gmrv.es )
 include( Common )
 
 common_find_package(VCG REQUIRED)
-common_find_package(QGLViwer REQUIRED)
-common_find_package(glm REQUIRED)
 common_find_package(OpenMesh REQUIRED)
 common_find_package(Boost COMPONENTS filesystem REQUIRED)
 common_find_package(GLEW REQUIRED)
@@ -57,15 +55,15 @@ list( APPEND NEURONIZE_DEPENDENT_LIBRARIES
         Qt5::Xml
         ${GLEW_LIBRARIES}
         GLUT
-        OpenGL::GL
+        OpenGL
         ${Boost_LIBRARIES}
         SkelGenerator
         VCG
-        SOIL
         glm
         ${OPENMESH_CORE_LIBRARY}
         ${OPENMESH_TOOLS_LIBRARY}
         QGLViewer
+        SOIL
         )
 
 add_subdirectory( libs/libSysNeuroUtils )
