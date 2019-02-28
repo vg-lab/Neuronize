@@ -26,6 +26,8 @@
 #ifndef DEFS_H_
 #define DEFS_H_
 
+#include <neuronize/api.h>
+
 #include <math.h>
 
 /********************************
@@ -79,7 +81,7 @@ const REAL TOLERANCIA EPSI;
  *  @param PREC		Precission for the comparisson
  *  @return bool	True if both REALS are equal for the pressicion and the tolerance.
  */
-bool SonIguales ( REAL a, REAL b, REAL TOL, REAL PREC );
+NEURONIZE_API bool SonIguales ( REAL a, REAL b, REAL TOL, REAL PREC );
 
 /**	
  *  Function to compare REALS with a certain tolerance and presision
@@ -88,21 +90,21 @@ bool SonIguales ( REAL a, REAL b, REAL TOL, REAL PREC );
  *  @param b		2nd REAL to compare
  *  @return bool	True if both REALS are equal for the default presision and the tolerance.
  */
-bool SonIguales ( REAL a, REAL b );
+NEURONIZE_API bool SonIguales ( REAL a, REAL b );
 
 /**	
  *  Function to compare if a REAL is 0 with a certain tolerance
  *  @param a		REAL to compare with 0
  *  @return bool	True if the REALS are equal 0 for the presision and the tolerance.
  */
-bool EsCero ( REAL a, REAL TOL );
+NEURONIZE_API bool EsCero ( REAL a, REAL TOL );
 
 /**	
  *  Function to compare if a REAL is 0 with the default tolerance
  *  @param a		REAL to compare with 0
  *  @return bool	True if the REALS are equal 0 for the presision and the tolerance.
  */
-bool EsCero ( REAL a );
+NEURONIZE_API bool EsCero ( REAL a );
 
 /********************************
  * 	  auxiliar  templates       *
@@ -111,7 +113,7 @@ bool EsCero ( REAL a );
 ///####
 #include <sstream>
 
-std::string Trim ( std::string::const_iterator i, std::string::const_iterator f );
+NEURONIZE_API std::string Trim ( std::string::const_iterator i, std::string::const_iterator f );
 
 /*
  * //####

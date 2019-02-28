@@ -21,6 +21,7 @@
 #ifndef _NEUROSWC_H_
 #define _NEUROSWC_H_
 
+
 #include <string>
 #include <vector>
 #include <iosfwd>

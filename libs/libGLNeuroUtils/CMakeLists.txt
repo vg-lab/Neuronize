@@ -28,9 +28,11 @@ set(GLNEUROUTILS_LINK_LIBRARIES
 		SysNeuroUtils
 		NeuroUtils
 		SOIL
-		GLEW
+		${GLEW_LIBRARIES}
 		${OPENGL_LIBRARIES}
 		${GLUT_LIBRARY}
+		${OPENMESH_CORE_LIBRARY}
+		${OPENMESH_TOOLS_LIBRARY}
 		)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
@@ -42,6 +44,7 @@ if (MSVC)
 	add_definitions("/W4")
 	# Static build
 	add_definitions(-DVISHNU3DVIEWER_STATIC)
+	add_definitions(-D_USE_MATH_DEFINES)
 endif ()
 
 common_library(GLNeuroUtils)

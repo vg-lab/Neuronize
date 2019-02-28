@@ -7,7 +7,7 @@
 */
 #include <string>
 #include <fstream>
-#include <dirent.h>
+#include <boost/filesystem.hpp>
 #include <algorithm>
 #include <sstream>
 #ifndef LECTURA_FICHERO_H
@@ -17,7 +17,7 @@ class LecturaFichero
 {
   private:
     string directorioInicial;
-    DIR *dp;
+    boost::filesystem::path dp;
     struct dirent *dirp;
     bool existeDirectorio;
     string ruta;

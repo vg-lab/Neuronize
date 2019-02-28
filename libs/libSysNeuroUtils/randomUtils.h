@@ -21,6 +21,8 @@
 #ifndef RANDUTILS_H_
 #define RANDUTILS_H_
 
+#include <neuronize/api.h>
+
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
@@ -39,61 +41,61 @@
 /**
  *  Use this first function to seed the random number generator, call this before any of the other functions
  */
-void initrand ( );
+NEURONIZE_API void initrand ( );
 
 /**	
  *  Generates a psuedo-random integer between 0 and 32767
  */
-int randint ( );
+NEURONIZE_API int randint ( );
 
 /**	
  * Generates a psuedo-random integer between 0 and max  
  */
-int randint ( int max );
+NEURONIZE_API int randint ( int max );
 
 /**	
  * Generates a psuedo-random integer between min and max  
  */
-int randint ( int min, int max );
+NEURONIZE_API int randint ( int min, int max );
 
 /**
  * Generates a psuedo-random float between 0.0 and 0.999...  
  */
-float randfloat ( );
+NEURONIZE_API float randfloat ( );
 
 /**
  * Generates a psuedo-random float between 0.0 and max  
  */
-float randfloat ( float max );
+NEURONIZE_API float randfloat ( float max );
 
 /**	
  * Generates a psuedo-random float between min and max  
  */
-float randfloat ( float min, float max );
+NEURONIZE_API float randfloat ( float min, float max );
 
 /**
  * Generates a psuedo-random double between 0.0 and 0.999...  
  */
-double randdouble ( );
+NEURONIZE_API double randdouble ( );
 
 /**	
  * Generates a psuedo-random double between 0.0 and max  
  */
-double randdouble ( double max );
+NEURONIZE_API double randdouble ( double max );
 
 /**
  * Generates a psuedo-random double between min and max 
  */
-double randdouble ( double min, double max );
+NEURONIZE_API double randdouble ( double min, double max );
 
 /**	
  *  Generates a random string with explicit lenght
  */
-char *randstr ( char *str, unsigned long length );
+NEURONIZE_API char *randstr ( char *str, unsigned long length );
 
 /**	
  *  Generates a random string with explicit lenght
  */
-char *randstr ( char *str, unsigned long length, unsigned long flags );
+NEURONIZE_API char *randstr ( char *str, unsigned long length, unsigned long flags );
 
 #endif /*DEFS_H_*/

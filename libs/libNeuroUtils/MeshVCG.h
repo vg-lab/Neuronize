@@ -6,6 +6,7 @@
 #define NEURONIZE_MESHVCG_H
 
 
+
 #include <string>
 #include <vector>
 #include <vcg/complex/complex.h>

@@ -1,11 +1,12 @@
 //
 // Created by ivelascog on 10/10/18.
 //
-
 #include <fstream>
 #include <stack>
 #include <iomanip>
 #include <unordered_set>
+#include <clocale>
+
 #include "AS2SWCV2.h"
 #include "MeshVCG.h"
 

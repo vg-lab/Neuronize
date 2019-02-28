@@ -59,7 +59,14 @@ set(NEUROUTILS_HEADERS
 
 set(NEUROUTILS_LINK_LIBRARIES
 		SysNeuroUtils
+		Qt5::OpenGL
+		OpenGL::GL
 		${Boost_LIBRARIES}
+		glm
+		${OPENMESH_CORE_LIBRARY}
+		${OPENMESH_TOOLS_LIBRARY}
+		Qt5::Core
+		SOIL
 		)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
@@ -71,6 +78,7 @@ if (MSVC)
 	add_definitions("/W4")
 	# Static build
 	add_definitions(-DVISHNU3DVIEWER_STATIC)
+	add_definitions(-D_USE_MATH_DEFINES)
 endif ()
 
 

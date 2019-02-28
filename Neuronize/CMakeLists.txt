@@ -63,6 +63,7 @@ if (MSVC)
 	add_definitions("/W4")
 	# Static build
 	add_definitions(-DVISHNU3DVIEWER_STATIC)
+	add_definitions(-D_USE_MATH_DEFINES)
 endif ()
 
 common_library(neuronizelib)

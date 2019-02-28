@@ -21,6 +21,8 @@
 #ifndef _BASE_MESH_H_
 #define _BASE_MESH_H_
 
+#include <neuronize/api.h>
+
 #include <string>
 #include <vector>
 #include <iosfwd>
@@ -70,7 +72,7 @@ namespace NSBaseMesh
     SOP_Undefined
   };
 
-  class BaseMesh
+  class  BaseMesh
   {
     protected:
       //Mesh to store data
@@ -144,7 +146,7 @@ namespace NSBaseMesh
       ~BaseMesh ( );
 
       // Get the mesh to render.
-      const MeshDef *getMesh ( ) const;
+      NEURONIZE_API const MeshDef *getMesh ( ) const;
 
       MeshDef *getUnprotectedMesh ( );
 
@@ -189,9 +191,9 @@ namespace NSBaseMesh
       // Set all streams at once.  Convienience function, can be set to NULL to disable messages.
       void setStreams ( std::ostream *o );
 
-      unsigned int getNumVertex ( );
+      NEURONIZE_API unsigned int getNumVertex ( );
 
-      unsigned int getNumFaces ( );
+      NEURONIZE_API unsigned int getNumFaces ( );
 
       unsigned int calcNumVertex ( );
 
@@ -205,19 +207,19 @@ namespace NSBaseMesh
 
       uint calcNumQuads ( );
 
-      uint getNumTri ( );
+      NEURONIZE_API uint getNumTri ( );
 
-      uint getNumQuads ( );
+      NEURONIZE_API uint getNumQuads ( );
 
-      void calcTriIndices ( );
+      NEURONIZE_API void calcTriIndices ( );
 
-      void calcQuadIndices ( );
+      NEURONIZE_API void calcQuadIndices ( );
 
       void calcVertexIterators ( );
 
-      std::vector < unsigned > getTriIndices ( );
+      NEURONIZE_API std::vector < unsigned > getTriIndices ( );
 
-      std::vector < unsigned > getQuadIndices ( );
+      NEURONIZE_API std::vector < unsigned > getQuadIndices ( );
 
       void prepareGeometry ( );
 
@@ -225,13 +227,13 @@ namespace NSBaseMesh
       void calcByteDistances ( );
 
       // Distance between sequential vertex points in memory
-      int getVertexPointDistance ( );
+      NEURONIZE_API int getVertexPointDistance ( );
 
       // Distance between sequential vertex colors in memory
-      int getVertexColorDistance ( );
+      NEURONIZE_API int getVertexColorDistance ( );
 
       // Distance between sequential vertex normals in memory
-      int getVertexNormalDistance ( );
+      NEURONIZE_API int getVertexNormalDistance ( );
 
       // Distance between sequential vertex texture coordinates in memory
       int getVertexTexCoordDistance ( );

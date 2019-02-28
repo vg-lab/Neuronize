@@ -20,6 +20,7 @@
 #include <vcg/complex/algorithms/voronoi_remesher.h>
 #include <vcg/complex/algorithms/stat.h>
 #include <QtCore/QFile>
+#include <clocale>
 
 
 MeshVCG::MeshVCG(const std::string &filename) {

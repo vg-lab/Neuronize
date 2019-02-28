@@ -32,8 +32,10 @@ set( COMMON_PROJECT_DOMAIN gmrv.es )
 include( Common )
 
 common_find_package(VCG REQUIRED)
+common_find_package(QGLViwer REQUIRED)
+common_find_package(glm REQUIRED)
 common_find_package(OpenMesh REQUIRED)
-common_find_package(Boost REQUIRED)
+common_find_package(Boost COMPONENTS filesystem REQUIRED)
 common_find_package(GLEW REQUIRED)
 common_find_package(OpenGL REQUIRED)
 common_find_package(GLUT REQUIRED)
@@ -44,6 +46,7 @@ common_find_package(Qt5OpenGL REQUIRED)
 common_find_package(Qt5Xml REQUIRED)
 common_find_package(Eigen3 SYSTEM REQUIRED)
 common_find_package(SkelGenerator REQUIRED )
+common_find_package(SOIL REQUIRED)
 common_find_package_post( )
 
 list( APPEND NEURONIZE_DEPENDENT_LIBRARIES
@@ -52,14 +55,17 @@ list( APPEND NEURONIZE_DEPENDENT_LIBRARIES
         Qt5::Gui
         Qt5::OpenGL
         Qt5::Xml
-        GLEW
+        ${GLEW_LIBRARIES}
         GLUT
-        OpenGL
+        OpenGL::GL
         ${Boost_LIBRARIES}
         SkelGenerator
         VCG
+        SOIL
+        glm
         ${OPENMESH_CORE_LIBRARY}
         ${OPENMESH_TOOLS_LIBRARY}
+        QGLViewer
         )
 
 add_subdirectory( libs/libSysNeuroUtils )
@@ -69,11 +75,13 @@ add_subdirectory( libs/libQtNeuroUtils )
 add_subdirectory( Neuronize )
 
 
+add_definitions(-D_USE_MATH_DEFINES)
+
 
 if( MSVC )
   # Set DataCooking as startup project on Visual Studio, CMake v3.6
   if( CMAKE_VERSION VERSION_GREATER 3.6 )
-    set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT DataCooking )
+    set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT neuronize )
   endif( )
 endif( )
 
