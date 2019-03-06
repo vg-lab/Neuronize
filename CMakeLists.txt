@@ -80,8 +80,7 @@ add_subdirectory( Neuronize )
 if( MSVC )
   # Set DataCooking as startup project on Visual Studio, CMake v3.6
   if( CMAKE_VERSION VERSION_GREATER 3.6 )
-    set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Neuronize)
-    add_definitions("-W4")
+    set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT neuronize)
   endif( )
 endif( )
 
