@@ -1,9 +1,12 @@
 source_group(\\ FILES CMakeLists.txt)
 
-set (NEURONIZELIB_SOURCES
+set (NEURONIZE_SOURCES
 		batchbuilder.cpp
 		FrameConstrictor.cpp
+		LoadFileDialog.cpp
+		main.cxx
 		manipulatedFrameSetConstraint.cpp
+		NeuroGeneratorWidget.cpp
 		NeuroGeneratorWidget.cpp
 		NeuroGeneratorWidgetViewer.cpp
 		neuronize.cpp
@@ -11,32 +14,29 @@ set (NEURONIZELIB_SOURCES
 		SomaCreatorWidget.cpp
 		SomaDeformerWidget.cpp
 		SomaDeformerWidgetViewer.cpp
-		LoadFileDialog.cpp
 		)
 
-set(NEURONIZELIB_HEADERS
+set(NEURONIZE_HEADERS
 		batchbuilder.h
 		batchbuilder.ui
 		FrameConstrictor.h
+		LoadFileDialog.h
 		manipulatedFrameSetConstraint.h
 		NeuroGeneratorWidget.h
 		NeuroGeneratorWidget.ui
 		NeuroGeneratorWidgetViewer.h
 		neuronize.h
+		neuronize.qrc
 		neuronize.ui
 		object.h
 		SomaCreatorWidget.h
 		SomaCreatorWidget.ui
-		SomaDeformerWidget.h
-		SomaDeformerWidget.ui
 		SomaDeformerWidgetViewer.h
-		LoadFileDialog.h
-		xneuron.ui
 		xneuron.qrc
-		neuronize.qrc
+		xneuron.ui
 		)
 
-set(NEURONIZELIB_LINK_LIBRARIES
+set(NEURONIZE_LINK_LIBRARIES
 		SysNeuroUtils
 		NeuroUtils
 		GLNeuroUtils
@@ -45,7 +45,7 @@ set(NEURONIZELIB_LINK_LIBRARIES
 		${OPENMESH_TOOLS_LIBRARY}
 		${OPENGL_LIBRARIES}
 		${GLUT_LIBRARY}
-		QGLViewer
+		${QGLVIEWER_LIBRARIES}
 		Qt5::Widgets
 		Qt5::Xml
 		Qt5::OpenGL
@@ -57,40 +57,15 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR}/src)
 include_directories(VCG_INCLUDE_DIR)
 
+
 add_definitions("-w")
 
 if (MSVC)
 	add_definitions("/W4")
 	# Static build
-	add_definitions(-DVISHNU3DVIEWER_STATIC)
+	#add_definitions(-DNEURONIZE_STATIC)
+	set(COMMON_APP_ARGS WIN32)
 	add_definitions(-D_USE_MATH_DEFINES)
-endif ()
-
-common_library(neuronizelib)
-
-
-source_group(\\ FILES CMakeLists.txt)
-
-set (NEURONIZE_SOURCES
-		main.cxx
-		)
-
-set(NEURONIZE_HEADERS
-		)
-
-set(NEURONIZE_LINK_LIBRARIES
-		neuronizelib
-		)
-
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-include_directories(${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR}/src)
-
-add_definitions("-w")
-
-if (MSVC)
-	add_definitions("/W4")
-	# Static build
-	add_definitions(-DVISHNU3DVIEWER_STATIC)
 endif ()
 
 common_application(neuronize)

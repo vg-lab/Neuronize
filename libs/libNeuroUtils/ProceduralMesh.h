@@ -20,13 +20,15 @@
 
 #pragma once
 
+#include <neuroutils/api.h>
+
 #include "BaseMesh.h"
 
 using namespace NSBaseMesh;
 
 namespace NSProceduralMesh
 {
-  class ProceduralMesh: public BaseMesh
+  class NEUROUTILS_API ProceduralMesh: public BaseMesh
   {
     protected:
 

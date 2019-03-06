@@ -47,7 +47,7 @@
  * 		Si discretizador == 1 -> Nos quedamos con la altura 2
  * 		En otro caso, nos quedamos con el valor de la interpolacion
  */
-NEURONIZE_API REAL Interpolacion ( REAL altura1, REAL altura2, REAL discretizador );
+SYSNEUROUTILS_API REAL Interpolacion ( REAL altura1, REAL altura2, REAL discretizador );
 
 /**
  * Realiza una interpolacion lineal:
@@ -56,24 +56,24 @@ NEURONIZE_API REAL Interpolacion ( REAL altura1, REAL altura2, REAL discretizado
  * 		Si discretizador == 1 -> Nos quedamos con la altura 2
  * 		En otro caso, nos quedamos con el valor de la interpolacion
  */
-NEURONIZE_API REAL InterpolacionLineal ( REAL altura1, REAL altura2, REAL discretizador );
+SYSNEUROUTILS_API REAL InterpolacionLineal ( REAL altura1, REAL altura2, REAL discretizador );
 
 /**
  * Realiza una interpolacion cosenoidal a partir de los valores suministrados
  */
-NEURONIZE_API REAL InterpolacionCosenoidal ( REAL altura1, REAL altura2 );
+SYSNEUROUTILS_API REAL InterpolacionCosenoidal ( REAL altura1, REAL altura2 );
 
 /**
  * Realiza una interpolacion cubica a partir de los valores suministrados
  */
-NEURONIZE_API REAL InterpolacionCubica ( REAL v0, REAL v1, REAL v2, REAL v3, REAL x );
+SYSNEUROUTILS_API REAL InterpolacionCubica ( REAL v0, REAL v1, REAL v2, REAL v3, REAL x );
 
 //Calc the cross product between two vectors
-NEURONIZE_API boost::numeric::ublas::vector < float > cross_prod ( boost::numeric::ublas::vector < float > vecA,
+SYSNEUROUTILS_API boost::numeric::ublas::vector < float > cross_prod ( boost::numeric::ublas::vector < float > vecA,
                                                      boost::numeric::ublas::vector < float > vecB );
 
 //Generate the transformation matrix for the vertices
-NEURONIZE_API void generateTransformationMatrix ( boost::numeric::ublas::matrix < float > &TransMatrix,
+SYSNEUROUTILS_API void generateTransformationMatrix ( boost::numeric::ublas::matrix < float > &TransMatrix,
                                     const boost::numeric::ublas::vector < float > &DespVector,
                                     const boost::numeric::ublas::vector < float > &TransVector,
                                     boost::numeric::ublas::vector < float > &glb_TransVectorAux,
@@ -83,20 +83,20 @@ NEURONIZE_API void generateTransformationMatrix ( boost::numeric::ublas::matrix 
                                     boost::numeric::ublas::vector < float > &YVector
 );
 
-NEURONIZE_API bool parallelVectors ( const boost::numeric::ublas::vector < float > &VecA,
+SYSNEUROUTILS_API bool parallelVectors ( const boost::numeric::ublas::vector < float > &VecA,
                        const boost::numeric::ublas::vector < float > &VecB );
 
-NEURONIZE_API void generateSquareUniformScaleMatrix ( boost::numeric::ublas::matrix < float > &pScaleMatrix,
+SYSNEUROUTILS_API void generateSquareUniformScaleMatrix ( boost::numeric::ublas::matrix < float > &pScaleMatrix,
                                         unsigned int pDimMatrix,
                                         float pScaleFactor );
 
-NEURONIZE_API void generateSquareRotationMatrix ( boost::numeric::ublas::matrix < float > &pRotationMatrix,
+SYSNEUROUTILS_API void generateSquareRotationMatrix ( boost::numeric::ublas::matrix < float > &pRotationMatrix,
                                     float pAngRotX,
                                     float pAngRotY,
                                     float pAngRotZ
 );
 
-NEURONIZE_API void generateSquareTraslationMatrix ( boost::numeric::ublas::matrix < float > &pTraslationMatrix,
+SYSNEUROUTILS_API void generateSquareTraslationMatrix ( boost::numeric::ublas::matrix < float > &pTraslationMatrix,
                                       float pTrasX,
                                       float pTrasY,
                                       float pTrasZ

@@ -1646,7 +1646,7 @@ void NeuroGeneratorWidgetViewer::importSpinesInfo ( QString fileName )
   if ( meshSpines != NULL )
   {
     delete meshSpines;
-    meshSpines == NULL;
+    meshSpines = NULL;
   }
 
   unsigned int lNumMeshes = mSpinesSynthContainers.getContainer ( ).size ( );;
@@ -1708,7 +1708,7 @@ void NeuroGeneratorWidgetViewer::generateSpinesVrml(QString dirPath) {
     if ( meshSpines != NULL )
     {
         delete meshSpines;
-        meshSpines == NULL;
+        meshSpines = NULL;
     }
 
     std::cout << dirPath.toStdString() << std::endl;

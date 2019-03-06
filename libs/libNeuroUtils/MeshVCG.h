@@ -5,7 +5,7 @@
 #ifndef NEURONIZE_MESHVCG_H
 #define NEURONIZE_MESHVCG_H
 
-
+#include <neuroutils/api.h>
 
 #include <string>
 #include <vector>
@@ -23,7 +23,7 @@ class MyFace    : public vcg::Face<   MyUsedTypes, vcg::face::Mark ,vcg::face::F
     class MyEdge    : public vcg::Edge<   MyUsedTypes, vcg::edge::EFAdj,vcg::edge::VertexRef> {};
     class MyMesh    : public vcg::tri::TriMesh< std::vector<MyVertex>, std::vector<MyFace> , std::vector<MyEdge>  > {};
 
-    class MeshVCG {
+    class NEUROUTILS_API MeshVCG {
         MyMesh mesh;
         std::string name;
 

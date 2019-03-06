@@ -26,7 +26,7 @@
 #ifndef DEFS_H_
 #define DEFS_H_
 
-#include <neuronize/api.h>
+#include <sysneuroutils/api.h>
 
 #include <math.h>
 
@@ -62,9 +62,9 @@ typedef float REAL;
 //typedef double REAL;
 
 //PI value
-#define PI      3.14159265358979323846264338327950288419716939937510582
-#define PIGPU    3.14159265358979323846264338327950288419716939937510582
-#define PRECISION  10E-10
+#define PI      3.14159265358979323846264338327950288419716939937510582f
+#define PIGPU    3.14159265358979323846264338327950288419716939937510582f
+#define PRECISION  10E-10f
 
 //The tolerance is obtained from the machine presision
 #define EPSI (fabs(cos(DEGTORAD(90.-PRECISION))-cos(DEGTORAD(90.+PRECISION))))
@@ -81,7 +81,7 @@ const REAL TOLERANCIA EPSI;
  *  @param PREC		Precission for the comparisson
  *  @return bool	True if both REALS are equal for the pressicion and the tolerance.
  */
-NEURONIZE_API bool SonIguales ( REAL a, REAL b, REAL TOL, REAL PREC );
+SYSNEUROUTILS_API bool SonIguales ( REAL a, REAL b, REAL TOL, REAL PREC );
 
 /**	
  *  Function to compare REALS with a certain tolerance and presision
@@ -90,21 +90,21 @@ NEURONIZE_API bool SonIguales ( REAL a, REAL b, REAL TOL, REAL PREC );
  *  @param b		2nd REAL to compare
  *  @return bool	True if both REALS are equal for the default presision and the tolerance.
  */
-NEURONIZE_API bool SonIguales ( REAL a, REAL b );
+SYSNEUROUTILS_API bool SonIguales ( REAL a, REAL b );
 
 /**	
  *  Function to compare if a REAL is 0 with a certain tolerance
  *  @param a		REAL to compare with 0
  *  @return bool	True if the REALS are equal 0 for the presision and the tolerance.
  */
-NEURONIZE_API bool EsCero ( REAL a, REAL TOL );
+SYSNEUROUTILS_API bool EsCero ( REAL a, REAL TOL );
 
 /**	
  *  Function to compare if a REAL is 0 with the default tolerance
  *  @param a		REAL to compare with 0
  *  @return bool	True if the REALS are equal 0 for the presision and the tolerance.
  */
-NEURONIZE_API bool EsCero ( REAL a );
+SYSNEUROUTILS_API bool EsCero ( REAL a );
 
 /********************************
  * 	  auxiliar  templates       *
@@ -113,7 +113,7 @@ NEURONIZE_API bool EsCero ( REAL a );
 ///####
 #include <sstream>
 
-NEURONIZE_API std::string Trim ( std::string::const_iterator i, std::string::const_iterator f );
+SYSNEUROUTILS_API std::string Trim ( std::string::const_iterator i, std::string::const_iterator f );
 
 /*
  * //####

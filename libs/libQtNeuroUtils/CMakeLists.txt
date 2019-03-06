@@ -46,7 +46,10 @@ add_definitions("-w")
 if (MSVC)
 	add_definitions("/W4")
 	# Static build
-	add_definitions(-DVISHNU3DVIEWER_STATIC)
+	# add_definitions(-DQTNEUROUTILS_STATIC)
 endif ()
+
+set( QTNEUROUTILS_INCLUDE_NAME qtneuroutils )
+set( QTNEUROUTILS_NAMESPACE qtneuroutils )
 
 common_library(QtNeuroUtils)

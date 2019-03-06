@@ -29,6 +29,8 @@
  */
 
 //#include <defs.h>
+#include <neuroutils/api.h>
+
 #include <string>
 #include <map>
 #include <vector>
@@ -98,7 +100,7 @@ namespace NSSWCImporter
 
   };
 
-  class SWCImporter
+  class NEUROUTILS_API SWCImporter
   {
       int mSomaNodesDiscarded;
 

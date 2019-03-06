@@ -1,5 +1,6 @@
 source_group(\\ FILES CMakeLists.txt)
 
+
 set (GLNEUROUTILS_SOURCES
 		LightManager.cpp
 		MeshRenderer.cpp
@@ -43,9 +44,13 @@ add_definitions("-w")
 if (MSVC)
 	add_definitions("/W4")
 	# Static build
-	add_definitions(-DVISHNU3DVIEWER_STATIC)
+	# add_definitions(-DLIBGLNEUROUTILS_STATIC)
 	add_definitions(-D_USE_MATH_DEFINES)
 endif ()
+
+set( GLNEUROUTILS_INCLUDE_NAME glneuroutils )
+set( GLNEUROUTILS_NAMESPACE glneuroutils )
+
 
 common_library(GLNeuroUtils)
 

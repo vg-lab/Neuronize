@@ -21,6 +21,7 @@
 #ifndef SOMACREATORWIDGET
 #define SOMACREATORWIDGET
 
+
 #include <QMainWindow>
 #include <QDomDocument>
 

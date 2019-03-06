@@ -21,6 +21,8 @@
 #ifndef _SPINESSWC_H_
 #define _SPINESSWC_H_
 
+#include <neuroutils/api.h>
+
 #include "NeuroSWC.h"
 #include "BaseMeshContainer.h"
 #include "SWCSpinesDistributor.h"
@@ -64,7 +66,7 @@ namespace NSSpinesSWC
     float lDistanceToSoma;
   };
 
-  class SpinesSWC: public BaseMesh
+  class NEUROUTILS_API SpinesSWC: public BaseMesh
   {
     protected:
       NeuroSWC *NeuronMesh;

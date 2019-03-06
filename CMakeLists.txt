@@ -3,7 +3,7 @@ set( PROJECT_VERSION_MAJOR "0" )
 set( PROJECT_VERSION_MINOR "0" )
 set( PROJECT_VERSION_PATCH "1" )
 set( PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH} )
-project( Neuronize VERSION ${PROJECT_VERSION} )
+project(Neuronize VERSION ${PROJECT_VERSION} )
 set( neuronize_VERSION_ABI 1 )
 # Disable in source building
 if( "${PROJECT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}" )
@@ -22,6 +22,7 @@ endif( NOT CMAKE_BUILD_TYPE )
 
 if ( CMAKE_BUILD_TYPE MATCHES "Debug" )
   add_definitions( -DDEBUG )
+  add_definitions("-W4")
 endif( )
 
 include( GitExternal )
@@ -32,6 +33,7 @@ set( COMMON_PROJECT_DOMAIN gmrv.es )
 include( Common )
 
 common_find_package(VCG REQUIRED)
+common_find_package(QGLViewer REQUIRED)
 common_find_package(OpenMesh REQUIRED)
 common_find_package(Boost COMPONENTS filesystem REQUIRED)
 common_find_package(GLEW REQUIRED)
@@ -66,20 +68,21 @@ list( APPEND NEURONIZE_DEPENDENT_LIBRARIES
         SOIL
         )
 
+if (MSVC)
+  add_definitions("-W4")
+endif()
+
 add_subdirectory( libs/libSysNeuroUtils )
 add_subdirectory( libs/libNeuroUtils )
 add_subdirectory( libs/libGLNeuroUtils )
 add_subdirectory( libs/libQtNeuroUtils )
 add_subdirectory( Neuronize )
 
-
-add_definitions(-D_USE_MATH_DEFINES)
-
-
 if( MSVC )
   # Set DataCooking as startup project on Visual Studio, CMake v3.6
   if( CMAKE_VERSION VERSION_GREATER 3.6 )
-    set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT neuronize )
+    set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Neuronize)
+    add_definitions("-W4")
   endif( )
 endif( )
 
@@ -93,3 +96,5 @@ include( CPackConfig )
 #Copy content (this must be improved)
 file(GLOB MY_CONTENT "Content/*")
 file(COPY ${MY_CONTENT} DESTINATION "${CMAKE_BINARY_DIR}/bin")
+
+

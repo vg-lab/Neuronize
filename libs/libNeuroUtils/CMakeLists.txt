@@ -76,9 +76,12 @@ add_definitions("-w")
 if (MSVC)
 	add_definitions("/W4")
 	# Static build
-	add_definitions(-DVISHNU3DVIEWER_STATIC)
+	# add_definitions(-DLIBNEUROUTILS_STATIC)
 	add_definitions(-D_USE_MATH_DEFINES)
 endif ()
 
+
+set( NEUROUTILS_INCLUDE_NAME neuroutils )
+set( NEUROUTILS_NAMESPACE neuroutils )
 
 common_library(NeuroUtils)

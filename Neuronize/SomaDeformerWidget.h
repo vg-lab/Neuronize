@@ -32,6 +32,7 @@
 #include "SomaCreatorWidget.h"
 #include <libs/libSysNeuroUtils/SystemUtils.h>
 
+
 class SomaDeformerWidget: public QWidget, public Ui::SomaDeformerWidget
 {
   Q_OBJECT

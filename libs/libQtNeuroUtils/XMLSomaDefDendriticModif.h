@@ -21,6 +21,8 @@
 #ifndef XMLDENDMODIF
 #define XMLDENDMODIF
 
+#include <qtneuroutils/api.h>
+
 #include <iostream>
 #include <fstream>
 
@@ -35,7 +37,7 @@ struct DenModifInfo
   float distance;
 };
 
-class XMLSomaDefDendriticModif
+class QTNEUROUTILS_API XMLSomaDefDendriticModif
 {
 
   public:

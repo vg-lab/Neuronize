@@ -20,11 +20,13 @@
 
 #pragma once
 
+#include <neuroutils/api.h>
+
 #include "BaseMesh.h"
 
 using namespace NSBaseMesh;
 
-class MSNode
+class NEUROUTILS_API MSNode
 {
   public:
 

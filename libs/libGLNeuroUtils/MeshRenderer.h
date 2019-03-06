@@ -21,6 +21,8 @@
 #ifndef _MESH_RENDERER_H_
 #define _MESH_RENDERER_H_
 
+#include <glneuroutils/api.h>
+
 #include "GLHelper.hpp"
 
 #include <libs/libNeuroUtils/BaseMesh.h>
@@ -32,7 +34,7 @@ using namespace NSGLHelper;
 
 namespace NSMeshRenderer
 {
-  class MeshRenderer
+  class GLNEUROUTILS_API MeshRenderer
   {
 
     public:

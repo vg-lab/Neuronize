@@ -5,13 +5,14 @@
 #ifndef NEURONIZE_AS2SWCV2_H
 #define NEURONIZE_AS2SWCV2_H
 
+#include <neuroutils/api.h>
 
 #include <vector>
 #include <string>
 #include <OpenMesh/Core/Mesh/Traits.hh>
 #include "MeshVCG.h"
 
-class SimplePoint {
+class NEUROUTILS_API SimplePoint {
 public:
     OpenMesh::Vec3d point;
     double d;
@@ -30,7 +31,7 @@ public:
     }
 };
 
-class Spine {
+class NEUROUTILS_API Spine {
 public:
     SimplePoint initPoint;
     SimplePoint finalPoint;
@@ -39,7 +40,7 @@ public:
     Spine(SimplePoint initPoint, SimplePoint finalPoint, double d) : initPoint(initPoint) ,finalPoint(finalPoint),d(d){}
 };
 
-class SWCPoint: public SimplePoint {
+class NEUROUTILS_API SWCPoint: public SimplePoint {
 public:
     int parent;
     int type;
@@ -52,7 +53,7 @@ public:
 
 using Dendrite = std::vector<SWCPoint>;
 
-class AS2SWCV2 {
+class NEUROUTILS_API AS2SWCV2 {
 public:
     static std::tuple<MeshVCG*,std::vector<Spine>> asc2swc(const std::string& inputFile, const std::string& outFile, bool useSoma);
 
