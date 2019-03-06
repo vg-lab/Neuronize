@@ -22,7 +22,6 @@ endif( NOT CMAKE_BUILD_TYPE )
 
 if ( CMAKE_BUILD_TYPE MATCHES "Debug" )
   add_definitions( -DDEBUG )
-  add_definitions("-W4")
 endif( )
 
 include( GitExternal )
