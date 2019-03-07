@@ -63,9 +63,10 @@ add_definitions("-w")
 if (MSVC)
 	add_definitions("/W4")
 	# Static build
-	#add_definitions(-DNEURONIZE_STATIC)
-	set(COMMON_APP_ARGS WIN32)
+	add_definitions(-DNEURONIZE_STATIC)
 	add_definitions(-D_USE_MATH_DEFINES)
+	common_application(neuronize WIN32)
+else(MSVC)
+	common_application(neuronize)
 endif ()
 
-common_application(neuronize)

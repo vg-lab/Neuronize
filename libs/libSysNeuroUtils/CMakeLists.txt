@@ -28,7 +28,7 @@ add_definitions("-w")
 if (MSVC)
     add_definitions("-W4")
     # Static build
-    # add_definitions(-DSYSNEUROUTILS_STATIC)
+    add_definitions(-DSYSNEUROUTILS_STATIC)
 endif ()
 
 set( SYSNEUROUTILS_INCLUDE_NAME sysneuroutils )
