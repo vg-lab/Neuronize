@@ -24,8 +24,8 @@ std::tuple<MeshVCG*,std::vector<Spine>> AS2SWCV2::asc2swc(const std::string &inp
         std::string line;
         while (inputStream >> line) {
             if (line.find("MBFObjectType") != std::string::npos) { //Esto es soma. hay otro soma pero no nos vale ya que tiene solo un contorno
-                inputStream >> line;
-                procesSomaPart(inputStream,contours);
+                //inputStream >> line;
+                //procesSomaPart(inputStream,contours);
             }
             if (line.find("Dendrite") !=  std::string::npos) {
                dentrites.push_back(processDendrite(inputStream, counter, 3, parentsCount,spines));
