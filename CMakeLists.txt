@@ -42,17 +42,17 @@ set( COMMON_PROJECT_DOMAIN gmrv.es )
 include( Common )
 
 common_find_package(VCG REQUIRED)
-common_find_package(QGLViewer REQUIRED)
-common_find_package(OpenMesh REQUIRED)
+common_find_package(OpenMesh SYSTEM REQUIRED)
+common_find_package(QGLViewer SYSTEM REQUIRED)
 common_find_package(Boost COMPONENTS filesystem REQUIRED)
 common_find_package(GLEW REQUIRED)
-common_find_package(OpenGL REQUIRED)
-common_find_package(GLUT REQUIRED)
-common_find_package(Qt5Widgets REQUIRED)
-common_find_package(Qt5Core REQUIRED)
-common_find_package(Qt5Gui REQUIRED)
-common_find_package(Qt5OpenGL REQUIRED)
-common_find_package(Qt5Xml REQUIRED)
+common_find_package(OpenGL SYSTEM REQUIRED)
+common_find_package(GLUT SYSTEM REQUIRED)
+common_find_package(Qt5Widgets SYSTEM REQUIRED)
+common_find_package(Qt5Core SYSTEM REQUIRED)
+common_find_package(Qt5Gui SYSTEM REQUIRED)
+common_find_package(Qt5OpenGL SYSTEM REQUIRED)
+common_find_package(Qt5Xml SYSTEM REQUIRED)
 common_find_package(Eigen3 SYSTEM REQUIRED)
 common_find_package(SkelGenerator REQUIRED )
 common_find_package(SOIL REQUIRED)
@@ -71,8 +71,7 @@ list( APPEND NEURONIZE_DEPENDENT_LIBRARIES
         SkelGenerator
         VCG
         glm
-        ${OPENMESH_CORE_LIBRARY}
-        ${OPENMESH_TOOLS_LIBRARY}
+        ${OPENMESH_LIBRARY}
         QGLViewer
         SOIL
         )

@@ -22,9 +22,10 @@
 #include <math.h>
 #include <SkelGenerator/SkelGeneratorUtil/Neuron.h>
 #include <QtCore/QDirIterator>
-#include "../libs/libSysNeuroUtils/MathUtils.h"
+#include <libs/libSysNeuroUtils/MathUtils.h>
 #include <QtConcurrent/QtConcurrent>
 #include <queue>
+#include <libs/libGLNeuroUtils/MeshRenderer.h>
 //#include <QtGui>
 
 // Constructor must call the base class constructor.
