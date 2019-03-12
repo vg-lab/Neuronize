@@ -25,7 +25,7 @@
 #include <QFileDialog>
 #include <QDir>
 #include <QMessageBox>
-#include <SkelGenerator/SkelGeneratorUtil/Neuron.h>
+#include <SkelGeneratorUtil/Neuron.h>
 
 
 #include "ui_NeuroGeneratorWidget.h"

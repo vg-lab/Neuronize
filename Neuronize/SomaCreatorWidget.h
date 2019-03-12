@@ -25,7 +25,7 @@
 #include <QMainWindow>
 #include <QDomDocument>
 
-#include <SkelGenerator/SkelGeneratorUtil/Neuron.h>
+#include <SkelGeneratorUtil/Neuron.h>
 
 #include <libs/libQtNeuroUtils/XMLSomaDef.h>
 #include <libs/libQtNeuroUtils/XMLSomaDefManager.h>

@@ -37,7 +37,7 @@
 #include <libs/libGLNeuroUtils/MeshRenderer.h>
 #include <libs/libGLNeuroUtils/LightManager.h>
 
-#include <SkelGenerator/SkelGeneratorUtil/Neuron.h>
+#include <SkelGeneratorUtil/Neuron.h>
 
 using namespace NSBaseMesh;
 using namespace NSBaseMeshContainer;

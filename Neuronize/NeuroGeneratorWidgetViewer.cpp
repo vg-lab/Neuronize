@@ -20,7 +20,7 @@
 
 #include "NeuroGeneratorWidgetViewer.h"
 #include <math.h>
-#include <SkelGenerator/SkelGeneratorUtil/Neuron.h>
+#include <SkelGeneratorUtil/Neuron.h>
 #include <QtCore/QDirIterator>
 #include <libs/libSysNeuroUtils/MathUtils.h>
 #include <QtConcurrent/QtConcurrent>
