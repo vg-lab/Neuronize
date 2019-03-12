@@ -11,6 +11,7 @@ FIND_PATH(QGLVIEWER_INCLUDE_DIR QGLViewer/qglviewer.h
         /usr/local/include/QGLViewer
         /sw/include/QGLViewer
         $ENV{QGLVIEWERROOT}/usr/local/include
+        $ENV{QGLVIEWERROOT}/usr/local/include/QGLViewer.framework/Headers
         )
 
 find_library(QGLVIEWER_LIBRARY_RELEASE
@@ -24,6 +25,7 @@ find_library(QGLVIEWER_LIBRARY_RELEASE
         ENV LIBRARY_PATH
         PATH_SUFFIXES QGLViewer QGLViewer/release
         )
+
 find_library(QGLVIEWER_LIBRARY_DEBUG
         NAMES dqglviewer dQGLViewer dqglviewer-qt5 dQGLViewer-qt5 QGLViewerd2
         PATHS /usr/lib

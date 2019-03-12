@@ -1,3 +1,4 @@
+
 cmake_minimum_required( VERSION 3.1 )
 set( PROJECT_VERSION_MAJOR "0" )
 set( PROJECT_VERSION_MINOR "0" )
@@ -38,6 +39,10 @@ include( GitExternal )
 
 set( NEURONIZE_DESCRIPTION "Neuronize" )
 set( COMMON_PROJECT_DOMAIN gmrv.es )
+
+if( APPLE )
+  set( CMAKE_CXX_FLAGS "-framework CoreFoundation" )
+endif()
 
 include( Common )
 
