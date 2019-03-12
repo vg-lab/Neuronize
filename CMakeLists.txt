@@ -10,6 +10,16 @@ if( "${PROJECT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}" )
   message( FATAL "no in source building allowed." )
 endif( )
 
+if( NOT EXISTS ${CMAKE_SOURCE_DIR}/CMake/common/Common.cmake )
+    message( FATAL_ERROR "CMake/common missing, run: git submodule update --init")
+endif( )
+
+if( NOT EXISTS ${CMAKE_SOURCE_DIR}/VCG/vcg/complex/all_types.h )
+    message( FATAL_ERROR "VCG missing, run: git submodule update --init")
+endif( )
+
+set (VCG_DIR "${CMAKE_SOURCE_DIR}/VCG")
+
 list( APPEND CMAKE_MODULE_PATH
         ${PROJECT_SOURCE_DIR}/CMake
         ${CMAKE_SOURCE_DIR}/CMake/common

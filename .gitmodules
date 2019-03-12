@@ -1,0 +1,6 @@
+[submodule "CMake/common"]
+	path = CMake/common
+	url = https://github.com/Eyescale/CMake.git
+[submodule "VCG"]
+	path = VCG
+	url = https://github.com/cnr-isti-vclab/vcglib.git

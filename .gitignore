@@ -1,5 +1,4 @@
 build
-CMake/common
 /cmake-build-debug/
 
 ### Linux template
