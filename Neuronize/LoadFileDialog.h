@@ -12,7 +12,7 @@
 #include <QPushButton>
 #include <QFutureWatcher>
 #include <QtWidgets/QProgressDialog>
-#include <SkelGenerator/SkelGeneratorUtil/Neuron.h>
+#include <SkelGeneratorUtil/Neuron.h>
 #include <QDialogButtonBox>
 
 
