@@ -32,7 +32,7 @@ MeshVCG::MeshVCG(const std::string &filename) {
     if (extension == ".off") {
         if (vcg::tri::io::ImporterOFF<MyMesh>::Open(mesh, filename.c_str()) !=
             vcg::tri::io::ImporterOFF<MyMesh>::NoError) {
-            printf("Error reading file  %s\n", filename);
+          printf("Error reading file  %s\n", filename.c_str());
         }
     } else {
         if (extension == ".obj") {
