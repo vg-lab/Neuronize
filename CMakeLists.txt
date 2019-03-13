@@ -47,7 +47,6 @@ endif()
 include( Common )
 
 common_find_package(VCG REQUIRED)
-common_find_package(OpenMesh SYSTEM REQUIRED)
 common_find_package(QGLViewer SYSTEM REQUIRED)
 common_find_package(Boost COMPONENTS filesystem REQUIRED)
 common_find_package(GLEW REQUIRED)
@@ -61,6 +60,7 @@ common_find_package(Qt5Xml SYSTEM REQUIRED)
 common_find_package(Eigen3 SYSTEM REQUIRED)
 common_find_package(SkelGenerator REQUIRED )
 common_find_package(SOIL REQUIRED)
+common_find_package(OpenMesh SYSTEM REQUIRED)
 common_find_package_post( )
 
 list( APPEND NEURONIZE_DEPENDENT_LIBRARIES
