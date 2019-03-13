@@ -31,7 +31,7 @@ OSX-subproject:
 Win7-VS14-x64-subproject:
   stage: build
   script:
-  - call dir %ENVFILESDIR%\
+  - call dir c:\libs
   - call %ENVFILESDIR%\Qt-5.9-vs14.bat
   - call %ENVFILESDIR%\eigen-3.1.2-vs12-x64.bat
   - call %ENVFILESDIR%\Boost-1.64-vs14-x64.bat
