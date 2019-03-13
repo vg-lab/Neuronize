@@ -32,7 +32,7 @@ Win7-VS14-x64-subproject:
   stage: build
   script:
   - call %ENVFILESDIR%\Qt-5.9-vs14.bat
-  - call %ENVFILESDIR%\Eigen-3.1.2-vs14.bat
+  - call %ENVFILESDIR%\eigen-3.1.2-vs12-x64.bat
   - call %ENVFILESDIR%\OpenMesh-6.3-vs14.bat
   - call %ENVFILESDIR%\libQGLViewer-2.6.3-vs14.bat
   - call %ENVFILESDIR%\Boost-1.64-vs14-x64.bat
