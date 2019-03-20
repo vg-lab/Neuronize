@@ -17,26 +17,33 @@ std::tuple<MeshVCG*,std::vector<Spine>> AS2SWCV2::asc2swc(const std::string &inp
         int counter = 2; //Saltamos el soma
         std::ifstream inputStream;
         inputStream.open(inputFile,std::ios::in);
-        std::vector<Dendrite > dentrites;
+        std::vector<Dendrite > basals;
+        std::vector<Dendrite > apicals;
+        std::vector<Dendrite > dendrites;
         std::vector<int> parentsCount;
         parentsCount.push_back(0); // el soma no importa pero se rellena para simplificar el acceso.
 
         std::string line;
         while (inputStream >> line) {
-            if (line.find("MBFObjectType") != std::string::npos) { //Esto es soma. hay otro soma pero no nos vale ya que tiene solo un contorno
+            if (line.find("MBFObjectType") !=
+                std::string::npos) { //Esto es soma. hay otro soma pero no nos vale ya que tiene solo un contorno
                 inputStream >> line;
-                procesSomaPart(inputStream,contours);
+                procesSomaPart(inputStream, contours);
             }
-            if (line.find("Dendrite") !=  std::string::npos) {
-               dentrites.push_back(processDendrite(inputStream, counter, 3, parentsCount,spines));
+            if (line.find("Dendrite") != std::string::npos) {
+                basals.push_back(processDendrite(inputStream, counter, 3, parentsCount, spines));
             }
             if (line.find("Apical") != std::string::npos) {
-                dentrites.push_back(processDendrite(inputStream, counter, 4, parentsCount,spines));
+                apicals.push_back(processDendrite(inputStream, counter, 4, parentsCount, spines));
 
             }
         }
         inputStream.close();
 
+        SimplePoint* auxSoma = calcSoma2(basals);
+        joinApicals(apicals,auxSoma->point);
+        dendrites = basals;
+        dendrites.insert(dendrites.end(),apicals.begin(),apicals.end());
 
         OpenMesh::Vec3d center;
         MeshVCG* finalSoma = nullptr;
@@ -46,13 +53,13 @@ std::tuple<MeshVCG*,std::vector<Spine>> AS2SWCV2::asc2swc(const std::string &inp
             MeshVCG somaConvex;
             somaMesh.convexHull(somaConvex);
             center = somaConvex.getCenter();
-            auto radius = calcSommaRadius(center,dentrites);
+            auto radius = calcSommaRadius(center,dendrites);
             soma = new SimplePoint(center[0],center[1],center[2],radius);
 
             //Desplazar los puntos fuera del soma
 
 
-            for (auto &dendrite: dentrites) {
+            for (auto &dendrite: dendrites) {
                 double dist= std::numeric_limits<double>::max();
                 OpenMesh::Vec3d v = dendrite[0].point - center;
                 v.normalize();
@@ -87,9 +94,9 @@ std::tuple<MeshVCG*,std::vector<Spine>> AS2SWCV2::asc2swc(const std::string &inp
             finalSoma = new MeshVCG();
             somaConvex.remesh(*finalSoma);
         }else {
-            soma = calcSoma2(dentrites);
+            soma = calcSoma2(dendrites);
         }
-        toSWC(outFile,dentrites,soma);
+        toSWC(outFile,dendrites,soma);
     return std::make_tuple(finalSoma,spines);
 
 }
@@ -167,7 +174,7 @@ Dendrite AS2SWCV2::processDendrite(std::ifstream &inputStream, int &counter, int
             double dist  = (lastPoint - actualPoint).norm();
             inputStream >> line; //saltamos parentesis final
             if ( (lastPoint - actualPoint).norm() > minDistance ) { // comprobamos que el punto anterior no sea igual a este
-                dendrite.emplace_back(x, y, z, d, parent, type);
+                dendrite.emplace_back(x, y, z, d,counter, parent, type);
                 parent = counter;
                 counter++;
                 lastPoint  = actualPoint;
@@ -199,15 +206,13 @@ Dendrite AS2SWCV2::processDendrite(std::ifstream &inputStream, int &counter, int
 void AS2SWCV2::toSWC(const std::string &filename,std::vector<Dendrite> &dendrites, SimplePoint* &soma) {
     std::ofstream outputStream;
     outputStream.open(filename, std::ios::out);
-    int counter = 1;
-    outputStream << std::setprecision(10) << counter << "\t" << 2 << "\t" << soma->point[0]<< "\t" << soma->point[1] <<
+    outputStream << std::setprecision(10) << 1 << "\t" << 2 << "\t" << soma->point[0]<< "\t" << soma->point[1] <<
                     "\t" << soma->point[2] << "\t" << soma->d << "\t" << -1 << std::endl;
-    counter++;
+
     for (const auto &dendrite: dendrites){
         for (const auto &point: dendrite) {
-            outputStream << std::setprecision(10) << counter << "\t" << point.type << "\t" << point.point[0] << "\t" <<
+            outputStream << std::setprecision(10) << point.counter << "\t" << point.type << "\t" << point.point[0] << "\t" <<
                             point.point[1] << "\t" << point.point[2] << "\t" << point.d << "\t" << point.parent << std::endl;
-            counter++;
 
         }
     }
@@ -257,4 +262,39 @@ double AS2SWCV2::calcSommaRadius(OpenMesh::Vec3d center,std::vector<Dendrite> &d
     }
     return minDist;
 
+}
+
+void AS2SWCV2::joinApicals(std::vector<Dendrite>& apicals,const OpenMesh::Vec3d& somaCenter) {
+
+    if (apicals.size() > 1) {
+        //Comprobar que dendrita esta mas cerca del soma
+        const Dendrite* principalApical = nullptr;
+        float minDist = std::numeric_limits<float>::max();
+        for (const Dendrite& api: apicals) {
+            float dist = (api[0].point - somaCenter).norm();
+
+            if (minDist > dist) {
+                principalApical = &api;
+                minDist = dist;
+            }
+        }
+
+
+        for (auto &api : apicals) {
+            if (&api != principalApical) {
+                minDist = std::numeric_limits<float>::max();
+                int mini = -1;
+                for (int i = 0; i < principalApical->size(); i++) {
+                    float dist = (api[0].point - (*principalApical)[i].point).norm();
+                    if (minDist > dist) {
+                        mini = i;
+                        minDist = dist;
+                    }
+                }
+
+
+                api[0].parent = (*principalApical)[mini].counter;
+            }
+        }
+    }
 }
