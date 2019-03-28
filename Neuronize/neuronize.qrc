@@ -1,11 +1,12 @@
 <RCC>
-    <qresource prefix="Neuronize">
+  <qresource prefix="Neuronize">
+    <file>icons/neuronize.png</file>
     <file>icons/edit-undo-8.png</file>
     <file>icons/application-exit.png</file>
     <file>icons/arrow-left.png</file>
     <file>icons/arrow-right.png</file>
     <file>icons/Camera.app.png</file>
     <file>icons/document-open-6.png</file>
-    <file>icons/help-2.png</file>	
-    </qresource>
+    <file>icons/help-2.png</file>
+  </qresource>
 </RCC>
