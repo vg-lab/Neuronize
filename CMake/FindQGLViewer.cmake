@@ -10,12 +10,13 @@ FIND_PATH(QGLVIEWER_INCLUDE_DIR QGLViewer/qglviewer.h
         /opt/local/include/QGLViewer
         /usr/local/include/QGLViewer
         /sw/include/QGLViewer
+        $ENV{QGLVIEWERROOT}
         $ENV{QGLVIEWERROOT}/usr/local/include
         $ENV{QGLVIEWERROOT}/usr/local/include/QGLViewer.framework/Headers
         )
 
 find_library(QGLVIEWER_LIBRARY_RELEASE
-        NAMES qglviewer QGLViewer qglviewer-qt5 QGLViewer-qt5
+        NAMES qglviewer QGLViewer qglviewer-qt5 QGLViewer-qt5 QGLViewer2
         PATHS /usr/lib
         /usr/local/lib
         /opt/local/lib
@@ -23,7 +24,7 @@ find_library(QGLVIEWER_LIBRARY_RELEASE
         ENV QGLVIEWERROOT
         ENV LD_LIBRARY_PATH
         ENV LIBRARY_PATH
-        PATH_SUFFIXES QGLViewer QGLViewer/release
+        PATH_SUFFIXES x64/Release QGLViewer QGLViewer/release
         )
 
 find_library(QGLVIEWER_LIBRARY_DEBUG
@@ -35,7 +36,7 @@ find_library(QGLVIEWER_LIBRARY_DEBUG
         ENV QGLVIEWERROOT
         ENV LD_LIBRARY_PATH
         ENV LIBRARY_PATH
-        PATH_SUFFIXES QGLViewer QGLViewer/debug
+        PATH_SUFFIXES x64/Debug QGLViewer QGLViewer/debug
         )
 
 if(QGLVIEWER_LIBRARY_RELEASE)
@@ -48,5 +49,5 @@ endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(QGLViewer
-        "QGLViewer NOT FOUND. Please provide QGLVIEWER_ROOT (via cmake or env. var)"
+        "QGLViewer NOT FOUND. Please provide QGLVIEWERROOT (via cmake or env. var)"
         QGLVIEWER_INCLUDE_DIR QGLVIEWER_LIBRARY)

@@ -11,13 +11,15 @@ IF(WIN32)
     FIND_PATH( SOIL_INCLUDE_PATH SOIL/SOIL.h
             $ENV{PROGRAMFILES}/SOIL/include
             ${SOIL_ROOT_DIR}/include
+            $ENV{SOIL_ROOT_DIR}/include
             DOC "The directory where SOIL/SOIL.h resides")
-
     FIND_LIBRARY( SOIL_LIBRARY
-            NAMES libSOIL.a SOIL
+            NAMES SOIL
             PATHS
             $ENV{PROGRAMFILES}/SOIL/lib
             ${SOIL_ROOT_DIR}/lib
+            $ENV{SOIL_ROOT_DIR}/lib
+            $ENV{SOIL_ROOT_DIR}/x64/Release
             DOC "The SOIL library")
 ELSE(WIN32)
     FIND_PATH( SOIL_INCLUDE_PATH SOIL/SOIL.h
