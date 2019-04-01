@@ -1220,6 +1220,7 @@ namespace NSSWCImporter
                nodesToProcess.push(this->nodeCollection[bifurcation->fin]);
                  translateMap.emplace(bifurcation->fin,-1);
              }
+
            } else {
              if (translateMap.find(node.id + 1) == translateMap.end() && node.id + 1 < nodeCollection.size()) {
                nodesToProcess.push(nodeCollection[node.id + 1]);

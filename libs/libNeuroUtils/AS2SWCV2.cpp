@@ -22,6 +22,7 @@ std::tuple<MeshVCG*,std::vector<Spine>> AS2SWCV2::asc2swc(const std::string &inp
         std::vector<Dendrite > dendrites;
         std::vector<int> parentsCount;
         parentsCount.push_back(0); // el soma no importa pero se rellena para simplificar el acceso.
+        int apiPos = -1;
 
         std::string line;
         while (inputStream >> line) {
@@ -34,6 +35,9 @@ std::tuple<MeshVCG*,std::vector<Spine>> AS2SWCV2::asc2swc(const std::string &inp
                 basals.push_back(processDendrite(inputStream, counter, 3, parentsCount, spines));
             }
             if (line.find("Apical") != std::string::npos) {
+                if (apiPos == -1) {
+                    apiPos = static_cast<int>(basals.empty() ? 0 : basals.size() - 1);
+                }
                 apicals.push_back(processDendrite(inputStream, counter, 4, parentsCount, spines));
 
             }
@@ -43,7 +47,7 @@ std::tuple<MeshVCG*,std::vector<Spine>> AS2SWCV2::asc2swc(const std::string &inp
         SimplePoint* auxSoma = calcSoma2(basals);
         joinApicals(apicals,auxSoma->point);
         dendrites = basals;
-        dendrites.insert(dendrites.end(),apicals.begin(),apicals.end());
+        dendrites.insert(dendrites.begin() + apiPos,apicals.begin(),apicals.end());
 
         OpenMesh::Vec3d center;
         MeshVCG* finalSoma = nullptr;

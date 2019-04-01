@@ -14,6 +14,7 @@
 #include <QtWidgets/QProgressDialog>
 #include <SkelGeneratorUtil/Neuron.h>
 #include <QDialogButtonBox>
+#include <QCheckBox>
 
 
 
@@ -38,6 +39,7 @@ private:
     QPushButton* tracePathButton;
     QPushButton* apiPathButton;
     QPushButton* basalPathButton;
+    QCheckBox* saveCheckBox;
     QDialogButtonBox* buttonBox;
     std::string file;
     QFutureWatcher<void>* futureWatcher;
@@ -50,6 +52,7 @@ private slots:
     void openSaveFileDialog(QLineEdit *target,const QString& title, const QString &types);
     void onRadioChanged(bool b);
     void onOkPressed();
+    void onSaveChanged(int state);
 
     void onProcessFinish();
     void processSkel(const std::string &fileName);
