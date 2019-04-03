@@ -1237,7 +1237,7 @@ namespace NSSWCImporter
 
         for (size_t i = 2; i < nodeColletionAux.size(); i++) {
           auto* node = &nodeColletionAux[i];
-          node->parent = translateMap.at(node->parent);;
+          node->parent = translateMap.at(node->parent);
         }
 
         for ( auto &node : nodeConnections) {

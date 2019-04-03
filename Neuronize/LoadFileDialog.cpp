@@ -16,7 +16,9 @@
 #include <QFutureWatcher>
 
 
-LoadFileDialog::LoadFileDialog(QWidget *parent): QDialog(parent) {
+LoadFileDialog::LoadFileDialog(const std::string &tmpDir,QWidget *parent): QDialog(parent) {
+
+    this->tmpDir = tmpDir;
     traces = new QRadioButton("Trace File: ", this);
     traces->setChecked(true);
 
@@ -157,7 +159,7 @@ void LoadFileDialog::onOkPressed() {
         this->file = tracePath->text().toStdString();
         accept();
     } else {
-        QFuture<void> future = QtConcurrent::run([=]() { processSkel("temp.asc"); });
+        QFuture<void> future = QtConcurrent::run([=]() { processSkel(tmpDir + "/temp.asc"); });
         futureWatcher->setFuture(future);
         progresDialog = new QProgressDialog("Operation in progress", "Cancel", 0, 0, this);
         progresDialog->setValue(0);

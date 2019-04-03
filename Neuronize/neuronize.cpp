@@ -21,6 +21,7 @@
 
 #include <QMessageBox>
 #include <QtCore/QDirIterator>
+
 #include "neuronize.h"
 
 Neuronize::Neuronize ( QWidget *parent )
@@ -32,6 +33,10 @@ Neuronize::Neuronize ( QWidget *parent )
   int argc = 0;
   char **argv = NULL;
   glutInit ( &argc, argv );
+  if (!tempDir.isValid()) {
+      throw "Cant create temporary dir";
+  }
+  std::cout << "TmpDir: " << tempDir.path().toStdString() << std::endl ;
 
   //QObject::connect(ui.actionGenerateNewNeuron	,SIGNAL(triggered())	,this,SLOT(generateNewNeuron()));
   QObject::connect ( ui.actionGenerateNewNeuron, SIGNAL( triggered ( )), this, SLOT( actionNewNeuron ( )) );
@@ -80,15 +85,15 @@ void Neuronize::resetNeuronnizeInterface ( )
   if ( mBatchBuilder != NULL )
     delete mBatchBuilder;
 
-  mSomaCreatorWidget = new SomaCreatorWidget ( this );
+  mSomaCreatorWidget = new SomaCreatorWidget (tempDir.path(), this );
   ui.verticalLayout_SomaCreator->addWidget ( mSomaCreatorWidget );
   QObject::connect ( mSomaCreatorWidget, SIGNAL( somaCreated ( )), this, SLOT( showSomaDeformer ( )) );
 
-  mSomaDeformerWidget = new SomaDeformerWidget ( this );
+  mSomaDeformerWidget = new SomaDeformerWidget ( tempDir.path(),this );
   ui.verticalLayout_SomaDeformer->addWidget ( mSomaDeformerWidget );
   QObject::connect ( mSomaDeformerWidget, SIGNAL( finishSoma ( )), this, SLOT( showDendriteGenerator ( )) );
 
-  mNeuroGeneratorWidget = new NeuroGeneratorWidget ( this );
+  mNeuroGeneratorWidget = new NeuroGeneratorWidget ( tempDir.path(), this );
   ui.verticalLayout_DendritesGenerator->addWidget ( mNeuroGeneratorWidget );
   mNeuroGeneratorWidget->loadSpinesModelFromPath ( QDir::currentPath ( ) + "/Content/Spines/Low/" );
 
@@ -154,10 +159,6 @@ void Neuronize::showSomaDeformer ( )
   ui.tabWidget_MainContainer->removeTab ( 0 );
   ui.tabWidget_MainContainer->insertTab ( 0, ui.tab_SomaGenerator, "Soma builder" );
 
-  if (mSomaCreatorWidget->isSomaContours()) {
-    //mSomaDeformerWidget->setModeledSoma("tmp/somaConvex.off");
-
-  }
 
   mSomaDeformerWidget->loadPredefinedXMLSomaDef();
   //mSomaDeformerWidget->startDeformation();
@@ -198,7 +199,7 @@ void Neuronize::showDendriteGenerator ( )
   //Cargar el nuevo soma y generar la neurona
   mNeuroGeneratorWidget->getUI ( ).comboBox_SomaModels->clear ( );
 
-  mNeuroGeneratorWidget->ReLoadSomaModelsFromPath ( QDir::currentPath ( ) + "/tmp/SomaGenerated/" );
+  mNeuroGeneratorWidget->ReLoadSomaModelsFromPath ( tempDir.path() + "/SomaGenerated/" );
 
   //El metod anterior resetea el mSWCFIle ...
   mNeuroGeneratorWidget->setMorphologyFile ( mFullSWCFilePath );

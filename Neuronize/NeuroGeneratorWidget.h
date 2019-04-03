@@ -41,6 +41,7 @@ class NeuroGeneratorWidget: public QWidget, public Ui::NeuroGeneratorWidget
 
     QMessageBox *msgBox;
 
+    QString mTempDir;
     skelgenerator::Neuron* neuron;
     std::vector<Spine> spines;
 public:
@@ -61,7 +62,7 @@ public slots:
     void loadNeuronDefinitionAndGenerateMesh ( );
 
   public:
-    NeuroGeneratorWidget ( QWidget *parent = 0 );
+    NeuroGeneratorWidget (const QString &tempDir, QWidget *parent = 0 );
 
     ~NeuroGeneratorWidget ( );
 

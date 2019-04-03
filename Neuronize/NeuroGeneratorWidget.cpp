@@ -24,7 +24,7 @@
 
 //#include <QtGui>
 
-NeuroGeneratorWidget::NeuroGeneratorWidget ( QWidget *parent )
+NeuroGeneratorWidget::NeuroGeneratorWidget (const QString &tmpDir, QWidget *parent )
   : QWidget ( parent )
 {
   ui.setupUi ( this );
@@ -37,6 +37,7 @@ NeuroGeneratorWidget::NeuroGeneratorWidget ( QWidget *parent )
   //Configure the compnent
   viewer->setupViewer ( );
 
+  mTempDir = tmpDir;
   mSWCFleName = "";
 
   setSpinesDistributionParams ( );
@@ -296,7 +297,7 @@ void NeuroGeneratorWidget::loadNeuronModel ( )
 
 void NeuroGeneratorWidget::loadSTDSoma(bool scale)
 {
-  viewer->loadNeuronModel ( QDir::currentPath ( ) + "/tmp/SomaGenerated/SomaDeformed.obj" );
+  viewer->loadNeuronModel ( mTempDir + "/SomaGenerated/SomaDeformed.obj" );
 
 
   viewer->loadSWCFile ( mSWCFleName );
@@ -534,8 +535,8 @@ void NeuroGeneratorWidget::generateSpines ( )
                                               lMaxRadio );
       break;
       case 5:
-          this->neuron->spines_to_obj_without_base("tmpSpines");
-          viewer->generateSpinesVrml("tmpSpines");
+          this->neuron->spines_to_obj_without_base(mTempDir.toStdString() + "/tmpSpines");
+          viewer->generateSpinesVrml(mTempDir + "/tmpSpines");
           break;
       case 6:
       viewer->generateSpinesASC(this->spines,lHorResol,
@@ -563,8 +564,8 @@ void NeuroGeneratorWidget::batchSpinesGeneration(skelgenerator::Neuron *pNeuron,
 
   if (pNeuron != nullptr) {
     std::cout<<"---------------------------------------------->> Opcion elegida: 5"<<"----------------------------------" <<std::endl << std::flush;
-    pNeuron->spines_to_obj_without_base("tmpSpines");
-    viewer->generateSpinesVrml("tmpSpines");
+    pNeuron->spines_to_obj_without_base(mTempDir.toStdString() + "/tmpSpines");
+    viewer->generateSpinesVrml(mTempDir + "/tmpSpines");
   } else if (!spines.empty()) {
     std::cout<<"---------------------------------------------->> Opcion elegida: 6"<<"----------------------------------" <<std::endl << std::flush;
     viewer->generateSpinesASC(spines, lHorResol,
