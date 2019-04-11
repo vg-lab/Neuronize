@@ -43,9 +43,12 @@ public:
 class NEUROUTILS_API SWCPoint: public SimplePoint {
 public:
     int parent;
+    int counter;
     int type;
 
-    SWCPoint(double x, double y, double z , double d , int parent,int type): SimplePoint(x,y,z,d) {
+
+    SWCPoint(double x, double y, double z , double d , int counter, int parent,int type): SimplePoint(x,y,z,d) {
+        this->counter = counter;
         this->parent = parent;
         this->type = type;
     }
@@ -69,6 +72,7 @@ private:
 
     static double calcSommaRadius(OpenMesh::Vec3d center,std::vector<Dendrite> &dentrites);
 
+    static void joinApicals(std::vector<Dendrite>& apicals,const OpenMesh::Vec3d& somaCenter);
 };
 
 
