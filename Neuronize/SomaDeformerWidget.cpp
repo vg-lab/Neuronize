@@ -19,17 +19,19 @@
  */
 
 #include "SomaDeformerWidget.h"
+#include "SomaCreatorWidget.h"
 
 #include <QMessageBox>
 
-SomaDeformerWidget::SomaDeformerWidget ( QWidget *parent )
+SomaDeformerWidget::SomaDeformerWidget (const QString &tempDir, QWidget *parent )
   : QWidget ( parent )
 {
   ui.setupUi ( this );
 
   viewer = new SomaDeformerWidgetViewer ( this );
 
-  mXMLFile = "";
+  mtmpDir = tempDir;
+  mXMLFile = tempDir + "/Definition.xml";
 
   //Add the viewer component to the interface
   ui.verticalLayout_Viewer->addWidget ( viewer );
@@ -118,6 +120,7 @@ SomaDeformerWidget::SomaDeformerWidget ( QWidget *parent )
   QObject::connect ( ui.pushButton_FinalizeSoma, SIGNAL( clicked ( )), this, SLOT( finalizeSoma ( )) );
   QObject::connect ( ui.pushButton_NextStep, SIGNAL( clicked ( )), this, SLOT( finalizeSoma ( )) );
   QObject::connect ( ui.pushButton_restoreDefaults, SIGNAL( clicked ( )), this, SLOT( restoreDefaultValues ( )) );
+  QObject::connect ( ui.pushButton_SphericalSoma, SIGNAL( clicked ( )), this, SLOT( useSphericalSoma() ));
 
   mMsgTimer = NULL;
   mMiSecsSimulation = 5000;
@@ -346,7 +349,10 @@ void SomaDeformerWidget::exportModel ( )
 
 void SomaDeformerWidget::exportModelWithSTDName ( )
 {
-  QString fileName = QDir::currentPath ( ) + "/tmp/SomaGenerated/SomaDeformed.obj";
+  QDir dir (mtmpDir);
+  dir.mkdir("SomaGenerated");
+
+  QString fileName = mtmpDir + "/SomaGenerated/SomaDeformed.obj";
   viewer->exportModel ( fileName );
 
   //Export configuration name
@@ -405,7 +411,9 @@ void SomaDeformerWidget::finalSomaOptimization ( )
   if ( viewer->isDeformating ( ))
   {
     optimizateDendriticBase ( );
-    deformDuringNSteps ( 25 );
+    //deformDuringNSteps ( 25 );
+
+
     viewer->setDeleteRedundantVertex ( true );
   }
   else
@@ -455,5 +463,27 @@ void SomaDeformerWidget::showContinueMsg ( )
   ui.pushButton_FinalizeSoma->setEnabled ( true );
   ui.pushButton_NextStep->setEnabled ( true );
 }
+
+void SomaDeformerWidget::setModeledSoma(std::string path) {
+    viewer->addSomaModel( path );
+    ui.comboBox_ModelledSomas->addItem(QString::fromStdString(path));
+    ui.radioButton_ModelledSomas->setChecked(true);
+
+}
+
+void SomaDeformerWidget::setSWCFile(std::string path) {
+    viewer->loadSWCFile(QString::fromStdString(path));
+}
+
+void SomaDeformerWidget::useSphericalSoma() {
+  somaCreator->generateXMLSoma(somaCreator->getInputFile(), false);
+  loadPredefinedXMLSomaDef();
+}
+
+void SomaDeformerWidget::setSomaCreator(SomaCreatorWidget *somaCreator) {
+  this->somaCreator = somaCreator;
+}
+
+
 
 

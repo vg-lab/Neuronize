@@ -1,38 +1,55 @@
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
-endif(NOT CMAKE_BUILD_TYPE)
+source_group(\\ FILES CMakeLists.txt)
 
-mark_as_advanced(CMAKE_BUILD_TYPE)
+set (QTNEUROUTILS_SOURCES
+		CriterionTypes.cpp
+		libqtneuroutils.cpp
+		NeuroDistGenerator.cpp
+		QtIndexedPalette.cpp
+		StateControlTypes.cpp
+		XMLProgressiveNeuroViz.cpp
+		XMLProgressiveNeuroVizCriterion.cpp
+		XMLProgressiveNeuroVizManager.cpp
+		XMLSomaDef.cpp
+		XMLSomaDefDendriticModif.cpp
+		XMLSomaDefManager.cpp
+		
+		)
 
-#Code and headers
-file (GLOB QtNeuroUtils_src "*.cpp")
-file (GLOB QtNeuroUtils_h "*.h")
-											
-include_directories (${PROJECT_SOURCE_DIR})
-include_directories (${PROJECT_BINARY_DIR})
+set(LQTNEUROUTILS_HEADERS
+		CriterionTypes.h
+		libqtneuroutils.h
+		NeuroDistGenerator.h
+		QtIndexedPalette.h
+		QtThreadsManager.hpp
+		StateControlTypes.h
+		XMLProgressiveNeuroViz.h
+		XMLProgressiveNeuroVizCriterion.h
+		XMLProgressiveNeuroVizManager.h
+		XMLSomaDef.h
+		XMLSomaDefDendriticModif.h
+		XMLSomaDefManager.h
+		
+		)
 
-include_directories(${QT_INCLUDES} 
-					${CMAKE_CURRENT_BINARY_DIR}
-					${CMAKE_CURRENT_SOURCE_DIR}
-					)
+set(QTNEUROUTILS_LINK_LIBRARIES
+		SysNeuroUtils
+		Qt5::Widgets
+		Qt5::Core
+		Qt5::Xml
+		)
 
-include_directories(../libSysNeuroUtils)
-include_directories(../libNeuroUtils)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR}/src)
 
-add_definitions(${QT_DEFINITIONS})
+add_definitions("-w")
 
-#Construccion de la librería
-add_library (QtNeuroUtils SHARED 
-    ${QtNeuroUtils_src}
-    ${QtNeuroUtils_h}
-)
+if (MSVC)
+	add_definitions("/W4")
+	# Static build
+	# add_definitions(-DQTNEUROUTILS_STATIC)
+endif ()
 
-target_link_libraries ( QtNeuroUtils	
-                        SysNeuroUtils															
-                        Qt5::Widgets
-                        Qt5::Core
-                        Qt5::Xml
-                      )
+set( QTNEUROUTILS_INCLUDE_NAME qtneuroutils )
+set( QTNEUROUTILS_NAMESPACE qtneuroutils )
 
-set_target_properties( QtNeuroUtils
-  PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+common_library(QtNeuroUtils)

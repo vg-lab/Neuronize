@@ -18,7 +18,10 @@
  *
  */
 
+
 #include <QMessageBox>
+#include <QtCore/QDirIterator>
+
 #include "neuronize.h"
 
 Neuronize::Neuronize ( QWidget *parent )
@@ -30,6 +33,10 @@ Neuronize::Neuronize ( QWidget *parent )
   int argc = 0;
   char **argv = NULL;
   glutInit ( &argc, argv );
+  if (!tempDir.isValid()) {
+      throw "Cant create temporary dir";
+  }
+  std::cout << "TmpDir: " << tempDir.path().toStdString() << std::endl ;
 
   //QObject::connect(ui.actionGenerateNewNeuron	,SIGNAL(triggered())	,this,SLOT(generateNewNeuron()));
   QObject::connect ( ui.actionGenerateNewNeuron, SIGNAL( triggered ( )), this, SLOT( actionNewNeuron ( )) );
@@ -78,15 +85,15 @@ void Neuronize::resetNeuronnizeInterface ( )
   if ( mBatchBuilder != NULL )
     delete mBatchBuilder;
 
-  mSomaCreatorWidget = new SomaCreatorWidget ( this );
+  mSomaCreatorWidget = new SomaCreatorWidget (tempDir.path(), this );
   ui.verticalLayout_SomaCreator->addWidget ( mSomaCreatorWidget );
   QObject::connect ( mSomaCreatorWidget, SIGNAL( somaCreated ( )), this, SLOT( showSomaDeformer ( )) );
 
-  mSomaDeformerWidget = new SomaDeformerWidget ( this );
+  mSomaDeformerWidget = new SomaDeformerWidget ( tempDir.path(),this );
   ui.verticalLayout_SomaDeformer->addWidget ( mSomaDeformerWidget );
   QObject::connect ( mSomaDeformerWidget, SIGNAL( finishSoma ( )), this, SLOT( showDendriteGenerator ( )) );
 
-  mNeuroGeneratorWidget = new NeuroGeneratorWidget ( this );
+  mNeuroGeneratorWidget = new NeuroGeneratorWidget ( tempDir.path(), this );
   ui.verticalLayout_DendritesGenerator->addWidget ( mNeuroGeneratorWidget );
   mNeuroGeneratorWidget->loadSpinesModelFromPath ( QDir::currentPath ( ) + "/Content/Spines/Low/" );
 
@@ -145,13 +152,15 @@ void Neuronize::showSomaCreator ( )
 void Neuronize::showSomaDeformer ( )
 {
   mActiveTab = 1;
+  mSomaDeformerWidget->setSomaCreator(mSomaCreatorWidget);
 
   mFullSWCFilePath = mSomaCreatorWidget->getFullPathToSWCFile ( );
 
   ui.tabWidget_MainContainer->removeTab ( 0 );
   ui.tabWidget_MainContainer->insertTab ( 0, ui.tab_SomaGenerator, "Soma builder" );
 
-  mSomaDeformerWidget->loadPredefinedXMLSomaDef ( );
+
+  mSomaDeformerWidget->loadPredefinedXMLSomaDef();
   //mSomaDeformerWidget->startDeformation();
 }
 
@@ -159,13 +168,16 @@ void Neuronize::showDendriteGenerator ( )
 {
   mActiveTab = 2;
 
-  ////Esto solohay que hacerse al terminar la deformaci�n (no en cada rebuild)
-  //mSomaDeformerWidget->finalSomaOptimization();
-  //mSomaDeformerWidget->exportModelWithSTDName();
-  //mSomaDeformerWidget->stopDeformation();
+
+  ////Esto solohay que hacerse al terminar la deformaci�n (no en cada rebuild
+  mSomaDeformerWidget->finalSomaOptimization();
+  mSomaDeformerWidget->exportModelWithSTDName();
+  mSomaDeformerWidget->stopDeformation();
 
   ui.tabWidget_MainContainer->removeTab ( 0 );
   ui.tabWidget_MainContainer->insertTab ( 0, ui.tab_DendritesGenerator, "Dendrites/Spines builder" );
+
+  mNeuroGeneratorWidget->setSpines(mSomaCreatorWidget->getSpines());
 
   //Noise options
   mNeuroGeneratorWidget->getUI ( ).checkBox_NoiseSoma->setVisible ( true );
@@ -187,13 +199,14 @@ void Neuronize::showDendriteGenerator ( )
   //Cargar el nuevo soma y generar la neurona
   mNeuroGeneratorWidget->getUI ( ).comboBox_SomaModels->clear ( );
 
-  mNeuroGeneratorWidget->ReLoadSomaModelsFromPath ( QDir::currentPath ( ) + "/tmp/SomaGenerated/" );
+  mNeuroGeneratorWidget->ReLoadSomaModelsFromPath ( tempDir.path() + "/SomaGenerated/" );
 
   //El metod anterior resetea el mSWCFIle ...
   mNeuroGeneratorWidget->setMorphologyFile ( mFullSWCFilePath );
 
   //Load the deformed soma
-  mNeuroGeneratorWidget->loadSTDSoma ( );
+  mNeuroGeneratorWidget->loadSTDSoma(!mSomaCreatorWidget->isSomaContours());
+
 
   //mNeuroGeneratorWidget->getUI().checkBox_SmoothNeuron->setChecked(true);
   //mNeuroGeneratorWidget->getUI().checkBox_SmoothSpines->setChecked(false);
@@ -223,6 +236,7 @@ void Neuronize::showSpinesGenerator ( )
   ////Pasar la malla y la definicion al spines generator
   //ui.tabWidget_MainContainer->removeTab(0);
   //ui.tabWidget_MainContainer->insertTab(1,ui.tab_SpinesGenerator,"Spines generator");
+          mNeuroGeneratorWidget->setNeuron(mSomaCreatorWidget->getNeuron());
 
   //Noise options
   mNeuroGeneratorWidget->getUI ( ).checkBox_NoiseSoma->setVisible ( false );
@@ -317,7 +331,7 @@ void Neuronize::genetareNeuronsInBatch ( )
   QString lBaseName = mBatchBuilder->getBaseName ( );
 
   //Cargar todos los ficheros del directorio de entrada
-  QDir directory;
+  /*QDir directory;
   if ( mInputFilePath.isNull ( ) == false )
   {
     directory.setPath ( mInputFilePath );
@@ -334,12 +348,65 @@ void Neuronize::genetareNeuronsInBatch ( )
       QString mFileName = directory.absolutePath ( ) + "/" + list.at ( i );
       mFilesContainer.push_back ( mFileName );
     }
-  }
+  }*/
+
+   QDir directory;
+  if ( mInputFilePath.isNull ( ) == false ) {
+    directory.setPath(mInputFilePath);
+    QDirIterator it(directory.absolutePath(), QDir::AllEntries | QDir::NoDotAndDotDot);
+    while (it.hasNext()) {
+      QFileInfo current = it.next();
+      if (current.isFile()) {
+        auto ext = current.suffix();
+        if (ext == "asc" || ext == "ASC" || ext == "swc" || ext == "SWC") {
+          mFilesContainer.emplace_back(it.next(), nullptr);
+        }
+      } else if (current.isDir()) {
+          QDir dir (current.absoluteFilePath());
+          QDirIterator itFiles(dir.absolutePath(), QDir::AllEntries | QDir::NoDotAndDotDot);
+          std::string apiFile;
+          std::vector <std::string> basalFiles;
+          while (itFiles.hasNext()) {
+            QFileInfo info = itFiles.next();
+            QString path = info.absoluteFilePath();
+            if (info.isFile()) {
+              std::string test = path.toStdString();
+              if (path.contains("api", Qt::CaseInsensitive)) {
+                apiFile = path.toStdString();
+              } else if (path.contains("basal", Qt::CaseInsensitive)) {
+                basalFiles.emplace_back(path.toStdString());
+              }
+            } else {
+              QDirIterator itBasalFiles(path, QDir::AllEntries | QDir::NoDotAndDotDot);
+              while (itBasalFiles.hasNext()) {
+                basalFiles.emplace_back(itBasalFiles.next().toStdString());
+              }
+            }
+          }
+          std::string resultFile = mInputFilePath.toStdString() ;
+          std::string name = dir.dirName().toStdString();
+          resultFile.append("/").append(name).append(".asc");
+
+
+          auto neuron = new skelgenerator::Neuron(apiFile, basalFiles);
+          std::ofstream file;
+          file.open(resultFile);
+          file << neuron->to_asc();
+          file.close();
+          mFilesContainer.emplace_back(QString::fromStdString(resultFile),neuron);
+        }
+      }
+    }
+
 
   for ( unsigned int i = 0; i < mFilesContainer.size ( ); ++i )
   {
+    std::cout << "Init" << std::endl << std::flush;
     showSomaCreator ( );
-    mSomaCreatorWidget->generateXMLSoma ( mFilesContainer[i] );
+    auto filePath = std::get<0>(mFilesContainer[i]);
+    auto neuron = std::get<1>(mFilesContainer[i]);
+    mSomaCreatorWidget->generateXMLSoma ( filePath, true );
+    auto spines = mSomaCreatorWidget->getSpines();
 
     //Luego pasar al somaDeformer y hacer el build
     showSomaDeformer ( );
@@ -347,14 +414,18 @@ void Neuronize::genetareNeuronsInBatch ( )
     mSomaDeformerWidget->deformDuringNSteps ( 1000 );
     mSomaDeformerWidget->finalizeSoma ( );
 
+    std::cout << "Deformer" << std::endl << std::flush;
+
     //Luego pasar al NeuriteGenerator y hacer el build
     showDendriteGenerator ( );
     mNeuroGeneratorWidget->loadNeuronDefinitionAndGenerateMesh ( );
 
+    std::cout << "Dendrites" << std::endl << std::flush;
+
     //Suavizado
     mNeuroGeneratorWidget->applySmooth ( 2, 0, 0, 0 );
 
-    QFileInfo f ( mFilesContainer[i] );
+    QFileInfo f ( filePath );
     QString lFileName = f.fileName ( );
 
     QString lTmpId = "";
@@ -365,17 +436,19 @@ void Neuronize::genetareNeuronsInBatch ( )
     else
       lTmpId = QString::number ( i );
 
-    QString lTmpPath = mOuputFilePath + "\\" + lBaseName + lTmpId;
+    QString lTmpPath = mOuputFilePath + "/" + lBaseName + lTmpId;
     QDir ( ).mkdir ( lTmpPath );
 
-    mNeuroGeneratorWidget->exportNeuron ( lTmpPath + "\\" + lFileName );
+    mNeuroGeneratorWidget->exportNeuron ( lTmpPath + "/" + lFileName );
 
     //Copiar el .SWC
-    QFile::copy ( mFilesContainer.at ( i ), lTmpPath + "\\" + lFileName );
-    QFile::copy ( lTmpPath + "\\" + lFileName + ".obj.xml", lTmpPath + "\\" + lBaseName + lTmpId + ".xml" );
+    QFile::copy ( filePath, lTmpPath + "/" + lFileName );
+    QFile::copy ( lTmpPath + "/" + lFileName + ".obj.xml", lTmpPath + "/" + lBaseName + lTmpId + ".xml" );
 
     //Spines
-    mNeuroGeneratorWidget->batchSpinesGeneration ( );
+    std::cout << "Spines" << std::endl << std::flush;
+
+    mNeuroGeneratorWidget->batchSpinesGeneration(neuron, spines);
     lTmpId = "";
     if ( i < 10 )
       lTmpId = "00" + QString::number ( i );
@@ -384,7 +457,7 @@ void Neuronize::genetareNeuronsInBatch ( )
     else
       lTmpId = QString::number ( i );
 
-    mNeuroGeneratorWidget->exportSpinesInmediatly ( lTmpPath + "\\" + lFileName.replace ( ".", "" ) + "_Spines.obj" );
+    mNeuroGeneratorWidget->exportSpinesInmediatly ( lTmpPath + "/" + lFileName.replace ( ".", "" ) + "_Spines.obj" );
 
     //Luego volver al inicio
   }

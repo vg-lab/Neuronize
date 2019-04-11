@@ -26,7 +26,7 @@
  */
 #include "NeuroDistGenerator.h"
 
-#include <randomUtils.h>
+#include <libs/libSysNeuroUtils/randomUtils.h>
 
 #include <iostream>
 using namespace std;

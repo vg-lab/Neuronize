@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <qtneuroutils/api.h>
+
 #include <string>
 #include <fstream>
 
@@ -30,7 +32,7 @@
 
 using namespace std;
 
-class XMLProgressiveNeuroVizManager
+class QTNEUROUTILS_API XMLProgressiveNeuroVizManager
 {
     QDomDocument mDomDoc;
 

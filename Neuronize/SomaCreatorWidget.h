@@ -21,14 +21,18 @@
 #ifndef SOMACREATORWIDGET
 #define SOMACREATORWIDGET
 
+
 #include <QMainWindow>
 #include <QDomDocument>
 
-#include <XMLSomaDef.h>
-#include <XMLSomaDefManager.h>
+#include <SkelGeneratorUtil/Neuron.h>
 
-#include <SWCImporter.h>
-#include <BaseMesh.h>
+#include <libs/libQtNeuroUtils/XMLSomaDef.h>
+#include <libs/libQtNeuroUtils/XMLSomaDefManager.h>
+
+#include <libs/libNeuroUtils/SWCImporter.h>
+#include <libs/libNeuroUtils/BaseMesh.h>
+#include <libs/libNeuroUtils/AS2SWCV2.h>
 
 #include "ui_SomaCreatorWidget.h"
 
@@ -44,6 +48,7 @@ class SomaCreatorWidget: public QWidget, public Ui::SomaCreatorWidget
   Q_OBJECT
 
     //!!!Engine *m_pEngine;
+
 
   public slots:
 
@@ -80,7 +85,7 @@ class SomaCreatorWidget: public QWidget, public Ui::SomaCreatorWidget
 
     void generateXMLSoma ( );
 
-    void generateXMLSoma ( QString fileName );
+    void generateXMLSoma ( QString fileName, bool useSoma );
 
     void calcNearestVertex ( );
 
@@ -93,7 +98,7 @@ class SomaCreatorWidget: public QWidget, public Ui::SomaCreatorWidget
     void somaCreated ( );
 
   public:
-    SomaCreatorWidget ( QWidget *parent = 0 );
+    SomaCreatorWidget (const QString &tempDir,QWidget *parent = 0);
 
     ~SomaCreatorWidget ( );
 
@@ -101,7 +106,14 @@ class SomaCreatorWidget: public QWidget, public Ui::SomaCreatorWidget
 
     void loadSWCFile ( QString pFileToLoad );
 
-  private:
+    skelgenerator::Neuron *getNeuron() const;
+
+    void setNeuron(skelgenerator::Neuron *neuron);
+
+    bool isSomaContours();
+
+
+private:
 
     Ui::SomaCreatorWidget ui;
 
@@ -118,8 +130,20 @@ class SomaCreatorWidget: public QWidget, public Ui::SomaCreatorWidget
     QString mFullPathSWCFileName;
     QString mMehsFileName;
     QString mExitDirectory;
+    QString mInputFile;
+public:
+    const QString &getInputFile() const;
+
+private:
 
     std::vector < unsigned int > mNearestVertex;
+    skelgenerator::Neuron* neuron;
+    bool somaContours;
+    std::vector<Spine> spines;
+public:
+    const vector<Spine> &getSpines() const;
+
+private:
 
     bool isIdInContainer ( unsigned int pId, std::vector < unsigned int > pVector );
 

@@ -20,6 +20,12 @@
 
 #include "NeuroGeneratorWidgetViewer.h"
 #include <math.h>
+#include <SkelGeneratorUtil/Neuron.h>
+#include <QtCore/QDirIterator>
+#include <libs/libSysNeuroUtils/MathUtils.h>
+#include <QtConcurrent/QtConcurrent>
+#include <queue>
+#include <libs/libGLNeuroUtils/MeshRenderer.h>
 //#include <QtGui>
 
 // Constructor must call the base class constructor.
@@ -149,6 +155,7 @@ void NeuroGeneratorWidgetViewer::loadNeuronModel ( QString pModel )
   mesh->setVertexColor ( mesh->getMesh ( )->vertices_begin ( ),
                          mesh->getMesh ( )->vertices_end ( ),
                          MeshDef::Color ( 0.5, 0.5, 1.0, 1.0 ));
+
 
   if ( meshRend == NULL )
   {
@@ -763,7 +770,7 @@ void NeuroGeneratorWidgetViewer::destroyAllGroupsSpines ( )
   if ( meshSpines != NULL )
   {
     delete meshSpines;
-    meshSpines == NULL;
+    meshSpines = nullptr;
   }
 
   unsigned int lNumMeshes = mSpinesSynthContainers.getContainer ( ).size ( );
@@ -845,6 +852,7 @@ void NeuroGeneratorWidgetViewer::generateSpinesInSegment ( unsigned int pNumSpin
 
   mSpinesSynthContainers.addElement ( new BaseMesh ( ));
   mSpinesSynthContainers.getElementAt ( i )->JoinBaseMesh ( meshSpines );
+
 
   MeshDef::ConstVertexIter iniLimit = mSpinesSynthContainers.getElementAt ( i )->getMesh ( )->vertices_begin ( );
   MeshDef::ConstVertexIter finLimit = mSpinesSynthContainers.getElementAt ( i )->getMesh ( )->vertices_end ( );
@@ -1639,7 +1647,7 @@ void NeuroGeneratorWidgetViewer::importSpinesInfo ( QString fileName )
   if ( meshSpines != NULL )
   {
     delete meshSpines;
-    meshSpines == NULL;
+    meshSpines = NULL;
   }
 
   unsigned int lNumMeshes = mSpinesSynthContainers.getContainer ( ).size ( );;
@@ -1693,5 +1701,190 @@ void NeuroGeneratorWidgetViewer::importSpinesInfo ( QString fileName )
   updateGL ( );
 
 }
+
+void NeuroGeneratorWidgetViewer::generateSpinesVrml(QString dirPath) {
+    if ( mesh == NULL )
+        return;
+
+    if ( meshSpines != NULL )
+    {
+        delete meshSpines;
+        meshSpines = NULL;
+    }
+
+    std::cout << dirPath.toStdString() << std::endl;
+    QDir dir( dirPath );
+    dir.setFilter( QDir::AllEntries | QDir::NoDotAndDotDot );
+    int total_files = dir.count();
+
+    QDirIterator it (dirPath,QDir::Files | QDir::NoDotAndDotDot);
+    boost::numeric::ublas::matrix<float> translationMatrix (4,4);
+    boost::numeric::ublas::matrix<float> scaleMatrix (4,4);
+
+    auto displacement = mSWCImporter->getDisplacement();
+
+    generateSquareTraslationMatrix(translationMatrix,-displacement[0],-displacement[1],-displacement[2]);
+
+    std::vector<SpinesSWC*> spinesMeshes(static_cast<size_t>(total_files), nullptr);
+
+    int i = 0;
+    while (it.hasNext()) {
+        auto filename = it.next();
+        SpinesSWC* auxMesh = new SpinesSWC();
+        auxMesh->loadModel(filename.toStdString());
+        auxMesh->applyMatrixTransform(translationMatrix,4);
+        auxMesh->updateBaseMesh();
+        spinesMeshes[i] = auxMesh;
+        i++;
+    }
+
+    meshSpines = fusionAllSpines(spinesMeshes);
+    for(int i = 0; i < spinesMeshes.size();i++) {
+        if (spinesMeshes[i] != meshSpines) {
+            delete spinesMeshes[i];
+        } else {
+            std::cout << i << ":"<< spinesMeshes.size() <<std::endl;
+        }
+    }
+
+
+    MeshDef::ConstVertexIter iniLimit = meshSpines->getMesh ( )->vertices_begin ( );
+    MeshDef::ConstVertexIter finLimit = meshSpines->getMesh ( )->vertices_end ( );
+
+    meshSpines->setVertexColor ( iniLimit, finLimit, MeshDef::Color ( 1.0, 0.0, 0.0, 1.0 ));
+
+
+    if ( spineMeshRend != NULL )
+    {
+        delete spineMeshRend;
+    }
+
+    spineMeshRend = new MeshRenderer ( );
+
+    spineMeshRend->setMeshToRender ( meshSpines );
+
+    spineMeshRend->setRenderOptions ( renderMask );
+
+    updateGL();
+}
+
+SpinesSWC* NeuroGeneratorWidgetViewer::fusionAllSpines(vector<SpinesSWC *> &spineMeshes) {
+  QThreadPool pool;
+  std::queue<QFuture<SpinesSWC *>> futures;
+  for (int i = 1; i < spineMeshes.size(); i += 2) {
+    QFuture<SpinesSWC *> future = QtConcurrent::run(&pool, [=]() {
+        return fusionSpines(spineMeshes[i - 1], spineMeshes[i]);
+    });
+
+    futures.push(future);
+  }
+
+  if (spineMeshes.size() % 2 == 1) {
+    auto future = QtConcurrent::run(&pool, [=]() { return spineMeshes[spineMeshes.size() - 1]; });
+    futures.push(future);
+  }
+
+  while (futures.size() > 1) {
+    auto mesh1 = futures.front().result();
+    futures.pop();
+    auto mesh2 = futures.front().result();
+    futures.pop();
+    auto future = QtConcurrent::run(&pool, [=]() { return fusionSpines(mesh1, mesh2); });
+    futures.push(future);
+  }
+  return futures.front().result();
+}
+
+SpinesSWC* NeuroGeneratorWidgetViewer::fusionSpines(SpinesSWC* mesh1, SpinesSWC* mesh2) {
+    mesh1->JoinBaseMesh(mesh2);
+    mesh1->updateBaseMesh();
+    return mesh1;
+}
+
+void
+NeuroGeneratorWidgetViewer::generateSpinesASC(std::vector<Spine>& spines,unsigned int pHorResol, unsigned int pVerResol,
+                                              float pMinLongSpine, float pMaxLongSpine, float pMinRadio,
+                                              float pMaxRadio) {
+    unsigned int lNumMeshes = mSpinesSynthContainers.getContainer ( ).size ( );
+    unsigned int lTotalNumSpines = 0;
+    float lDendriticModificator = 0;
+    float lNumGroupsOfSpines = 0;
+    BaseMesh *tmpMesh = NULL;
+
+    if ( mesh == NULL )
+        return;
+
+    if ( meshSpines != NULL )
+    {
+        delete meshSpines;
+        meshSpines = nullptr;
+    }
+
+    if ( spineMeshRend != NULL )
+    {
+        delete spineMeshRend;
+    }
+
+    spineMeshRend = new MeshRenderer ( );
+
+    if ( lNumMeshes != 0 )
+    {
+        for ( int i = 0; i < lNumMeshes; ++i )
+        {
+            delete mSpinesSynthContainers.getElementAt ( i );
+        }
+
+        mSpinesSynthContainers.getContainer ( ).clear ( );
+    }
+
+    meshSpines =
+            new SpinesSWC (mesh, static_cast<unsigned int>(spines.size()), pHorResol, pVerResol, pMinLongSpine, pMaxLongSpine, pMinRadio, pMaxRadio );
+
+    meshSpines->setSpinesContainer ( &mSpinesModelsContainers );
+
+    meshSpines->distributeSpines (spines);
+
+    int i = 0;
+
+    mSpinesSynthContainers.addElement ( new BaseMesh ( ));
+    mSpinesSynthContainers.getElementAt ( i )->JoinBaseMesh ( meshSpines );
+
+
+    MeshDef::ConstVertexIter iniLimit = mSpinesSynthContainers.getElementAt ( i )->getMesh ( )->vertices_begin ( );
+    MeshDef::ConstVertexIter finLimit = mSpinesSynthContainers.getElementAt ( i )->getMesh ( )->vertices_end ( );
+
+    mSpinesSynthContainers.getElementAt ( i )->setVertexColor ( iniLimit, finLimit, MeshDef::Color ( 0.6, 0.0, 0.0, 1.0 )
+    );
+
+    mLastSpinesInfo.clear ( );
+    mLastSpinesInfo = meshSpines->getSpinesInfo ( );
+    mNumVertesSpineIndexation = meshSpines->getNumVerticesEnSpina ( );
+
+    delete meshSpines;
+    meshSpines = NULL;
+
+    if ( spineMeshRend != NULL )
+    {
+        delete spineMeshRend;
+    }
+
+    spineMeshRend = new MeshRenderer ( );
+
+    spineMeshRend->setMeshToRender ( mSpinesSynthContainers.getElementAt ( 0 ));
+
+    spineMeshRend->setRenderOptions ( renderMask );
+
+    boost::numeric::ublas::matrix<float> translationMatrix (4,4);
+    auto displacement = mSWCImporter->getDisplacement();
+    generateSquareTraslationMatrix(translationMatrix,-displacement[0],-displacement[1],-displacement[2]);
+    spineMeshRend->getBaseMesh()->applyMatrixTransform(translationMatrix,4);
+
+    updateGL ( );
+}
+
+
+
+
+
 
 

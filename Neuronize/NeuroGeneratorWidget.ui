@@ -441,6 +441,26 @@
            </widget>
           </item>
           <item>
+           <widget class="QRadioButton" name="radioButton_RealAscPos">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Real Positions of ASC file</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="radioButton_VrmlSpines">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Real Spines in VRML</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QRadioButton" name="radioButton_AdvanceSpinesCtrl_LoadPositionsFromFile">
             <property name="enabled">
              <bool>false</bool>
@@ -577,7 +597,7 @@
              <bool>false</bool>
             </property>
             <property name="autoExclusive">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -836,8 +856,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>298</width>
-               <height>260</height>
+               <width>335</width>
+               <height>303</height>
               </rect>
              </property>
              <layout class="QFormLayout" name="formLayout_8">
@@ -1023,8 +1043,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>221</width>
-            <height>570</height>
+            <width>246</width>
+            <height>631</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_12">

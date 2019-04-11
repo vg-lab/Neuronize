@@ -29,6 +29,8 @@
  */
 
 //#include <defs.h>
+#include <neuroutils/api.h>
+
 #include <string>
 #include <map>
 #include <vector>
@@ -36,7 +38,7 @@
 
 #include <OpenMesh/Core/Mesh/PolyMesh_ArrayKernelT.hh>
 
-#include "MathUtils.h"
+#include <libs/libSysNeuroUtils/MathUtils.h>
 //#include "defs.h"
 
 using namespace std;
@@ -98,7 +100,7 @@ namespace NSSWCImporter
 
   };
 
-  class SWCImporter
+  class NEUROUTILS_API SWCImporter
   {
       int mSomaNodesDiscarded;
 
@@ -135,6 +137,8 @@ namespace NSSWCImporter
       //branches of the neuron
       std::vector <SWCBranch> mBranches;
 
+      OpenMesh::Vec3f displacement;
+
       //Load the file
       void loadFile ( string fileName, bool pApplyStdDims, bool pApplyReplicantNodeTest );
 
@@ -160,6 +164,12 @@ namespace NSSWCImporter
 
       void calcDendritics ( );
 
+      void restructIdentifiers ( );
+
+      const SWCConnection* findBifurcations(int id);
+
+      double computeAngle(OpenMesh::Vec3f v1 , OpenMesh::Vec3f v2);
+
       bool isIdInContainer ( SWCNode pId, const std::vector <SWCNode> &pVector );
 
     public:
@@ -182,6 +192,8 @@ namespace NSSWCImporter
 
       //Get number of nodes
       unsigned int getNumNodes ( ) const;
+
+      OpenMesh::Vec3f getDisplacement() const;
 
       //Get number of connection
       unsigned int getNumConnection ( );

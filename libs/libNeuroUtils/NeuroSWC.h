@@ -21,6 +21,8 @@
 #ifndef _NEUROSWC_H_
 #define _NEUROSWC_H_
 
+#include <neuroutils/api.h>
+
 #include <string>
 #include <vector>
 #include <iosfwd>
@@ -34,7 +36,7 @@
 #include "SWCImporter.h"
 #include "BaseMesh.h"
 #include "BaseMeshContainer.h"
-#include "MathUtils.h"
+#include <libs/libSysNeuroUtils/MathUtils.h>
 
 using namespace std;
 using namespace NSBaseMesh;
@@ -43,7 +45,7 @@ using namespace NSBaseMeshContainer;
 
 namespace NSNeuroSWC
 {
-  class NeuroSWC: public BaseMesh
+  class NEUROUTILS_API NeuroSWC: public BaseMesh
   {
     protected:
 

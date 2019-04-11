@@ -18,6 +18,7 @@
  *
  */
 
+
 #include "defs.h"
 
 /**	
@@ -63,7 +64,7 @@ bool SonIguales ( REAL a, REAL b )
  */
 bool EsCero ( REAL a, REAL TOL )
 {
-  return SonIguales ( a, 0., TOL, PRECISION );
+  return SonIguales ( a, 0.f, TOL, PRECISION );
 }
 
 /**	

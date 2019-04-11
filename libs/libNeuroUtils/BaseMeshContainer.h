@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <neuroutils/api.h>
+
 #include "BaseMesh.h"
 #include <string>
 
@@ -28,7 +30,7 @@ using namespace NSBaseMesh;
 
 namespace NSBaseMeshContainer
 {
-  class BaseMeshContainer
+  class NEUROUTILS_API BaseMeshContainer
   {
     private:
 

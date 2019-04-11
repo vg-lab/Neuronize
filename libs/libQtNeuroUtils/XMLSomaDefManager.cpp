@@ -127,6 +127,7 @@ void XMLSomaDefManager::generateXMLContent ( QString pSWCFile,
 
   for ( unsigned int i = 0; i < pNumDendritics; ++i )
   {
+
     lXMLDendriticModif.mDenType = "BAS";
     lXMLDendriticModif.mId = i;
     lXMLDendriticModif.mGeodeVertexDistanceFile = pDefaultGeodesicFileName + QString::number ( i ) + ".dat";

@@ -50,6 +50,13 @@
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="pushButton_SphericalSoma">
+         <property name="text">
+          <string>Use Spherical soma</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="pushButton_FinalizeSoma">
          <property name="text">
           <string>Next step</string>
@@ -270,8 +277,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>229</width>
-            <height>922</height>
+            <width>256</width>
+            <height>1027</height>
            </rect>
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -353,6 +360,9 @@
                    <property name="text">
                     <string>Modelled Soma</string>
                    </property>
+                   <property name="checked">
+                    <bool>false</bool>
+                   </property>
                   </widget>
                  </item>
                  <item row="2" column="0" colspan="2">
@@ -364,7 +374,7 @@
                     <string>Procedural Soma</string>
                    </property>
                    <property name="checked">
-                    <bool>true</bool>
+                    <bool>false</bool>
                    </property>
                   </widget>
                  </item>
@@ -408,7 +418,7 @@
                     <string>XMLSoma</string>
                    </property>
                    <property name="checked">
-                    <bool>false</bool>
+                    <bool>true</bool>
                    </property>
                   </widget>
                  </item>

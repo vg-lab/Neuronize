@@ -26,7 +26,7 @@
 
 #include "ui_batchbuilder.h"
 
-class BatchBuilder: public QWidget
+class  BatchBuilder: public QWidget
 {
   Q_OBJECT
 

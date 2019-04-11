@@ -23,6 +23,8 @@
 #include "DeformableObject.h"
 #include "MSSpringConstraint.h"
 
+#include <neuroutils/api.h>
+
 #include <vector>
 #include <list>
 
@@ -30,7 +32,7 @@ using namespace std;
 
 namespace NSMSObject
 {
-  class MSObject: public NSDeformableObject::DeformableObject
+  class NEUROUTILS_API MSObject: public NSDeformableObject::DeformableObject
   {
     private:
 

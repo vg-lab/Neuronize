@@ -1,34 +1,86 @@
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
-endif(NOT CMAKE_BUILD_TYPE)
+source_group(\\ FILES CMakeLists.txt)
 
-mark_as_advanced(CMAKE_BUILD_TYPE)
+set (NEUROUTILS_SOURCES
+		AABB.cpp
+		ASC2SWC.cpp
+		BaseMesh.cpp
+		BaseMeshContainer.cpp
+		BSphere.cpp
+		DeformableObject.cpp
+		LecturaFichero.cpp
+		MSNode.cpp
+		MSObject.cpp
+		MSSpring.cpp
+		MSSpringConstraint.cpp
+		NeuroLevelVizNode.cpp
+		NeuroLevelVizTable.cpp
+		NeuronGraph.cpp
+		NeuronGraphOptimizer.cpp
+		NeuroSWC.cpp
+		ProceduralMesh.cpp
+		SpinesSWC.cpp
+		SWCImporter.cpp
+		SWCSpinesDistributor.cpp
+		AS2SWCV2.cpp
+		MeshVCG.cpp
+		)
 
-#Boost
-find_package (Boost)
+set(NEUROUTILS_HEADERS
+		AABB.h
+		ASC2SWC.h
+		BaseMesh.h
+		BaseMeshContainer.h
+		BSphere.h
+		CriterionsEvaluators.hpp
+		DeformableObject.h
+		glmSpline.hpp
+		imppsimpl.h
+		LecturaFichero.h
+		MeshDef.hpp
+		MSNode.h
+		MSObject.h
+		MSSpring.h
+		MSSpringConstraint.h
+		NeuroLevelVizNode.h
+		NeuroLevelVizTable.h
+		NeuronGraph.h
+		NeuronGraphOptimizer.h
+		NeuroSWC.h
+		NodoParseado.h
+		ProceduralMesh.h
+		psimpl.h
+		SpinesSWC.h
+		Subdivider.hpp
+		SWCImporter.h
+		SWCSpinesDistributor.h
+		ASC2SWC.h
+		MeshVCG.h
+		)
 
-#Code and headers
-file (GLOB NeuroUtils_src "*.cpp")
-file (GLOB NeuroUtils_h "*.h")
-											
-include_directories (${PROJECT_SOURCE_DIR})
-include_directories (${PROJECT_BINARY_DIR})
+set(NEUROUTILS_LINK_LIBRARIES
+		SysNeuroUtils
+		Qt5::OpenGL
+		${OPENGL_gl_LIBRARY}
+		${Boost_LIBRARIES}
+		${OPENMESH_LIBRARIES}
+		Qt5::Core
+		${SOIL_LIBRARIES}
+		)
 
-INCLUDE_DIRECTORIES ( ${Boost_INCLUDE_DIRS} )
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR}/src)
 
-include_directories(
-					${CMAKE_CURRENT_BINARY_DIR}
-					${CMAKE_CURRENT_SOURCE_DIR}
-					)
+add_definitions("-w")
 
-include_directories(../libSysNeuroUtils)
+if (MSVC)
+	add_definitions("/W4")
+	# Static build
+	# add_definitions(-DLIBNEUROUTILS_STATIC)
+	add_definitions(-D_USE_MATH_DEFINES)
+endif ()
 
-#Construccion de la librería
-add_library (NeuroUtils SHARED 
-            ${NeuroUtils_src}
-            ${NeuroUtils_h})
 
-target_link_libraries ( NeuroUtils	SysNeuroUtils	${Boost_LIBRARIES} )
+set( NEUROUTILS_INCLUDE_NAME neuroutils )
+set( NEUROUTILS_NAMESPACE neuroutils )
 
-set_target_properties( NeuroUtils
-  PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+common_library(NeuroUtils)

@@ -29,6 +29,8 @@
  * @version 0.1
  */
 
+#include <glneuroutils/api.h>
+
 #include <string>
 #include <iostream>
 
@@ -57,7 +59,7 @@ struct LightConfig
 
 namespace NSLightManager
 {
-  class LightManager
+  class GLNEUROUTILS_API LightManager
   {
       //Parametros de la luz
       LightConfig MaterialLight;

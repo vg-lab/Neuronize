@@ -1,14 +1,16 @@
-/**	Autor: �ngel Luis L�pez Monterroso
+/**	Autor: Angel Luis Lopez Monterroso
 * Clase cabecera ASC2SWC.h
-* Lee un fichero ASC y lo convierte a un SWC compatible y v�lido
-* Uso singletone, s�lo a trav�s de el m�todo p�blico convierteASWC pasando la ruta donde esta el fichero y una coincidencia del fichero ASC
+* Lee un fichero ASC y lo convierte a un SWC compatible y valido
+* Uso singletone, solo a traves de el metodo publico convierteASWC pasando la ruta donde esta el fichero y una coincidencia del fichero ASC
 * Crea un fichero llamado RECONVERTIDO.swc en la misma ruta que el ASC
 */
 #include "LecturaFichero.h"
 #include "NodoParseado.h"
 #include <stack>
+
 #ifndef ASC2SWC_H
 #define ASC2SWC_H
+
 #define APICAL 4
 #define BASAL 3
 #define AXON 2

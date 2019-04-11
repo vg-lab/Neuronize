@@ -28,6 +28,8 @@
 #ifndef SYSTEMUTILS_H_
 #define SYSTEMUTILS_H_
 
+#include <sysneuroutils/api.h>
+
 #include <stdlib.h>
 #include <time.h>
 
@@ -47,16 +49,16 @@ using namespace std;
 /*
  * Return string where replace the first string for the second
  */
-string changeExps ( string cad, string expSearch, string expRepl );
+SYSNEUROUTILS_API string changeExps ( string cad, string expSearch, string expRepl );
 
 /**
  * Return actual time
  */
-string actTime ( );
+SYSNEUROUTILS_API string actTime ( );
 
 /**
  * Write pCad int pFilePath
  */
-void strToFile ( string pCad, string pFilePath );
+SYSNEUROUTILS_API void strToFile ( string pCad, string pFilePath );
 
 #endif /*SYSTEMUTILS_H_*/

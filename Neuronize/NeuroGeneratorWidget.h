@@ -25,9 +25,12 @@
 #include <QFileDialog>
 #include <QDir>
 #include <QMessageBox>
+#include <SkelGeneratorUtil/Neuron.h>
+
 
 #include "ui_NeuroGeneratorWidget.h"
 #include "NeuroGeneratorWidgetViewer.h"
+#include <libs/libNeuroUtils/AS2SWCV2.h>
 
 class NeuroGeneratorWidget: public QWidget, public Ui::NeuroGeneratorWidget
 {
@@ -38,7 +41,16 @@ class NeuroGeneratorWidget: public QWidget, public Ui::NeuroGeneratorWidget
 
     QMessageBox *msgBox;
 
-  public slots:
+    QString mTempDir;
+    skelgenerator::Neuron* neuron;
+    std::vector<Spine> spines;
+public:
+    void setSpines(const vector<Spine> &spines);
+
+public:
+    void setNeuron(skelgenerator::Neuron *neuron);
+
+public slots:
 
     void destroyAllGroupsSpines ( ) { viewer->destroyAllGroupsSpines ( ); }
 
@@ -50,7 +62,7 @@ class NeuroGeneratorWidget: public QWidget, public Ui::NeuroGeneratorWidget
     void loadNeuronDefinitionAndGenerateMesh ( );
 
   public:
-    NeuroGeneratorWidget ( QWidget *parent = 0 );
+    NeuroGeneratorWidget (const QString &tempDir, QWidget *parent = 0 );
 
     ~NeuroGeneratorWidget ( );
 
@@ -62,13 +74,13 @@ class NeuroGeneratorWidget: public QWidget, public Ui::NeuroGeneratorWidget
 
     void loadMorphologyFile ( QString lSWCFile );
 
-    void loadSTDSoma ( );
+    void loadSTDSoma(bool b);
 
     void showDendirtesTab ( );
 
     void showSpinesTab ( );
 
-    void batchSpinesGeneration ( );
+    void batchSpinesGeneration(skelgenerator::Neuron *pNeuron, vector<Spine> vector1);
 
     void exportSpinesInmediatly ( QString fileName );
 

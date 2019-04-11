@@ -29,7 +29,9 @@
 #include "ui_SomaDeformerWidget.h"
 
 #include "SomaDeformerWidgetViewer.h"
-#include <SystemUtils.h>
+#include "SomaCreatorWidget.h"
+#include <libs/libSysNeuroUtils/SystemUtils.h>
+
 
 class SomaDeformerWidget: public QWidget, public Ui::SomaDeformerWidget
 {
@@ -39,12 +41,14 @@ class SomaDeformerWidget: public QWidget, public Ui::SomaDeformerWidget
     unsigned int mMiSecsSimulation;
 
   public:
-    SomaDeformerWidget ( QWidget *parent = 0 );
+    SomaDeformerWidget (const QString &tempDir, QWidget *parent = 0);
     ~SomaDeformerWidget ( );
 
     void deformDuringNSteps ( int pSteps );
     void finalSomaOptimization ( );
     void stopDeformation ( );
+    void setModeledSoma(std::string path);
+    void setSWCFile (std::string path);
 
     //const
     SomaDeformerWidgetViewer *getViewer ( ) { return viewer; }
@@ -57,9 +61,16 @@ class SomaDeformerWidget: public QWidget, public Ui::SomaDeformerWidget
 
     Ui::SomaDeformerWidget ui;
 
+    SomaCreatorWidget* somaCreator;
+public:
+    void setSomaCreator(SomaCreatorWidget *somaCreator);
+
+private:
+
     SomaDeformerWidgetViewer *viewer;
 
     QString mXMLFile;
+    QString mtmpDir;
 
   public slots:
     void startDeformation ( );
@@ -71,6 +82,7 @@ class SomaDeformerWidget: public QWidget, public Ui::SomaDeformerWidget
     void loadPredefinedXMLSomaDefAndSimulate ( );
 
     void finalizeSoma ( );
+    
 
   private slots:
 
@@ -81,6 +93,7 @@ class SomaDeformerWidget: public QWidget, public Ui::SomaDeformerWidget
 
     void generateSoma ( );
     void singleStepDeformation ( );
+    void useSphericalSoma ();
 
     void setAnimationPeriod ( );
 

@@ -16,8 +16,8 @@ LecturaFichero::LecturaFichero ( string directorioActual )
   {
     directorioInicial = directorioActual;
   }
-  dp = opendir ( directorioInicial.c_str ( ));
-  if ( dp != NULL )
+  dp = boost::filesystem::path ( directorioInicial.c_str ( ));
+  if ( boost::filesystem::exists(dp) )
   {
     existeDirectorio = true;
   }
@@ -30,14 +30,47 @@ LecturaFichero::~LecturaFichero ( )
 
 bool LecturaFichero::buscaFichero ( string coincidencia, bool buscaDirectorios, string rutaActual )
 {
-  DIR *dirTemp;
+  boost::filesystem::path dirTemp;
   bool retornado = false;
   ficheroAbierto = false;
   string miCoincidencia = coincidencia;
   transform ( miCoincidencia.begin ( ), miCoincidencia.end ( ), miCoincidencia.begin ( ), ::tolower );
   if ( existeDirectorioInicial ( ))
   {
-    while (( dirp = readdir ( dp )) && !ficheroAbierto )
+      if (buscaDirectorios) {
+          boost::filesystem::recursive_directory_iterator it (dp);
+          while (it != boost::filesystem::recursive_directory_iterator() && !ficheroAbierto) {
+              string rutaOriginal = directorioInicial + "/" + (*it).path().filename().string();
+              ruta = rutaOriginal;
+              transform ( ruta.begin ( ), ruta.end ( ), ruta.begin ( ), ::tolower );
+              size_t encontrado;
+              encontrado = ruta.find ( coincidencia );
+              if ( encontrado != string::npos )
+              {
+                  fichero.open ( rutaOriginal.c_str ( ));
+                  nombreFichero = ruta; //TODO - TO-DO ESTO ESTA MAL
+                  ficheroAbierto = retornado = true;
+              }
+          }
+      } else {
+          boost::filesystem::directory_iterator it (dp);
+          while (it != boost::filesystem::directory_iterator() && !ficheroAbierto) {
+              string rutaOriginal = directorioInicial + "/" + (*it).path().filename().string();
+              ruta = rutaOriginal;
+              transform ( ruta.begin ( ), ruta.end ( ), ruta.begin ( ), ::tolower );
+              size_t encontrado;
+              encontrado = ruta.find ( coincidencia );
+              if ( encontrado != string::npos )
+              {
+                  fichero.open ( rutaOriginal.c_str ( ));
+                  nombreFichero = ruta; //TODO - TO-DO ESTO ESTA MAL
+                  ficheroAbierto = retornado = true;
+              }
+          }
+      }
+      return retornado;
+  }
+    /*while (( dirp = readdir ( dp )) && !ficheroAbierto )
     {
       string rutaOriginal = directorioInicial + "/" + dirp->d_name;
       ruta = rutaOriginal;
@@ -61,7 +94,7 @@ bool LecturaFichero::buscaFichero ( string coincidencia, bool buscaDirectorios, 
       }
     }
   }
-  return retornado;
+  return retornado; */
 }
 
 string LecturaFichero::siguienteLinea ( )

@@ -21,6 +21,8 @@
 #ifndef _BASE_MESH_H_
 #define _BASE_MESH_H_
 
+#include <neuroutils/api.h>
+
 #include <string>
 #include <vector>
 #include <iosfwd>
@@ -30,8 +32,8 @@
 
 #include "MeshDef.hpp"
 
-#include "randomUtils.h"
-#include "MathUtils.h"
+#include <libs/libSysNeuroUtils/randomUtils.h>
+#include <libs/libSysNeuroUtils/MathUtils.h>
 
 #include <OpenMesh/Tools/Subdivider/Uniform/SubdividerT.hh>
 
@@ -70,7 +72,7 @@ namespace NSBaseMesh
     SOP_Undefined
   };
 
-  class BaseMesh
+  class NEUROUTILS_API BaseMesh
   {
     protected:
       //Mesh to store data
@@ -144,7 +146,7 @@ namespace NSBaseMesh
       ~BaseMesh ( );
 
       // Get the mesh to render.
-      const MeshDef *getMesh ( ) const;
+       const MeshDef *getMesh ( ) const;
 
       MeshDef *getUnprotectedMesh ( );
 
@@ -189,9 +191,9 @@ namespace NSBaseMesh
       // Set all streams at once.  Convienience function, can be set to NULL to disable messages.
       void setStreams ( std::ostream *o );
 
-      unsigned int getNumVertex ( );
+       unsigned int getNumVertex ( );
 
-      unsigned int getNumFaces ( );
+       unsigned int getNumFaces ( );
 
       unsigned int calcNumVertex ( );
 
@@ -205,19 +207,19 @@ namespace NSBaseMesh
 
       uint calcNumQuads ( );
 
-      uint getNumTri ( );
+       uint getNumTri ( );
 
-      uint getNumQuads ( );
+       uint getNumQuads ( );
 
-      void calcTriIndices ( );
+       void calcTriIndices ( );
 
-      void calcQuadIndices ( );
+       void calcQuadIndices ( );
 
       void calcVertexIterators ( );
 
-      std::vector < unsigned > getTriIndices ( );
+       std::vector < unsigned > getTriIndices ( );
 
-      std::vector < unsigned > getQuadIndices ( );
+       std::vector < unsigned > getQuadIndices ( );
 
       void prepareGeometry ( );
 
@@ -225,13 +227,13 @@ namespace NSBaseMesh
       void calcByteDistances ( );
 
       // Distance between sequential vertex points in memory
-      int getVertexPointDistance ( );
+       int getVertexPointDistance ( );
 
       // Distance between sequential vertex colors in memory
-      int getVertexColorDistance ( );
+       int getVertexColorDistance ( );
 
       // Distance between sequential vertex normals in memory
-      int getVertexNormalDistance ( );
+       int getVertexNormalDistance ( );
 
       // Distance between sequential vertex texture coordinates in memory
       int getVertexTexCoordDistance ( );

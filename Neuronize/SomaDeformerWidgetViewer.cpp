@@ -21,6 +21,7 @@
 #include <QMouseEvent>
 #include <math.h>
 #include <limits.h>
+#include <libs/libNeuroUtils/MeshVCG.h>
 #include "SomaDeformerWidgetViewer.h"
 
 #define INCSCALE 0.0
@@ -344,6 +345,7 @@ void SomaDeformerWidgetViewer::removeIdFromSelection ( int id )
 
 void SomaDeformerWidgetViewer::generateSomaModel ( unsigned int pModelId, float pScaleFactor )
 {
+
   if ( mBaseMesh == NULL )
   {
     mBaseMesh = new ProceduralMesh ( );
@@ -706,10 +708,11 @@ QString SomaDeformerWidgetViewer::configurationToString ( )
   result += "\n--------------------------------";
   result += "\nPendiente aun.";
   //result+="\nSWCPathFile: " + mXMLSomaDefManager->getXMLDomDocument().	mSWCPathFile;
-
-  result += "\n\nParams associated with SWCImporter";
-  result += "\n--------------------------------";
-  result += "\nSWCNumDendritics: " + QString::number ( mSWCImporter->getNumDendritics ( ));
+  if (mSWCImporter != NULL) {
+    result += "\n\nParams associated with SWCImporter";
+    result += "\n--------------------------------";
+    result += "\nSWCNumDendritics: " + QString::number(mSWCImporter->getNumDendritics());
+  }
 
   return result;
 }
@@ -991,7 +994,7 @@ void SomaDeformerWidgetViewer::setSWCDendriticConstraints ( )
         unsigned int nextContourVertexId = 0;
 
         //Atacamos cada vertice adyacente.
-        for ( CVVIter = mBaseMesh->getMesh ( )->cvv_iter ( vhandle ); CVVIter->is_valid ( ); ++CVVIter )
+        for ( CVVIter = mBaseMesh->getMesh ( )->cvv_iter ( vhandle ); CVVIter; ++CVVIter )
         {
           lAuxVertexHandle = mBaseMesh->getMesh ( )->vertex_handle ( CVVIter->idx ( ));
           nextContourVertexId = CVVIter->idx ( );
@@ -1173,7 +1176,8 @@ void SomaDeformerWidgetViewer::setNodesInCustomSphere ( )
 void SomaDeformerWidgetViewer::optimizateDendriticBase ( )
 {
   setVertexIdsforDendritics ( );
-  optimizateDendriticTesellation ( );
+  optimizateDendriticTesellation ();
+  //optimizateDendriticTesellation2 ( );
   optimizateDendriticRadius ( );
 
 }
@@ -1292,7 +1296,7 @@ void SomaDeformerWidgetViewer::optimizateDendriticRadius ( )
 
       MeshDef::ConstVertexVertexIter CVVIter;
 
-      for ( CVVIter = mBaseMesh->getMesh ( )->cvv_iter ( vhandle ); CVVIter->is_valid ( ); ++CVVIter )
+      for ( CVVIter = mBaseMesh->getMesh ( )->cvv_iter ( vhandle ); CVVIter; ++CVVIter )
       {
         ltmpVetexId = mBaseMesh->getMesh ( )->vertex_handle ( CVVIter->idx ( )).idx ( );
 
@@ -1404,7 +1408,7 @@ void SomaDeformerWidgetViewer::optimizateDendriticTesellation ( )
         //recorremos el contorno del vertice actual
         vhandle = mBaseMesh->getMesh ( )->vertex_handle ( lIdVertex );
 
-        for ( CVVIter = mBaseMesh->getMesh ( )->cvv_iter ( vhandle ); CVVIter->is_valid ( ); ++CVVIter )
+        for ( CVVIter = mBaseMesh->getMesh ( )->cvv_iter ( vhandle ); CVVIter; ++CVVIter )
         {
           ltmpVetexId = mBaseMesh->getMesh ( )->vertex_handle ( CVVIter->idx ( )).idx ( );
 
@@ -1449,7 +1453,7 @@ void SomaDeformerWidgetViewer::optimizateDendriticTesellation ( )
         //recorremos el controno del vertice actual
         vhandle = mBaseMesh->getMesh ( )->vertex_handle ( lIdsCentralVertex.at ( k ));
 
-        for ( CVFIter = mBaseMesh->getMesh ( )->cvf_iter ( vhandle ); CVFIter->is_valid ( ); ++CVFIter )
+        for ( CVFIter = mBaseMesh->getMesh ( )->cvf_iter ( vhandle ); CVFIter; ++CVFIter )
         {
           lAuxFaceHandle = mBaseMesh->getMesh ( )->face_handle ( CVFIter->idx ( ));
 
@@ -1483,7 +1487,7 @@ void SomaDeformerWidgetViewer::optimizateDendriticTesellation ( )
       {
         vhandle = mBaseMesh->getMesh ( )->vertex_handle ( lIdsContourVertex.at ( k ));
 
-        for ( CVVIter = mBaseMesh->getMesh ( )->cvv_iter ( vhandle ); CVVIter->is_valid ( ); ++CVVIter )
+        for ( CVVIter = mBaseMesh->getMesh ( )->cvv_iter ( vhandle ); CVVIter; ++CVVIter )
         {
           ltmpVetexId = mBaseMesh->getMesh ( )->vertex_handle ( CVVIter->idx ( )).idx ( );
 
@@ -1513,4 +1517,215 @@ void SomaDeformerWidgetViewer::optimizateDendriticTesellation ( )
   }
 }
 
+void SomaDeformerWidgetViewer::addSomaModel(string path) {
+    auto auxBaseMesh = new BaseMesh ( path );
+    mSomaModelsContainers.addElement ( auxBaseMesh );
+    mNormalizeModel = true;
+}
 
+void SomaDeformerWidgetViewer::optimizateDendriticTesellation2 ( ) {
+  startDeformation ( false );
+  unsigned int lSomaId = 1;
+
+  if ( mSWCImporter != NULL )
+  {
+    unsigned int lNumDendritics = mSWCImporter->getNumDendritics ( );
+    unsigned int idAux = 0;
+
+    SWCNode nodeAux;
+
+    MeshDef::Point lTmpVertex ( 0, 0, 0 );
+    OpenMesh::Vec3f lNodePos ( 0, 0, 0 );
+
+    std::vector < unsigned int > lIdsCentralVertex;
+    std::vector < unsigned int > lIdsContourVertex;
+    std::vector < unsigned int > lIdsTotalVertex;
+
+    std::vector < unsigned int > lIdsTotalFacesToDel;
+    mVertexIdToDel.clear ( );
+
+    for ( int i = 0; i < ( lNumDendritics ); ++i )
+    {
+      //Seleccionamos los datos que tenemos en la dendrita actual
+      idAux = mSWCImporter->getDendritics ( )[i].initialNode;
+      nodeAux = mSWCImporter->getElementAt ( idAux );
+
+      //Seleccionamos todos los datos relativos al a dendrita actual en la definicion XML
+      XMLSomaDefDendriticModif lXMLDendriticModif = mXMLSomaDefManager->getXMLSomaDef ( )->dendriticContainer.at ( i );
+
+      //Nos quedamos con la posici�n del primer nodo de la dendrita
+      lNodePos = nodeAux.position;
+
+      //Seleccionamos el primer v�rtice del grupo de candidatos
+      unsigned int lIdVertex = lXMLDendriticModif.mGeoVertexIdsCand.at ( 0 );
+
+      //Ahora compararemos con la malla directamente
+      lTmpVertex = mBaseMesh->getMesh ( )->points ( )[lIdVertex];
+
+      //lQtVecActSomaId = mFrameSelectors.at(0).position();
+
+      unsigned int lNearestIdVertexSelected = lIdVertex;
+      float lLenght = ( lTmpVertex - lNodePos ).length ( );
+      float lActLenght = lLenght;
+
+      unsigned int lNumVertexIds = lXMLDendriticModif.mGeoVertexIdsCand.size ( );
+
+      for ( unsigned int j = 0; j < lNumVertexIds; ++j )
+      {
+        lIdVertex = lXMLDendriticModif.mGeoVertexIdsCand.at ( j );
+
+        //Cargamos el contenedor del total de vertices mientras lo recorremos
+        lIdsTotalVertex.push_back ( lIdVertex );
+
+        //Ahora compararemos con la malla directamente
+        lTmpVertex = mBaseMesh->getMesh ( )->points ( )[lIdVertex];
+
+        lActLenght = ( lTmpVertex - lNodePos ).length ( );
+
+        if (( lActLenght < lLenght )
+                )
+        {
+          lNearestIdVertexSelected = lIdVertex;
+          lLenght = lActLenght;
+        }
+      }
+      //Limpiamos los contenedores
+      lIdsContourVertex.clear ( );
+      lIdsCentralVertex.clear ( );
+
+      bool lCentralVertex = true;
+      unsigned int ltmpVetexId = 0;
+      MeshDef::ConstVertexVertexIter CVVIter;
+      MeshDef::VertexHandle vhandle;
+
+      for ( unsigned int j = 0; j < lNumVertexIds; ++j )
+      {
+        lIdVertex = lXMLDendriticModif.mGeoVertexIdsCand.at ( j );
+        lCentralVertex = true;
+
+        //recorremos el contorno del vertice actual
+        vhandle = mBaseMesh->getMesh ( )->vertex_handle ( lIdVertex );
+
+        for ( CVVIter = mBaseMesh->getMesh ( )->cvv_iter ( vhandle ); CVVIter; ++CVVIter )
+        {
+          ltmpVetexId = mBaseMesh->getMesh ( )->vertex_handle ( CVVIter->idx ( )).idx ( );
+
+          if (
+                  ( !isIdInContainer ( ltmpVetexId, mVertexIdsByDendritic.at ( i )))
+                  )
+          {
+            lCentralVertex = false;
+          }
+        }
+
+        if ( lCentralVertex )
+          lIdsCentralVertex.push_back ( lIdVertex );
+        else
+          lIdsContourVertex.push_back ( lIdVertex );
+
+      }
+
+      //Marcamos todos los vertices centrales excepto el seleccionado como pivote para eliminarlos
+      //en la exportacion
+      for ( unsigned int k = 0; k < lIdsCentralVertex.size ( ); ++k )
+      {
+        if ( lIdsCentralVertex.at ( k ) != lNearestIdVertexSelected )
+        {
+          mVertexIdToDel.push_back ( lIdsCentralVertex.at ( k ));
+        }
+      }
+
+      //Borramos los triangulos adyacentes a los centrales
+      MeshDef::ConstVertexFaceIter CVFIter;
+      MeshDef::FaceHandle lAuxFaceHandle;
+
+      lIdsTotalFacesToDel.clear ( );
+
+      std::vector < MeshDef::FaceHandle > vecFaceHoleHandle;
+      vecFaceHoleHandle.clear ( );
+
+      //Seleccionamos todas las facetas a borrar
+      // ->adyacentes a cada vertice central
+      for ( unsigned k = 0; k < lIdsCentralVertex.size ( ); ++k )
+      {
+        //recorremos el controno del vertice actual
+        vhandle = mBaseMesh->getMesh ( )->vertex_handle ( lIdsCentralVertex.at ( k ));
+
+        for ( CVFIter = mBaseMesh->getMesh ( )->cvf_iter ( vhandle ); CVFIter; ++CVFIter )
+        {
+          lAuxFaceHandle = mBaseMesh->getMesh ( )->face_handle ( CVFIter->idx ( ));
+
+          if ( !isIdInContainer ( lAuxFaceHandle.idx ( ), lIdsTotalFacesToDel ) )
+          {
+            lIdsTotalFacesToDel.push_back ( lAuxFaceHandle.idx ( ));
+            vecFaceHoleHandle.push_back ( lAuxFaceHandle );
+          }
+        }
+      }
+
+      for ( unsigned int k = 0; k < vecFaceHoleHandle.size ( ); ++k )
+      {
+        mBaseMesh->getUnprotectedMesh ( )->delete_face ( vecFaceHoleHandle.at ( k ), false );
+      }
+
+      //Free the memory of deleted objects
+      mBaseMesh->getUnprotectedMesh ( )->garbage_collection ( );
+      mBaseMesh->updateBaseMesh ( );
+
+
+      //TODO cerrar agujeros
+      OpenMesh::Vec3f center(0,0,0);
+      for (size_t j = 0; j < lIdsContourVertex.size();j++) {
+          auto vh = mBaseMesh->getMesh()->vertex_handle(lIdsContourVertex[j]);
+          auto v = mBaseMesh->getMesh()->point(vh);
+          center += v ;
+      }
+      center /= lIdsContourVertex.size();
+      mBaseMesh->getUnprotectedMesh()->set_point( mBaseMesh->getMesh()->vertex_handle(lNearestIdVertexSelected),center);
+
+      std::vector < MeshDef::VertexHandle > glb_tubeFace_VHandles;
+
+        unsigned int lIdVertexA = lIdsContourVertex.at ( 0 );
+        unsigned int lIdVertexB = 0;
+
+        std::vector < unsigned int > lUserVertex;
+        lUserVertex.clear ( );
+
+        lUserVertex.push_back ( lIdVertexA );
+        for ( unsigned int k = 0; k < lIdsContourVertex.size ( ); ++k )
+        {
+            vhandle = mBaseMesh->getMesh ( )->vertex_handle ( lIdsContourVertex.at ( k ));
+
+            for ( CVVIter = mBaseMesh->getMesh ( )->cvv_iter ( vhandle ); CVVIter; ++CVVIter )
+            {
+                ltmpVetexId = mBaseMesh->getMesh ( )->vertex_handle ( CVVIter->idx ( )).idx ( );
+
+                //Si el actual forma parte del contorno y no ha sido usado
+                if (
+                        ( isIdInContainer ( ltmpVetexId, lIdsContourVertex ))
+                        )
+                {
+                    lIdVertexA = vhandle.idx ( );
+                    lIdVertexB = ltmpVetexId;
+
+                    glb_tubeFace_VHandles.clear ( );
+
+                    glb_tubeFace_VHandles.push_back ( mBaseMesh->getMesh ( )->vertex_handle ( lNearestIdVertexSelected ));
+                    glb_tubeFace_VHandles.push_back ( mBaseMesh->getMesh ( )->vertex_handle ( lIdVertexA ));
+                    glb_tubeFace_VHandles.push_back ( mBaseMesh->getMesh ( )->vertex_handle ( lIdVertexB ));
+
+                    mBaseMesh->getUnprotectedMesh ( )->add_face ( glb_tubeFace_VHandles );
+
+                    lUserVertex.push_back ( ltmpVetexId );
+                }
+            }
+        }
+        mBaseMesh->getUnprotectedMesh ( )->garbage_collection ( );
+        mBaseMesh->updateBaseMesh ( );
+    }
+  }
+}
+
+ProceduralMesh *SomaDeformerWidgetViewer::getMBaseMesh() const {
+  return mBaseMesh;
+}

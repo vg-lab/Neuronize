@@ -20,7 +20,7 @@
 
 #include "NeuronGraphOptimizer.h"
 
-#include <randomUtils.h>
+#include <libs/libSysNeuroUtils/randomUtils.h>
 
 //NeuronGraphOptimizer::NeuronGraphOptimizer(const NeuronGraph & pOriginalGraph, NeuronGraph & pOptimizedGraph)
 //	:mOriginalGraph(pOriginalGraph)

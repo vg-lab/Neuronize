@@ -23,7 +23,7 @@
 #include <boost/graph/copy.hpp>
 
 #include <glm/glm.hpp>
-#include <glmSpline.hpp>
+#include "glmSpline.hpp"
 #include "imppsimpl.h"
 
 class NeuronGraphOptimizer

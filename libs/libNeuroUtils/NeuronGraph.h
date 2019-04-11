@@ -26,8 +26,8 @@
 
 //#include <boost/graph/dijkstra_shortest_paths.hpp>
 
-#include <SWCImporter.h>
-#include <glmSpline.hpp>
+#include "SWCImporter.h"
+#include "glmSpline.hpp"
 
 //#include <QVector>
 

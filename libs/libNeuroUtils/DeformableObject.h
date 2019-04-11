@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <neuroutils/api.h>
+
 #include "ProceduralMesh.h"
 #include <string>
 
@@ -29,7 +31,7 @@ using namespace NSProceduralMesh;
 
 namespace NSDeformableObject
 {
-  class DeformableObject
+  class NEUROUTILS_API DeformableObject
   {
     protected:
 

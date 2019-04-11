@@ -25,6 +25,7 @@
 //#include <GL/glut.h>
 
 #include <QMainWindow>
+#include <QTemporaryDir>
 
 #include "ui_neuronize.h"
 
@@ -32,6 +33,7 @@
 #include "SomaDeformerWidget.h"
 #include "NeuroGeneratorWidget.h"
 #include "batchbuilder.h"
+
 
 class Neuronize: public QMainWindow
 {
@@ -42,7 +44,8 @@ class Neuronize: public QMainWindow
     QString mInputFilePath;
     QString mOuputFilePath;
 
-    std::vector < QString > mFilesContainer;
+    std::vector < std::tuple<QString,skelgenerator::Neuron* >> mFilesContainer;
+    QTemporaryDir tempDir;
 
   public:
 
