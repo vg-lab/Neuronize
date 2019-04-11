@@ -95,7 +95,7 @@ void Neuronize::resetNeuronnizeInterface ( )
 
   mNeuroGeneratorWidget = new NeuroGeneratorWidget ( tempDir.path(), this );
   ui.verticalLayout_DendritesGenerator->addWidget ( mNeuroGeneratorWidget );
-  mNeuroGeneratorWidget->loadSpinesModelFromPath ( QDir::currentPath ( ) + "/Content/Spines/Low/" );
+  mNeuroGeneratorWidget->loadSpinesModelFromPath ( QCoreApplication::applicationDirPath() + "/Content/Spines/Low/" );
 
   //mNeuroGeneratorWidget ->getUI().tabWidget_RenderControl->removeTab(1);
 

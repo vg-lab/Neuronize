@@ -56,13 +56,13 @@ SomaCreatorWidget::SomaCreatorWidget (const QString &tempDir, QWidget *parent )
   mDefaultGeoDistFileName = "GeoDistDendrite_";
   mFullPathSWCFileName = mSWCFileName = "";
 
-  //mMehsFileName	= QDir::currentPath() + "/Content/Meshes/IcoSphera3Subdiv1Radio.off";
-  mMehsFileName = QDir::currentPath ( ) + "/Content/Meshes/IcoSphera4Subdiv1Radio.off";
-  //mMehsFileName	= QDir::currentPath() + "/Content/Meshes/IcoSphera5Subdiv1Radio.off";
-  //mMehsFileName	= QDir::currentPath() + "/Content/Meshes/IcoSphera6Subdiv1Radio.off";
+  //mMehsFileName	= QCoreApplication::applicationDirPath() + "/Content/Meshes/IcoSphera3Subdiv1Radio.off";
+  mMehsFileName =    QCoreApplication::applicationDirPath() + "/Content/Meshes/IcoSphera4Subdiv1Radio.off";
+  //mMehsFileName	= QCoreApplication::applicationDirPath() + "/Content/Meshes/IcoSphera5Subdiv1Radio.off";
+  //mMehsFileName	= QCoreApplication::applicationDirPath() + "/Content/Meshes/IcoSphera6Subdiv1Radio.off";
 
-  //mMehsFileName	= QDir::currentPath() + "/Content/Meshes/TETIcoSphera4Subdiv1Radio.off";
-  //mMehsFileName	= QDir::currentPath() + "/Content/Meshes/Icosphere.1.off";
+  //mMehsFileName	= QCoreApplication::applicationDirPath() + "/Content/Meshes/TETIcoSphera4Subdiv1Radio.off";
+  //mMehsFileName	= QCoreApplication::applicationDirPath() + "/Content/Meshes/Icosphere.1.off";
 
   mExitDirectory = tempDir;
 
@@ -578,7 +578,7 @@ void SomaCreatorWidget::generateMatLabScritp()
 
 	//mToolBoxDir = mExitDirectory;
 	//mToolBoxDir = QDir::setCurrent(QCoreApplication::applicationDirPath());
-	mToolBoxDir = QDir::currentPath()+"/MatLab/Geodesic/";
+	mToolBoxDir = QCoreApplication::applicationDirPath()+"/MatLab/Geodesic/";
 	QString lTmpPath="\'" +  mToolBoxDir + "\\toolbox_fast_marching\\\'";
 	lMatLAbScriptFile+= "path(path, " + lTmpPath + ");\n";
 
@@ -728,7 +728,7 @@ void SomaCreatorWidget::generateXMLSoma ( ) {
     lMatLAbScriptFile+="idVertex = 1; \n";
     lMatLAbScriptFile+="nstart = 1; \n";
 
-    mToolBoxDir = QDir::currentPath()+"/Content/MatLab/Geodesic";
+    mToolBoxDir = QCoreApplication::applicationDirPath()+"/Content/MatLab/Geodesic";
     //mToolBoxDir = "E:\\Devel\\MatLab\\Geodesic";
     QString lTmpPath="\'" +  mToolBoxDir + "/toolbox_fast_marching/'";
     lMatLAbScriptFile+= "path(path, " + lTmpPath + ");\n";
@@ -797,7 +797,7 @@ void SomaCreatorWidget::generateXMLSoma ( ) {
     //---calcAndExportNearestVertexToSWCDendritics ( );
 
     //Store current dir (Matlab will change this)
-    fileName = QDir::currentPath();
+    fileName = QCoreApplication::applicationDirPath();
 
 
     //GeoCalcInitialize();
@@ -807,7 +807,7 @@ void SomaCreatorWidget::generateXMLSoma ( ) {
 
 
       //mwArray lPathName("E:\\WorkSpace\\VisualStudio\\CPP\\Produccion\\Puppeteer Engine\\tutorials\\Qt\\XNeuron");
-      QString lPathDoubleBackSlah =  QDir::currentPath();
+      QString lPathDoubleBackSlah =  QCoreApplication::applicationDirPath();
       //lPathDoubleBackSlah.replace("/","\\\\");
 
       //GeoCalcTerminate();
@@ -1026,7 +1026,7 @@ void SomaCreatorWidget::generateXMLSoma ( QString fileName, bool useSoma ) {
         lMatLAbScriptFile += "idVertex = 1; \n";
         lMatLAbScriptFile += "nstart = 1; \n";
 
-        mToolBoxDir = QDir::currentPath() + "/Content/MatLab/Geodesic";
+        mToolBoxDir = QCoreApplication::applicationDirPath() + "/Content/MatLab/Geodesic";
         //mToolBoxDir = "E:\\Devel\\MatLab\\Geodesic";
         QString lTmpPath = "\'" + mToolBoxDir + "/toolbox_fast_marching/'";
         lMatLAbScriptFile += "path(path, " + lTmpPath + ");\n";
@@ -1095,7 +1095,7 @@ void SomaCreatorWidget::generateXMLSoma ( QString fileName, bool useSoma ) {
         //---calcAndExportNearestVertexToSWCDendritics ( );
 
         //Store current dir (Matlab will change this)
-        fileName = QDir::currentPath();
+        fileName = QCoreApplication::applicationDirPath();
 
 
         //GeoCalcInitialize();
@@ -1105,7 +1105,7 @@ void SomaCreatorWidget::generateXMLSoma ( QString fileName, bool useSoma ) {
 
 
         //mwArray lPathName("E:\\WorkSpace\\VisualStudio\\CPP\\Produccion\\Puppeteer Engine\\tutorials\\Qt\\XNeuron");
-        QString lPathDoubleBackSlah = QDir::currentPath();
+        QString lPathDoubleBackSlah = QCoreApplication::applicationDirPath();
         //lPathDoubleBackSlah.replace("/","\\\\");
 
         //GeoCalcTerminate();
