@@ -59,13 +59,21 @@ include_directories(VCG_INCLUDE_DIR)
 
 add_definitions("-w")
 
+if ( APPLE )
+  set( NEURONIZE_ICON neuronize.icns )
+endif()
+
+if ( UNIX AND NOT APPLE )
+  set( NEURONIZE_ICON icons/neuronize.png )
+endif( )
+
+
 if (MSVC)
 	add_definitions("/W4")
 	# Static build
 	add_definitions(-DNEURONIZE_STATIC)
 	add_definitions(-D_USE_MATH_DEFINES)
-	common_application(neuronize WIN32)
+	common_application(neuronize GUI WIN32)
 else(MSVC)
-	common_application(neuronize)
+	common_application(neuronize GUI)
 endif ()
-

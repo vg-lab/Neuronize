@@ -1,10 +1,6 @@
 
 cmake_minimum_required( VERSION 3.1 )
-set( PROJECT_VERSION_MAJOR "0" )
-set( PROJECT_VERSION_MINOR "0" )
-set( PROJECT_VERSION_PATCH "1" )
-set( PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH} )
-project(Neuronize VERSION ${PROJECT_VERSION} )
+project(Neuronize VERSION 0.2.0 )
 set( neuronize_VERSION_ABI 1 )
 # Disable in source building
 if( "${PROJECT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}" )
