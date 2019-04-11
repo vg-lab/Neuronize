@@ -26,7 +26,7 @@ LoadFileDialog::LoadFileDialog(QWidget *parent): QDialog(parent) {
     tracePath->setPlaceholderText("Trace file (SWC,ASC)");
 
     apiPath = new QLineEdit(this);
-    apiPath->setPlaceholderText("Apical VRML file");
+    apiPath->setPlaceholderText("Apical VRML file (if any)");
     apiPath->setEnabled(false);
 
     basalPath = new QLineEdit(this);
@@ -40,12 +40,14 @@ LoadFileDialog::LoadFileDialog(QWidget *parent): QDialog(parent) {
     basalPathButton->setEnabled(false);
     apiPathButton = new QPushButton("Select File...",this);
     apiPathButton->setEnabled(false);
+    saveCheckBox = new QCheckBox("Save Output File",this);
+    saveCheckBox->setEnabled(false);
 
-    ascButton = new QPushButton("Select File...",this);
+    ascButton = new QPushButton("Select Output File...",this);
     ascButton->setEnabled(false);
 
     ascPath = new QLineEdit(this);
-    ascPath->setPlaceholderText("Trace Export Path (ASC)");
+    ascPath->setPlaceholderText("Export Tracing (ASC)");
     ascPath->setEnabled(false);
 
 
@@ -59,14 +61,17 @@ LoadFileDialog::LoadFileDialog(QWidget *parent): QDialog(parent) {
     grid->addWidget(tracePath,0,2);
 
     grid->addWidget(vrmls,1,0);
-    grid->addWidget(apiPathButton,1,1);
-    grid->addWidget(apiPath,1,2);
+    grid->addWidget(basalPathButton,1,1);
+    grid->addWidget(basalPath,1,2);
 
-    grid->addWidget(basalPathButton,2,1);
-    grid->addWidget(basalPath,2,2);
+    grid->addWidget(apiPathButton,2,1);
+    grid->addWidget(apiPath,2,2);
 
-    grid->addWidget(ascButton,3,1);
-    grid->addWidget(ascPath,3,2);
+    grid->addWidget(saveCheckBox,3,1);
+    grid->addWidget(ascButton,4,1);
+    grid->addWidget(ascPath,4,2);
+
+
 
 
     auto mainLayout = new QVBoxLayout();
@@ -75,6 +80,7 @@ LoadFileDialog::LoadFileDialog(QWidget *parent): QDialog(parent) {
 
 
     connect(traces,&QRadioButton::toggled,this,&LoadFileDialog::onRadioChanged);
+    connect(saveCheckBox,&QCheckBox::stateChanged,this,&LoadFileDialog::onSaveChanged);
     connect(tracePathButton, &QPushButton::released,[=](){
         openSelectFileDialog(tracePath,"Select trace file","NeuroMorpho(*.swc *.SWC);;Neurolucida ASC(*.asc *.ASC)",false);
     });
@@ -106,8 +112,21 @@ void LoadFileDialog::onRadioChanged(bool b) {
     apiPathButton->setDisabled(b);
     basalPath->setDisabled(b);
     basalPathButton->setDisabled(b);
-    ascPath->setDisabled(b);
-    ascButton->setDisabled(b);
+    saveCheckBox->setDisabled(b);
+    if (b) {
+        ascButton->setDisabled(b);
+        ascPath->setDisabled(b);
+    } else {
+        bool active = saveCheckBox->checkState() == Qt::Checked;
+        ascPath->setDisabled(!active);
+        ascButton->setDisabled(!active);
+    }
+}
+
+void LoadFileDialog::onSaveChanged(int state) {
+    bool active = state == Qt::Checked;
+    ascPath->setDisabled(!active);
+    ascButton->setDisabled(!active);
 }
 
 void LoadFileDialog::openSelectFileDialog(QLineEdit *target,const QString& title, const QString &types,bool multiFile) {
@@ -197,7 +216,7 @@ void LoadFileDialog::onProcessFinish() {
     progresDialog->setMaximum(1);
     progresDialog->setValue(1);
     QMessageBox msgBox(this);
-    if (ascPath->text() != nullptr && ascPath->text() != "") {
+    if (saveCheckBox->checkState() == Qt::Checked && ascPath->text() != nullptr && ascPath->text() != "") {
         std::ofstream file;
         file.open(ascPath->text().toStdString());
         file << this->neuron->to_asc();
