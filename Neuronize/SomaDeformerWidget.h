@@ -41,7 +41,7 @@ class SomaDeformerWidget: public QWidget, public Ui::SomaDeformerWidget
     unsigned int mMiSecsSimulation;
 
   public:
-    SomaDeformerWidget ( QWidget *parent = 0);
+    SomaDeformerWidget (const QString &tempDir, QWidget *parent = 0);
     ~SomaDeformerWidget ( );
 
     void deformDuringNSteps ( int pSteps );
@@ -70,6 +70,7 @@ private:
     SomaDeformerWidgetViewer *viewer;
 
     QString mXMLFile;
+    QString mtmpDir;
 
   public slots:
     void startDeformation ( );

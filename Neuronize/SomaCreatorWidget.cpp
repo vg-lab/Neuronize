@@ -37,7 +37,7 @@
 
 using namespace std;
 
-SomaCreatorWidget::SomaCreatorWidget ( QWidget *parent )
+SomaCreatorWidget::SomaCreatorWidget (const QString &tempDir, QWidget *parent )
 //: QMainWindow(parent, flags)
   : QWidget ( parent )
 {
@@ -64,8 +64,7 @@ SomaCreatorWidget::SomaCreatorWidget ( QWidget *parent )
   //mMehsFileName	= QDir::currentPath() + "/Content/Meshes/TETIcoSphera4Subdiv1Radio.off";
   //mMehsFileName	= QDir::currentPath() + "/Content/Meshes/Icosphere.1.off";
 
-  mExitDirectory = QDir::currentPath ( ) + "/tmp";
-  mToolBoxDir = QDir::currentPath ( ) + "/Content/MatLab/Geodesic/";
+  mExitDirectory = tempDir;
 
   QObject::connect ( ui.pushButton_generateFile, SIGNAL( clicked ( )), this, SLOT( generateXMLContent ( )) );
   QObject::connect ( ui.pushButton_LoadXML, SIGNAL( clicked ( )), this, SLOT( loadXMLContent ( )) );
@@ -638,7 +637,7 @@ void SomaCreatorWidget::generateXMLSoma ( ) {
     /*fileName =
       QFileDialog::getOpenFileName ( this, tr ( "Open File" ), "./", tr ( "NeuroMorpho(*.swc);;Neurolucida(*.asc)" )); */
 
-    LoadFileDialog dialog;
+    LoadFileDialog dialog(mExitDirectory.toStdString(),this);
     dialog.exec();
     fileName = QString::fromStdString(dialog.getFile());
     if (dialog.result() == QDialog::Accepted) {
@@ -683,7 +682,7 @@ void SomaCreatorWidget::generateXMLSoma ( ) {
     QString destination = mExitDirectory + "/" + sourceInfo.fileName();
 
     //QFile::copy(mFullPathSWCFileName, destination)
-    if (!QFile::copy(mFullPathSWCFileName, destination)) {
+    if (!QFile::copy(mFullPathSWCFileName, destination) && mFullPathSWCFileName != destination) {
       QFile::remove(destination);
       QFile::copy(mFullPathSWCFileName, destination);
     }
@@ -762,7 +761,7 @@ void SomaCreatorWidget::generateXMLSoma ( ) {
     {
       vertexs.push_back(mNearestVertex.at(i));
     }
-    auto somaPath = somaContours ? mExitDirectory.toStdString() + "/" + "somaConvex.off" : "tmp/IcoSphera4Subdiv1Radio_RadioReal.off";
+    auto somaPath = somaContours ? mExitDirectory.toStdString() + "/" + "somaConvex.off" : mExitDirectory.toStdString() + "/IcoSphera4Subdiv1Radio_RadioReal.off";
     MeshVCG mesh(somaPath);
     std::string path = mExitDirectory.toStdString() + "/";
     path+=mDefaultGeoDistFileName.toStdString();
@@ -893,7 +892,7 @@ void SomaCreatorWidget::generateXMLSoma ( ) {
       //Export XMLFile
       //control de errores
       //QString fileName = QFileDialog::getSaveFileName(this);
-      fileName = QDir::currentPath() + "/tmp/Definition";
+      fileName = mExitDirectory + "/Definition";
       //if (!fileName.isEmpty())
       {
           if (mXMLSomaDefManager!=NULL) delete mXMLSomaDefManager;
@@ -1059,8 +1058,8 @@ void SomaCreatorWidget::generateXMLSoma ( QString fileName, bool useSoma ) {
         for (int i = 0; i < lNumDendrites; ++i) {
             vertexs.push_back(mNearestVertex.at(i));
         }
-        auto somaPath = somaContours ? mExitDirectory.toStdString() + "/" + "somaConvex.off"
-                                     : "tmp/IcoSphera4Subdiv1Radio_RadioReal.off";
+        auto somaPath = somaContours ? mExitDirectory.toStdString() + "/" + "somaConvex.off" : mExitDirectory.toStdString() + "/IcoSphera4Subdiv1Radio_RadioReal.off";
+
         MeshVCG mesh(somaPath);
         std::string path = mExitDirectory.toStdString() + "/";
         path += mDefaultGeoDistFileName.toStdString();
@@ -1184,7 +1183,7 @@ void SomaCreatorWidget::generateXMLSoma ( QString fileName, bool useSoma ) {
         //Export XMLFile
         //control de errores
         //QString fileName = QFileDialog::getSaveFileName(this);
-        fileName = QDir::currentPath() + "/tmp/Definition";
+        fileName = mExitDirectory + "/Definition";
         //if (!fileName.isEmpty())
         {
             if (mXMLSomaDefManager != NULL) delete mXMLSomaDefManager;

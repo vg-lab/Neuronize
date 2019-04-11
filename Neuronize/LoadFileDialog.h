@@ -24,7 +24,7 @@ class LoadFileDialog: public QDialog {
 
 
 public:
-    explicit LoadFileDialog(QWidget* parent = 0);
+    explicit LoadFileDialog(const std::string &tmpDir,QWidget* parent = 0);
     const std::string &getFile() const;
     skelgenerator::Neuron *getNeuron() const;
 
@@ -42,6 +42,7 @@ private:
     QCheckBox* saveCheckBox;
     QDialogButtonBox* buttonBox;
     std::string file;
+    std::string tmpDir;
     QFutureWatcher<void>* futureWatcher;
     QProgressDialog *progresDialog;
     skelgenerator::Neuron* neuron;

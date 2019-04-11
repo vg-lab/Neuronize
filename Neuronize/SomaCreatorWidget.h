@@ -98,7 +98,7 @@ class SomaCreatorWidget: public QWidget, public Ui::SomaCreatorWidget
     void somaCreated ( );
 
   public:
-    SomaCreatorWidget ( QWidget *parent = 0 );
+    SomaCreatorWidget (const QString &tempDir,QWidget *parent = 0);
 
     ~SomaCreatorWidget ( );
 

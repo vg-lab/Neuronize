@@ -220,6 +220,8 @@ void AS2SWCV2::toSWC(const std::string &filename,std::vector<Dendrite> &dendrite
 
         }
     }
+
+    outputStream.close();
 }
 
 SimplePoint* AS2SWCV2::calcSoma(std::vector<Dendrite> &dentrites) {

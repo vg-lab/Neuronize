@@ -23,14 +23,15 @@
 
 #include <QMessageBox>
 
-SomaDeformerWidget::SomaDeformerWidget ( QWidget *parent )
+SomaDeformerWidget::SomaDeformerWidget (const QString &tempDir, QWidget *parent )
   : QWidget ( parent )
 {
   ui.setupUi ( this );
 
   viewer = new SomaDeformerWidgetViewer ( this );
 
-  mXMLFile = "tmp/Definition.xml";
+  mtmpDir = tempDir;
+  mXMLFile = tempDir + "/Definition.xml";
 
   //Add the viewer component to the interface
   ui.verticalLayout_Viewer->addWidget ( viewer );
@@ -348,7 +349,10 @@ void SomaDeformerWidget::exportModel ( )
 
 void SomaDeformerWidget::exportModelWithSTDName ( )
 {
-  QString fileName = QDir::currentPath ( ) + "/tmp/SomaGenerated/SomaDeformed.obj";
+  QDir dir (mtmpDir);
+  dir.mkdir("SomaGenerated");
+
+  QString fileName = mtmpDir + "/SomaGenerated/SomaDeformed.obj";
   viewer->exportModel ( fileName );
 
   //Export configuration name
