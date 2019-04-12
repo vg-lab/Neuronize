@@ -56,9 +56,6 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR}/src)
 include_directories(VCG_INCLUDE_DIR)
 
-
-add_definitions("-w")
-
 if ( APPLE )
   set( NEURONIZE_ICON neuronize.icns )
 endif()
@@ -69,8 +66,6 @@ endif( )
 
 
 if (MSVC)
-	add_definitions("/W4")
-	# Static build
 	add_definitions(-DNEURONIZE_STATIC)
 	add_definitions(-D_USE_MATH_DEFINES)
 	common_application(neuronize GUI WIN32)
