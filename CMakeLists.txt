@@ -78,6 +78,10 @@ list( APPEND NEURONIZE_DEPENDENT_LIBRARIES
         SOIL
         )
 
+if( NOT MSVC )
+  add_definitions("-w")
+endif()
+
 add_subdirectory( libs/libSysNeuroUtils )
 add_subdirectory( libs/libNeuroUtils )
 add_subdirectory( libs/libGLNeuroUtils )
@@ -101,5 +105,3 @@ include( CPackConfig )
 #Copy content (this must be improved)
 file(GLOB MY_CONTENT "Content/*")
 file(COPY ${MY_CONTENT} DESTINATION "${CMAKE_BINARY_DIR}/bin")
-
-
