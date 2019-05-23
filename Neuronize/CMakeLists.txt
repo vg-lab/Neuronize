@@ -14,6 +14,7 @@ set (NEURONIZE_SOURCES
 		SomaCreatorWidget.cpp
 		SomaDeformerWidget.cpp
 		SomaDeformerWidgetViewer.cpp
+		BBDD.cpp
 		)
 
 set(NEURONIZE_HEADERS
@@ -34,6 +35,7 @@ set(NEURONIZE_HEADERS
 		SomaDeformerWidgetViewer.h
 		xneuron.qrc
 		xneuron.ui
+		BBDD.h
 		)
 
 set(NEURONIZE_LINK_LIBRARIES
@@ -50,6 +52,7 @@ set(NEURONIZE_LINK_LIBRARIES
 		Qt5::OpenGL
 		${Boost_LIBRARIES}
 		skelgeneratorutil
+		${SQLite3_LIBRARIES}
 		)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})

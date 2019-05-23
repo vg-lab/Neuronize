@@ -58,6 +58,7 @@ common_find_package(SkelGenerator REQUIRED )
 common_find_package(SOIL REQUIRED)
 common_find_package(OpenMesh SYSTEM REQUIRED)
 common_find_package(QGLViewer SYSTEM REQUIRED)
+common_find_package(SQLite3 REQUIRED)
 common_find_package_post( )
 
 list( APPEND NEURONIZE_DEPENDENT_LIBRARIES
@@ -76,6 +77,7 @@ list( APPEND NEURONIZE_DEPENDENT_LIBRARIES
         ${OPENMESH_LIBRARY}
         QGLViewer
         SOIL
+        ${SQLite3_LIBRARIES}
         )
 
 if (MSVC)

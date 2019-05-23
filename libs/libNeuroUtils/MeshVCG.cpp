@@ -94,6 +94,7 @@ MeshVCG::MeshVCG(const std::vector<std::vector<OpenMesh::Vec3d>> &contours) {
         }
         ei->V(0) = previusPoint;
         ei->V(1) = firstPoint;
+        toObj("test.obj");
     }
 
 }

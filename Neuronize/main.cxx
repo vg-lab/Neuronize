@@ -20,10 +20,14 @@
 
 #include <QApplication>
 #include "neuronize.h"
+#include "BBDD.h"
 
 
 int main ( int argc, char *argv[] )
 {
+    /*
+    BBDD db ("test.sqlite");
+    db.addSpine("Test",0,0,"testNeuron",1,"mesh_mesh(1).pdf"); */
 
   QApplication a ( argc, argv );
   Neuronize w;
