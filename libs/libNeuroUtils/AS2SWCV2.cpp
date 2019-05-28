@@ -36,7 +36,7 @@ std::tuple<MeshVCG*,std::vector<Spine>> AS2SWCV2::asc2swc(const std::string &inp
             }
             if (line.find("Apical") != std::string::npos) {
                 if (apiPos == -1) {
-                    apiPos = static_cast<int>(basals.empty() ? 0 : basals.size() - 1);
+                    apiPos = static_cast<int>(basals.empty() ? 0 : basals.size());
                 }
                 apicals.push_back(processDendrite(inputStream, counter, 4, parentsCount, spines));
 
