@@ -65,10 +65,12 @@ class MyFace    : public vcg::Face<   MyUsedTypes, vcg::face::Mark ,vcg::face::F
 
         double getArea();
 
-
+        std::vector<std::vector<OpenMesh::Vec3d>> slice(float zStep);
 
 
     private:
+
+        std::vector<OpenMesh::Vec3d> sliceAux(float z);
     };
 
 

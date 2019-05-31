@@ -223,6 +223,80 @@ double MeshVCG::getArea() {
     return vcg::tri::Stat<MyMesh>::ComputeMeshArea(mesh);
 }
 
+using triangle =tuple<std::vector<OpenMesh::Vec3d>,std::vector<OpenMesh::Vec3d>>;
+std::vector<OpenMesh::Vec3d> MeshVCG::sliceAux(float z) {
+    std::set<triangle> triangles;
+    std::vector<OpenMesh::Vec3d> slice;
+    for (auto fi = mesh.face.begin(); fi != mesh.face.end(); fi++) {
+        std::vector<OpenMesh::Vec3d> underPoints;
+        std::vector<OpenMesh::Vec3d> upperPoints;
+        auto fp = &*fi;
+        OpenMesh::Vec3d v0(fp->V(0)->P()[0], fp->V(0)->P()[1], fp->V(0)->P()[2]);
+        OpenMesh::Vec3d v1(fp->V(1)->P()[0], fp->V(1)->P()[1], fp->V(1)->P()[2]);
+        OpenMesh::Vec3d v2(fp->V(2)->P()[0], fp->V(2)->P()[1], fp->V(2)->P()[2]);
+        if (!(v0[2] > z && v1[2] > z && v2[2] > z) && !(v0[2] < z && v1[2] < z && v2[2] < z)) {
+            if (v0[2] == z) {
+                slice.push_back(v0);
+            } else if (v0[2] > z) {
+                upperPoints.push_back(v0);
+            } else {
+                underPoints.push_back(v0);
+            }
+
+            if (v1[2] == z) {
+                slice.push_back(v1);
+            } else if (v1[2] > z) {
+                upperPoints.push_back(v1);
+            } else {
+                underPoints.push_back(v1);
+            }
+
+            if (v2[2] == z) {
+                slice.push_back(v2);
+            } else if (v2[2] > z) {
+                upperPoints.push_back(v2);
+            } else {
+                underPoints.push_back(v2);
+            }
+
+            triangles.emplace(upperPoints, underPoints);
+        }
+    }
+    for (const auto &triangle:triangles) {
+        const auto &upperPoints = std::get<0>(triangle);
+        const auto &underPoints = std::get<1>(triangle);
+        std::vector<OpenMesh::Vec3f> oneP;
+        std::vector<OpenMesh::Vec3f> twoP;
+
+        for (int i = 0; i < upperPoints.size(); i++) {
+            for (int j = 0; j < underPoints.size();j++) {
+                auto v = underPoints[j] - upperPoints[i];
+                float alpha = (z - upperPoints[i][2]) / v[2];
+                float x = upperPoints[i][0] + alpha * v[0];
+                float y = upperPoints[i][1] + alpha * v[1];
+                slice.emplace_back(x, y, z);
+            }
+        }
+    }
+
+    return slice;
+}
+
+std::vector<std::vector<OpenMesh::Vec3d>> MeshVCG::slice(float zStep) {
+    vcg::tri::UpdateBounding<MyMesh>::Box(mesh);
+    auto min = mesh.bbox.P(0);
+    float minZ = min[2];
+    auto max = mesh.bbox.P(7);
+    float maxZ = max[2];
+
+    std::vector<std::vector<OpenMesh::Vec3d>> contours;
+
+    for (float currentZ  = minZ; currentZ <= maxZ ; currentZ+=zStep) {
+        contours.push_back(sliceAux(currentZ));
+    }
+    return contours;
+}
+
 
 
 
