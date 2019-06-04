@@ -354,6 +354,9 @@ void SomaDeformerWidget::exportModelWithSTDName ( )
 
   QString fileName = mtmpDir + "/SomaGenerated/SomaDeformed.obj";
   viewer->exportModel ( fileName );
+  MeshVCG mesh1 (mtmpDir.toStdString() + "/SomaGenerated/SomaDeformed.obj");
+  std::cout << "Soma 2D Area Neuronize: " << mesh1.getMax2DArea()<< std::endl;
+
 
   //Export configuration name
   QString result = viewer->configurationToString ( );
@@ -483,6 +486,9 @@ void SomaDeformerWidget::useSphericalSoma() {
 void SomaDeformerWidget::setSomaCreator(SomaCreatorWidget *somaCreator) {
   this->somaCreator = somaCreator;
 }
+
+
+
 
 
 

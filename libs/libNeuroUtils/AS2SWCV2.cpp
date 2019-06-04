@@ -6,9 +6,9 @@
 #include <iomanip>
 #include <unordered_set>
 #include <clocale>
-
-#include "AS2SWCV2.h"
 #include "MeshVCG.h"
+#include "AS2SWCV2.h"
+
 
 std::tuple<MeshVCG*,std::vector<Spine>> AS2SWCV2::asc2swc(const std::string &inputFile, const std::string &outFile, bool useSoma) {
         std::setlocale(LC_ALL, "en_US.UTF-8");
@@ -54,6 +54,8 @@ std::tuple<MeshVCG*,std::vector<Spine>> AS2SWCV2::asc2swc(const std::string &inp
         SimplePoint* soma;
         if (contours.size() >1 && useSoma) {
             MeshVCG  somaMesh (contours);
+            somaMesh.toObj("originConts.obj");
+            std::cout << "Soma 2D Area Neorulucida: " << MeshVCG::getMax2DArea(contours) << std::endl;
             MeshVCG somaConvex;
             somaMesh.convexHull(somaConvex);
             center = somaConvex.getCenter();

@@ -13,6 +13,7 @@
 #include <vcg/complex/all_types.h>
 #include <OpenMesh/Core/Mesh/Traits.hh>
 
+using Edge = std::tuple<int, int, float>;
 
 class MyVertex; class MyEdge; class MyFace;
     struct MyUsedTypes : public vcg::UsedTypes<vcg::Use<MyVertex>   ::AsVertexType,
@@ -29,7 +30,9 @@ class MyFace    : public vcg::Face<   MyUsedTypes, vcg::face::Mark ,vcg::face::F
 
     public:
         explicit MeshVCG(const std::string &filename);
+
         explicit MeshVCG(const std::vector<std::vector<OpenMesh::Vec3d>> &contours);
+
         MeshVCG() = default;
 
         void toObj(std::string filename);
@@ -37,7 +40,7 @@ class MyFace    : public vcg::Face<   MyUsedTypes, vcg::face::Mark ,vcg::face::F
         void calcGeodesicDistance(const std::vector<int> &vertex,
                                   const std::string &exportPath);
 
-        void convexHull(MeshVCG& destination);
+        void convexHull(MeshVCG &destination);
 
         void toOff(std::string filename);
 
@@ -52,14 +55,14 @@ class MyFace    : public vcg::Face<   MyUsedTypes, vcg::face::Mark ,vcg::face::F
         OpenMesh::Vec3d center();
 
         bool RayIntersects(OpenMesh::Vec3d rayOrigin,
-                            OpenMesh::Vec3d rayVector,
+                           OpenMesh::Vec3d rayVector,
                            std::vector<OpenMesh::Vec3d> &outIntersectionPoint,
                            std::vector<MyMesh::FacePointer> &intersectTriangles);
 
         bool RayIntersectsTriangle(OpenMesh::Vec3d rayOrigin,
                                    OpenMesh::Vec3d rayVector,
                                    MyMesh::FacePointer face,
-                                   OpenMesh::Vec3d& outIntersectionPoint);
+                                   OpenMesh::Vec3d &outIntersectionPoint);
 
         double getVolume();
 
@@ -67,11 +70,47 @@ class MyFace    : public vcg::Face<   MyUsedTypes, vcg::face::Mark ,vcg::face::F
 
         std::vector<std::vector<OpenMesh::Vec3d>> slice(float zStep);
 
+        float getMax2DArea();
+
+        static float getMax2DArea(const std::vector<std::vector<OpenMesh::Vec3d>> &contours);
+
 
     private:
 
         std::vector<OpenMesh::Vec3d> sliceAux(float z);
+
+        static float getContourArea(const std::vector<OpenMesh::Vec3d> &contour);
+
+        static MeshVCG* triangulateContour(const std::vector<OpenMesh::Vec3d> &contour);
+
+
+
+        static bool intersectEdges(const Edge &edge1, const Edge &edge2, const std::vector<OpenMesh::Vec3d> &points);
+
+        static bool findEdge(int v, const std::vector<Edge>& edges);
+
+        inline static float edgeEQ (OpenMesh::Vec3d point, Edge edge,const std::vector<OpenMesh::Vec3d>& points);
+
     };
+/*struct EdgeEquals {
+public:
+    bool operator()(const Edge & edge1, const Edge& edge2) const {
+        int v01 = std::get<0>(edge1);
+        int v11 = std::get<1>(edge1);
+        int v02 = std::get<0>(edge2);
+        int v12 = std::get<1>(edge2);
+
+        return (v01 == v02 && v11 == v02) || (v01 == v12 && v11 == v02);
+    }
+};
+
+
+struct EdgeHash {
+public:
+    size_t operator()(const Edge & str) const {
+        return std::hash<int>()(size);
+    }
+};*/
 
 
 
