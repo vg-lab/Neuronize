@@ -93,6 +93,8 @@ class SomaCreatorWidget: public QWidget, public Ui::SomaCreatorWidget
 
     void resetInterface ( );
 
+    void showRepairDialog ( );
+
   signals:
 
     void somaCreated ( );

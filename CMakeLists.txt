@@ -58,6 +58,7 @@ common_find_package(SkelGenerator REQUIRED )
 common_find_package(SOIL REQUIRED)
 common_find_package(OpenMesh SYSTEM REQUIRED)
 common_find_package(QGLViewer SYSTEM REQUIRED)
+common_find_package(MeshReconstructWrapper REQUIRED)
 common_find_package_post( )
 
 list( APPEND NEURONIZE_DEPENDENT_LIBRARIES
@@ -87,6 +88,7 @@ add_subdirectory( libs/libNeuroUtils )
 add_subdirectory( libs/libGLNeuroUtils )
 add_subdirectory( libs/libQtNeuroUtils )
 add_subdirectory( Neuronize )
+
 
 if( MSVC )
   # Set DataCooking as startup project on Visual Studio, CMake v3.6
