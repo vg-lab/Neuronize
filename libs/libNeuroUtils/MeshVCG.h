@@ -21,7 +21,7 @@ class MyVertex; class MyEdge; class MyFace;
             vcg::Use<MyFace>     ::AsFaceType>{};
 class MyVertex  : public vcg::Vertex< MyUsedTypes,vcg::vertex::Coord3d, vcg::vertex::Normal3d,vcg::vertex::Qualityf, vcg::vertex::VFAdj ,vcg::vertex::BitFlags>{};
 class MyFace    : public vcg::Face<   MyUsedTypes, vcg::face::Mark ,vcg::face::FFAdj,vcg::face::VFAdj,  vcg::face::VertexRef,vcg::face::Normal3d , vcg::face::BitFlags > {};
-    class MyEdge    : public vcg::Edge<   MyUsedTypes, vcg::edge::EFAdj,vcg::edge::VertexRef> {};
+    class MyEdge    : public vcg::Edge<   MyUsedTypes, vcg::edge::EFAdj,vcg::edge::VertexRef, vcg::edge::BitFlags,vcg::edge::EEAdj> {};
     class MyMesh    : public vcg::tri::TriMesh< std::vector<MyVertex>, std::vector<MyFace> , std::vector<MyEdge>  > {};
 
     class NEUROUTILS_API MeshVCG {
@@ -68,49 +68,16 @@ class MyFace    : public vcg::Face<   MyUsedTypes, vcg::face::Mark ,vcg::face::F
 
         double getArea();
 
-        std::vector<std::vector<OpenMesh::Vec3d>> slice(float zStep);
+        std::vector<MeshVCG*> slice(float zStep);
 
-        float getMax2DArea();
-
-        static float getMax2DArea(const std::vector<std::vector<OpenMesh::Vec3d>> &contours);
-
+        float getMax2DArea(float zStep = 0.1f);
+        static float getMax2DArea(const std::vector<std::vector<OpenMesh::Vec3d>>& contours);
 
     private:
 
-        std::vector<OpenMesh::Vec3d> sliceAux(float z);
-
-        static float getContourArea(const std::vector<OpenMesh::Vec3d> &contour);
-
-        static MeshVCG* triangulateContour(const std::vector<OpenMesh::Vec3d> &contour);
-
-
-
-        static bool intersectEdges(const Edge &edge1, const Edge &edge2, const std::vector<OpenMesh::Vec3d> &points);
-
-        static bool findEdge(int v, const std::vector<Edge>& edges);
-
-        inline static float edgeEQ (OpenMesh::Vec3d point, Edge edge,const std::vector<OpenMesh::Vec3d>& points);
+         MeshVCG*  sliceAux(float z);
 
     };
-/*struct EdgeEquals {
-public:
-    bool operator()(const Edge & edge1, const Edge& edge2) const {
-        int v01 = std::get<0>(edge1);
-        int v11 = std::get<1>(edge1);
-        int v02 = std::get<0>(edge2);
-        int v12 = std::get<1>(edge2);
-
-        return (v01 == v02 && v11 == v02) || (v01 == v12 && v11 == v02);
-    }
-};
-
-
-struct EdgeHash {
-public:
-    size_t operator()(const Edge & str) const {
-        return std::hash<int>()(size);
-    }
-};*/
 
 
 

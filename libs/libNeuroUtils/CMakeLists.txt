@@ -69,6 +69,8 @@ set(NEUROUTILS_LINK_LIBRARIES
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR}/src)
+include_directories(${CMAKE_SOURCE_DIR}/earcut/include)
+
 
 add_definitions("-w")
 

@@ -54,8 +54,6 @@ std::tuple<MeshVCG*,std::vector<Spine>> AS2SWCV2::asc2swc(const std::string &inp
         SimplePoint* soma;
         if (contours.size() >1 && useSoma) {
             MeshVCG  somaMesh (contours);
-            somaMesh.toObj("originConts.obj");
-            std::cout << "Soma 2D Area Neorulucida: " << MeshVCG::getMax2DArea(contours) << std::endl;
             MeshVCG somaConvex;
             somaMesh.convexHull(somaConvex);
             center = somaConvex.getCenter();

@@ -9,6 +9,8 @@
 #include <wrap/io_trimesh/import_obj.h>
 #include <wrap/io_trimesh/export_obj.h>
 #include <wrap/io_trimesh/export_off.h>
+#include <GL/gl.h>
+#include <wrap/gl/glu_tessellator_cap.h>
 #include <vcg/complex/algorithms/update/topology.h>
 #include <vcg/complex/algorithms/update/position.h>
 #include <vcg/complex/algorithms/convex_hull.h>
@@ -18,6 +20,7 @@
 #include <vcg/complex/algorithms/isotropic_remeshing.h>
 #include <vcg/complex/algorithms/voronoi_remesher.h>
 #include <vcg/complex/algorithms/stat.h>
+#include <vcg/complex/algorithms/intersection.h>
 #include <QtCore/QFile>
 #include <clocale>
 #include <queue>
@@ -42,6 +45,7 @@ MeshVCG::MeshVCG(const std::string &filename) {
     }
     vcg::tri::UpdateTopology<MyMesh>::FaceFace(mesh);
     vcg::tri::UpdateTopology<MyMesh>::VertexFace(mesh);
+
     vcg::tri::UpdateNormal<MyMesh>::PerVertexNormalized(mesh);
 }
 
@@ -224,220 +228,85 @@ double MeshVCG::getArea() {
     return vcg::tri::Stat<MyMesh>::ComputeMeshArea(mesh);
 }
 
-using triangle =tuple<std::vector<OpenMesh::Vec3d>,std::vector<OpenMesh::Vec3d>>;
-std::vector<OpenMesh::Vec3d> MeshVCG::sliceAux(float z) {
-    std::set<triangle> triangles;
-    std::vector<OpenMesh::Vec3d> slice;
-    for (auto fi = mesh.face.begin(); fi != mesh.face.end(); fi++) {
-        std::vector<OpenMesh::Vec3d> underPoints;
-        std::vector<OpenMesh::Vec3d> upperPoints;
-        auto fp = &*fi;
-        OpenMesh::Vec3d v0(fp->V(0)->P()[0], fp->V(0)->P()[1], fp->V(0)->P()[2]);
-        OpenMesh::Vec3d v1(fp->V(1)->P()[0], fp->V(1)->P()[1], fp->V(1)->P()[2]);
-        OpenMesh::Vec3d v2(fp->V(2)->P()[0], fp->V(2)->P()[1], fp->V(2)->P()[2]);
-        if (!(v0[2] > z && v1[2] > z && v2[2] > z) && !(v0[2] < z && v1[2] < z && v2[2] < z)) {
-            if (v0[2] == z) {
-                slice.push_back(v0);
-            } else if (v0[2] > z) {
-                upperPoints.push_back(v0);
-            } else {
-                underPoints.push_back(v0);
-            }
+MeshVCG* MeshVCG::sliceAux(float z) {
+   vcg::Point3d planeCenter(0,0,z);
+   vcg::Point3d planeDir(0,0,1);
+   vcg::Plane3d plane;
+   plane.Init(planeCenter,planeDir);
 
-            if (v1[2] == z) {
-                slice.push_back(v1);
-            } else if (v1[2] > z) {
-                upperPoints.push_back(v1);
-            } else {
-                underPoints.push_back(v1);
-            }
-
-            if (v2[2] == z) {
-                slice.push_back(v2);
-            } else if (v2[2] > z) {
-                upperPoints.push_back(v2);
-            } else {
-                underPoints.push_back(v2);
-            }
-
-            triangles.emplace(upperPoints, underPoints);
-        }
-    }
-    for (const auto &triangle:triangles) {
-        const auto &upperPoints = std::get<0>(triangle);
-        const auto &underPoints = std::get<1>(triangle);
-        std::vector<OpenMesh::Vec3f> oneP;
-        std::vector<OpenMesh::Vec3f> twoP;
-
-        for (int i = 0; i < upperPoints.size(); i++) {
-            for (int j = 0; j < underPoints.size();j++) {
-                auto v = underPoints[j] - upperPoints[i];
-                float alpha = (z - upperPoints[i][2]) / v[2];
-                float x = upperPoints[i][0] + alpha * v[0];
-                float y = upperPoints[i][1] + alpha * v[1];
-                slice.emplace_back(x, y, z);
-            }
-        }
-    }
-
-    return slice;
+   MeshVCG* sliceContour = new MeshVCG();
+   vcg::IntersectionPlaneMesh<MyMesh,MyMesh,double>(this->mesh,plane,sliceContour->mesh);
+   vcg::tri::Clean<MyMesh>::RemoveDuplicateVertex(sliceContour->mesh);
+    return sliceContour;
 }
 
-std::vector<std::vector<OpenMesh::Vec3d>> MeshVCG::slice(float zStep) {
+
+std::vector<MeshVCG*> MeshVCG::slice(float zStep) {
     vcg::tri::UpdateBounding<MyMesh>::Box(mesh);
     auto min = mesh.bbox.P(0);
     float minZ = min[2];
     auto max = mesh.bbox.P(7);
     float maxZ = max[2];
-
-    std::vector<std::vector<OpenMesh::Vec3d>> contours;
-
-    for (float currentZ  = minZ; currentZ <= maxZ ; currentZ+=zStep) {
+    std::vector<MeshVCG* > contours;
+    for (float currentZ  = minZ + zStep; currentZ <= maxZ ; currentZ+=zStep) {
         contours.push_back(sliceAux(currentZ));
     }
+
     return contours;
 }
-static int cont = 0;
-float MeshVCG::getContourArea(const std::vector<OpenMesh::Vec3d>& contour) {
-    MeshVCG* meshAux = triangulateContour(contour);
-    float area = meshAux->getArea();
-    meshAux->toObj("contour" + std::to_string(cont) +".obj");
-    cont++;
-    delete(meshAux);
-    return area;
-}
 
-float MeshVCG::getMax2DArea() {
-    auto contours = this->slice(0.1f);
-    return getMax2DArea(contours);
-}
+static int cont =0;
+float MeshVCG::getMax2DArea(float zStep) {
 
-float MeshVCG::getMax2DArea(const std::vector<std::vector<OpenMesh::Vec3d>>& contours){
-    float maxArea = -1;
-    for(const auto& contour:contours) {
-        maxArea = std::max(maxArea,getContourArea(contour));
-    }
-    return maxArea;
-}
-
-
-using Edge = tuple<int,int,float>;
-
-float MeshVCG::edgeEQ (OpenMesh::Vec3d point, Edge edge,const std::vector<OpenMesh::Vec3d>& points) {
-    OpenMesh::Vec3d edgeInit = points[std::get<0>(edge)];
-    OpenMesh::Vec3d edgeFin = points[std::get<1>(edge)];
-    return ( point[0] - edgeInit[0]) * (edgeFin[1] - edgeInit[1]) - (point[1] - edgeInit[1]) * ( edgeFin[0] - edgeInit[0]);
-}
-
-bool MeshVCG::intersectEdges(const Edge &edge1, const Edge &edge2,const std::vector<OpenMesh::Vec3d>& points){
-
-    float p1E1 = edgeEQ(points[std::get<0>(edge1)],edge2,points);
-    float p2E1 = edgeEQ(points[std::get<1>(edge1)],edge2,points);
-    float p1E2 = edgeEQ(points[std::get<0>(edge2)],edge1,points);
-    float p2E2 = edgeEQ(points[std::get<1>(edge2)],edge1,points);
-    if (p1E1 == 0 && p2E1 == 0 && p1E2 == 0 && p2E2 == 0) {
-        return true;
+    auto contours = this->slice(zStep);
+    double minArea = -1;
+    std::cout << contours.size() << std::endl;
+    for (auto& contour: contours) {
+        MeshVCG meshAux;
+        vcg::tri::CapEdgeMesh(contour->mesh,meshAux.mesh);
+        meshAux.toObj("contourDeformed" + std::to_string(cont) +".obj");
+        minArea = std::max(minArea,meshAux.getArea());
+        cont++;
+        delete contour;
     }
 
-    bool diferent_sides1 = (p1E1 != 0 && p2E1 != 0) && ((p1E1 < 0) != (p2E1 < 0));
-    bool difrente_sides2 = (p1E2 != 0 && p2E2 != 0) && ((p1E2 < 0) != (p2E2 < 0));
-    return diferent_sides1 && difrente_sides2;
+    return minArea;
 }
 
-bool MeshVCG::findEdge(int v, const std::vector<Edge>& edges) {
-    for (const auto & edge : edges) {
-        int v0 = std::get<0>(edge);
-        int v1 = std::get<1>(edge);
-        if (v == v0 || v == v1) {
-            return true;
-        }
-    }
-    return false;
-}
-
-
-MeshVCG* MeshVCG::triangulateContour(const std::vector<OpenMesh::Vec3d>& contour) {
-    auto compare = [](Edge e1, Edge e2) {
-        float lenght1 = std::get<2>(e1);
-        float lenght2 = std::get<2>(e2);
-        return lenght1 >= lenght2;
-    };
-
-    std::priority_queue<Edge, std::vector<Edge>, decltype(compare)> edgeCandidates(compare);
-    std::set<Edge> finalEdges;
-    for (int i = 0; i < contour.size(); ++i) {
-        for (int j = i + 1; j < contour.size(); ++j) {
-            edgeCandidates.emplace(i, j, ((contour[i] - contour[j]).norm()));
-        }
-    }
-
-    std::vector<std::vector<Edge >> edgeListAdajacency( contour.size() );
-
-    while (!edgeCandidates.empty()) {
-        Edge currentEdge = edgeCandidates.top();
-        edgeCandidates.pop();
-        bool cross = false;
-        for (const auto &finalEdge: finalEdges) {
-            if (intersectEdges(currentEdge, finalEdge, contour)) {
-                cross = true;
-                break;
-            }
-        }
-
-        if (!cross) {
-            finalEdges.insert(currentEdge);
-            edgeListAdajacency[std::get<0>(currentEdge)].push_back(currentEdge);
-            edgeListAdajacency[std::get<1>(currentEdge)].push_back(currentEdge);
-        }
-    }
-
-    std::set<OpenMesh::Vec3i> triangles;
-
-    for (unsigned int i= 0; i < contour.size(); i++) {
-        for (unsigned int j = 0; j < edgeListAdajacency[i].size();j++) {
-            for (unsigned int k = j + 1; k < edgeListAdajacency[i].size() ; k++) {
-                auto edge1 = edgeListAdajacency[i][j];
-                auto edge2 = edgeListAdajacency[i][k];
-                int edge1v0 = std::get<0>(edge1);
-                int edge1v1 = std::get<1>(edge1);
-                int edge2v0 = std::get<0>(edge2);
-                int edge2v1 = std::get<1>(edge2);
-
-                int extv0 = edge1v0 == i ? edge1v1 : edge1v0;
-                int extv1 = edge2v0 == i ? edge2v1 : edge2v0;
-
-                if (findEdge(extv1,edgeListAdajacency[extv0])) {
-                    OpenMesh::Vec3i triangle (i,extv0,extv1);
-                    std::sort(triangle.begin(),triangle.end());
-                    triangles.insert(triangle);
-                }
-            }
-
-        }
-    }
-
-
-    MeshVCG *meshAux = new MeshVCG();
-    auto vi = vcg::tri::Allocator<MyMesh>::AddVertices(meshAux->mesh, contour.size());
-    for (const auto &point: contour) {
-        vi->P() = MyMesh::CoordType(point[0], point[1], point[2]);
+float MeshVCG::getMax2DArea(const std::vector<std::vector<OpenMesh::Vec3d>>& contours) {
+    double minArea = -1;
+    for (const auto &contour: contours) {
+        MeshVCG mesh;
+        auto vi = vcg::tri::Allocator<MyMesh>::AddVertices(mesh.mesh, contour.size());
+        auto ei = vcg::tri::Allocator<MyMesh>::AddEdges(mesh.mesh, contour.size());
+        auto firstPoint = &*vi;
+        vi->P() = MyMesh::CoordType(contour[0][0], contour[0][1], contour[0][2]);
         ++vi;
-    }
-    auto fi = vcg::tri::Allocator<MyMesh>::AddFaces(meshAux->mesh,triangles.size());
-    for (const auto& triangle: triangles) {
-        MyMesh::VertexPointer	 v0 = &(meshAux->mesh.vert[triangle[0]]);
-        MyMesh::VertexPointer	 v1 = &(meshAux->mesh.vert[triangle[1]]);
-        MyMesh::VertexPointer	 v2 = &(meshAux->mesh.vert[triangle[2]]);
-        fi->V(0) = v0;
-        fi->V(1) = v1;
-        fi->V(2) = v2;
-        ++fi;
-    }
-    return meshAux;
+        auto previusPoint = firstPoint;
+        for (int i = 1; i < contour.size(); i++) {
+            auto actualPoint = &*vi;
+            vi->P() = MyMesh::CoordType(contour[i][0], contour[i][1], contour[i][2]);
+            ++vi;
+            ei->V(0) = previusPoint;
+            ei->V(1) = actualPoint;
+            ++ei;
 
+            previusPoint = actualPoint;
+
+        }
+        ei->V(0) = previusPoint;
+        ei->V(1) = firstPoint;
+
+        MeshVCG meshAux;
+        vcg::tri::CapEdgeMesh(mesh.mesh,meshAux.mesh);
+        minArea = std::max(minArea,meshAux.getArea());
+        meshAux.toObj("contour" + std::to_string(cont) +".obj");
+    }
+
+
+    return minArea;
 
 }
-
 
 
 
