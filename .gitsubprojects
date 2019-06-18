@@ -1,3 +1,2 @@
 # -*- mode: cmake -*-
 git_subproject( SkelGenerator git@gitlab.gmrv.es:ivelasco/SkelGenerator.git 7dc7924d )
-git_subproject( MeshReconstructWrapper git@gitlab.gmrv.es:ivelasco/meshreconstructwrapper.git 4c7aee02)

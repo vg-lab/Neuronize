@@ -14,6 +14,13 @@
 #include <iostream>
 #include "RepairDialog.h"
 
+#ifdef _WIN32
+#define RUN "src/run.bat"
+#else
+#define RUN std::string("src/run.sh")
+#endif
+
+
 RepairDialog::RepairDialog(QWidget *parent):QDialog(parent) {
     inputPath = new QLineEdit( );
     inputPath->setPlaceholderText("Select input file");
@@ -135,18 +142,20 @@ void RepairDialog::onOk() {
         output = csvPath->text();
     }
     auto future = QtConcurrent::run([=](){
+
+        QSettings settings("Neuronize","preferences");
+        QString path = QFileInfo(settings.fileName()).absoluteDir().absolutePath();
+        QString envPath = path + "/" + "env";
+
         QStringList arguments;
         arguments << "-a" << output << "-v" << input << "-s" << saveCombo->currentText() << "-p" << precisionBox->text()
                   << "-r" << QString::number(percentageBox->value()) << "-f" << QString::number(segmentsCheckBox->isChecked()) << "-k" << kernelSizeBox->text()
                   << "-c" << QString::number(cleanCheckBox->isChecked());
-        for ( QString string: arguments) {
-            std::cout << string.toStdString() << " ";
-        }
 
-        QProcess* process = new QProcess();
-        process->start(program,arguments);
-        process->waitForFinished();
-        process->close();
+        std::string command = RUN + " " + envPath.toStdString() + " " + arguments.join(" ").toStdString();
+        std::system(command.c_str());
+
+
     });
     futureWatcher->setFuture(future);
 
