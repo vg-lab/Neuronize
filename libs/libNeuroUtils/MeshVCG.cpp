@@ -142,53 +142,35 @@ OpenMesh::Vec3d MeshVCG::center() {
     return center;
 }
 
-bool MeshVCG::RayIntersectsTriangle(OpenMesh::Vec3d rayOrigin,
-                           OpenMesh::Vec3d rayVector,
-                           MyMesh::FacePointer face,
-                           OpenMesh::Vec3d& outIntersectionPoint) {
-    OpenMesh::Vec3d v0 = {face->V(0)->P()[0],face->V(0)->P()[1],face->V(0)->P()[2]};
-    OpenMesh::Vec3d v1 = {face->V(1)->P()[0],face->V(1)->P()[1],face->V(1)->P()[2]};
-    OpenMesh::Vec3d v2 = {face->V(2)->P()[0],face->V(2)->P()[1],face->V(2)->P()[2]};
-
-    double kEpsilon = 0.00001;
-
-    OpenMesh::Vec3d v0v1 = v1 - v0;
-    OpenMesh::Vec3d v0v2 = v2 - v0;
-    OpenMesh::Vec3d pvec = rayVector % v0v2;
-    float det = OpenMesh::dot(v0v1,pvec);
-    // ray and triangle are parallel if det is close to 0
-    if (fabs(det) < kEpsilon) return false;
-    float invDet = 1 / det;
-
-    OpenMesh::Vec3d tvec = rayOrigin - v0;
-    auto u = OpenMesh::dot(tvec,pvec) * invDet;
-    if (u < 0 || u > 1) return false;
-
-    OpenMesh::Vec3d qvec = tvec % v0v1;
-    auto v = OpenMesh::dot(rayVector,qvec) * invDet;
-    if (v < 0 || u + v > 1) return false;
-
-    auto t = OpenMesh::dot(v0v2,qvec) * invDet;
-    outIntersectionPoint = rayOrigin + rayVector * t;
-
-    return true;
-
-}
 
 bool
-MeshVCG::RayIntersects(OpenMesh::Vec3d rayOrigin, OpenMesh::Vec3d rayVector, std::vector<OpenMesh::Vec3d> &outIntersectionPoint, std::vector<MyMesh::FacePointer> &intersectTriangles) {
-    OpenMesh::Vec3d intersectPointAux;
-    auto center = getCenter();
-    bool intersect = false;
-    for (auto fi = mesh.face.begin(); fi != mesh.face.end(); fi++) {
-        auto fp = &(*fi);
-        intersect = RayIntersectsTriangle(center, rayVector, fp, intersectPointAux);
-        if (intersect) {
-           outIntersectionPoint.push_back(intersectPointAux);
-           intersectTriangles.push_back(fp);
+MeshVCG::rayIntersects(OpenMesh::Vec3d rayOrigin, OpenMesh::Vec3d rayVector, std::vector<OpenMesh::Vec3d> &outIntersectionPoint) {
+
+    vcg::Point3d origin (rayOrigin[0],rayOrigin[1],rayOrigin[2]);
+    vcg::Point3d dir (rayVector[0],rayVector[1],rayVector[2]);
+    vcg::Line3d ray(origin,dir);
+
+    bool hit = false;
+    double bar1,bar2,dist;
+    vcg::Point3d p1;
+    vcg::Point3d p2;
+    vcg::Point3d p3;
+    for ( auto fi = mesh.face.begin(); fi != mesh.face.end(); ++fi) {
+        p1 = vcg::Point3d( (*fi).P(0).X() ,(*fi).P(0).Y(),(*fi).P(0).Z() );
+        p2 = vcg::Point3d( (*fi).P(1).X() ,(*fi).P(1).Y(),(*fi).P(1).Z() );
+        p3 = vcg::Point3d( (*fi).P(2).X() ,(*fi).P(2).Y(),(*fi).P(2).Z() );
+        if(vcg::IntersectionLineTriangle<double>(ray,p1,p2,p3,dist,bar1,bar2)) {
+            if (dist > 0) { // Direccion del rayo.
+                auto hitPoint = p1 * (1 - bar1 - bar2) + p2 * bar1 + p3 * bar2;
+                OpenMesh::Vec3d aux(hitPoint.X(), hitPoint.Y(), hitPoint.Z());
+                outIntersectionPoint.push_back(aux);
+                hit = true;
+            }
         }
     }
-    return intersect;
+
+    return hit;
+
 }
 
 

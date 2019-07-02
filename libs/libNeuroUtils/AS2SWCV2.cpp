@@ -59,39 +59,46 @@ std::tuple<MeshVCG*,std::vector<Spine>> AS2SWCV2::asc2swc(const std::string &inp
             center = somaConvex.getCenter();
             auto radius = calcSommaRadius(center,dendrites);
             soma = new SimplePoint(center[0],center[1],center[2],radius);
-
             //Desplazar los puntos fuera del soma
-
-
+            int erasedPoints = 0;
             for (auto &dendrite: dendrites) {
-                double dist= std::numeric_limits<double>::max();
-                OpenMesh::Vec3d v = dendrite[0].point - center;
-                v.normalize();
-                std::vector<OpenMesh::Vec3d> intersectPoints;
-                std::vector<MyMesh::FacePointer > trianglesIntersect;
-                somaConvex.RayIntersects(center,v,intersectPoints,trianglesIntersect);
-
-                OpenMesh::Vec3d normal1 (trianglesIntersect[0]->N()[0],trianglesIntersect[0]->N()[1],trianglesIntersect[0]->N()[2]);
-                OpenMesh::Vec3d normal2 (trianglesIntersect[1]->N()[0],trianglesIntersect[1]->N()[1],trianglesIntersect[1]->N()[2]);
-                auto pointToIntersect1 = dendrite[0].point - intersectPoints[0];
-                auto pointToInsertect2 = dendrite[0].point - intersectPoints[1];
-
-
-                // El punto se encuentra dentro del soma
-                if (OpenMesh::dot(pointToIntersect1, normal1) < 0 && OpenMesh::dot(pointToInsertect2, normal2) < 0) {
-
-                    for (const auto &intersectPoint: intersectPoints) {
-                        auto distAux = (intersectPoint - dendrite[0].point).norm();
-                        dist = std::min(dist, distAux);
+                std::vector<OpenMesh::Vec3d> intersectionPointLast;
+                std::vector<OpenMesh::Vec3d> intersectionPointCur;
+                if (checkPointInsideSoma(somaConvex, dendrite[0].point,intersectionPointCur)) {
+                    int firstPoint = 0;
+                    bool inside = true;
+                    while (inside && firstPoint < dendrite.size()) {
+                        intersectionPointLast = intersectionPointCur;
+                        intersectionPointCur.clear();
+                        firstPoint++;
+                        inside = checkPointInsideSoma(somaConvex, dendrite[firstPoint].point,intersectionPointCur);
                     }
-                    if (dist > 0) {
-                        auto desp = v * dist;
-                        for (auto &point :dendrite) {
-                            point.point += desp;
-                        }
+
+                    OpenMesh::Vec3d intersectionSoma;
+                    auto rayDir = dendrite[firstPoint].point - dendrite[firstPoint-1].point;
+                    intersectionPointLast.clear();
+                    somaConvex.rayIntersects(dendrite[firstPoint - 1].point, rayDir,intersectionPointLast);
+                    intersectionSoma = intersectionPointLast[0];
+
+
+                    dendrite.erase(dendrite.begin(), dendrite.begin() + firstPoint - 1); //dejamos un punto para modificarlo.
+                    dendrite[0].point = intersectionSoma;
+                    dendrite[0].parent = 1;
+
+                    erasedPoints += firstPoint -1;
+                }
+
+                //Ajustamos indices
+                if (erasedPoints > 0) {
+                    dendrite[0].counter -= erasedPoints;
+                    for (int i=1; i< dendrite.size();i++) {
+                        auto &node = dendrite[i];
+                        node.counter -= erasedPoints;
+                        node.parent -= erasedPoints;
                     }
                 }
             }
+
 
             somaConvex.center();
 
@@ -103,6 +110,14 @@ std::tuple<MeshVCG*,std::vector<Spine>> AS2SWCV2::asc2swc(const std::string &inp
         toSWC(outFile,dendrites,soma);
     return std::make_tuple(finalSoma,spines);
 
+}
+
+bool AS2SWCV2::checkPointInsideSoma(MeshVCG& soma, const OpenMesh::Vec3d& point,std::vector<OpenMesh::Vec3d>& intersectionPoints) {
+    auto center = soma.getCenter();
+    OpenMesh::Vec3d v = center - point;
+    v.normalize();
+    soma.rayIntersects(point,v,intersectionPoints);
+    return intersectionPoints.size() == 1;
 }
 
 void AS2SWCV2::procesSomaPart(std::ifstream &file,std::vector<std::vector<OpenMesh::Vec3d>> &countours) {

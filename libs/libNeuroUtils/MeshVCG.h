@@ -54,15 +54,10 @@ class MyFace    : public vcg::Face<   MyUsedTypes, vcg::face::Mark ,vcg::face::F
 
         OpenMesh::Vec3d center();
 
-        bool RayIntersects(OpenMesh::Vec3d rayOrigin,
+        bool rayIntersects(OpenMesh::Vec3d rayOrigin,
                            OpenMesh::Vec3d rayVector,
-                           std::vector<OpenMesh::Vec3d> &outIntersectionPoint,
-                           std::vector<MyMesh::FacePointer> &intersectTriangles);
-
-        bool RayIntersectsTriangle(OpenMesh::Vec3d rayOrigin,
-                                   OpenMesh::Vec3d rayVector,
-                                   MyMesh::FacePointer face,
-                                   OpenMesh::Vec3d &outIntersectionPoint);
+                           std::vector<OpenMesh::Vec3d> &outIntersectionPoint);
+        
 
         double getVolume();
 
