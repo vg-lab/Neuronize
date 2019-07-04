@@ -125,7 +125,6 @@ RepairDialog::RepairDialog(QWidget *parent):QDialog(parent) {
 }
 
 void RepairDialog::onOk() {
-    QString program = "meshreconstructwrapper";
     QString input;
     if (inputPath->text().isEmpty()) {
         QToolTip::showText(inputPath->mapToGlobal(QPoint()), tr("Need a input file"));
@@ -152,7 +151,7 @@ void RepairDialog::onOk() {
                   << "-r" << QString::number(percentageBox->value()) << "-f" << QString::number(segmentsCheckBox->isChecked()) << "-k" << kernelSizeBox->text()
                   << "-c" << QString::number(cleanCheckBox->isChecked());
 
-        std::string command = RUN + " " + envPath.toStdString() + " " + arguments.join(" ").toStdString();
+        std::string command = QCoreApplication::applicationDirPath().toStdString() + "/" + RUN + " " + envPath.toStdString() + " " + arguments.join(" ").toStdString();
         std::system(command.c_str());
 
 
