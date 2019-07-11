@@ -22,6 +22,8 @@
 #include "SomaCreatorWidget.h"
 
 #include <QMessageBox>
+#include <libs/libNeuroUtils/MeshVCG.h>
+#include <Neuronize/neuronize.h>
 
 SomaDeformerWidget::SomaDeformerWidget (const QString &tempDir, QWidget *parent )
   : QWidget ( parent )
@@ -352,10 +354,14 @@ void SomaDeformerWidget::exportModelWithSTDName ( )
   QDir dir (mtmpDir);
   dir.mkdir("SomaGenerated");
 
+  viewer->setNormalizeExportedModel(false);
+  viewer->exportModel(mtmpDir + "/RealSize.obj");
+  viewer->setNormalizeExportedModel(true);
   QString fileName = mtmpDir + "/SomaGenerated/SomaDeformed.obj";
   viewer->exportModel ( fileName );
 
-  //Export configuration name
+
+    //Export configuration name
   QString result = viewer->configurationToString ( );
   strToFile ( result.toStdString ( ), ( fileName.toStdString ( ) + ".cfg" ));
 }

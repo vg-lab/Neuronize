@@ -19,6 +19,7 @@
  */
 
 #include "NeuroGeneratorWidgetViewer.h"
+#include "neuronize.h"
 #include <math.h>
 #include <SkelGeneratorUtil/Neuron.h>
 #include <QtCore/QDirIterator>
@@ -1702,7 +1703,7 @@ void NeuroGeneratorWidgetViewer::importSpinesInfo ( QString fileName )
 
 }
 
-void NeuroGeneratorWidgetViewer::generateSpinesVrml(QString dirPath) {
+void NeuroGeneratorWidgetViewer::generateSpinesVrml(skelgenerator::Neuron *neuron,const std::string& tempPath) {
     if ( mesh == NULL )
         return;
 
@@ -1711,32 +1712,32 @@ void NeuroGeneratorWidgetViewer::generateSpinesVrml(QString dirPath) {
         delete meshSpines;
         meshSpines = NULL;
     }
+    std::string dirPath = tempPath + "/tmpSpines";
+    QDir().mkdir(QString::fromStdString(dirPath));
 
-    std::cout << dirPath.toStdString() << std::endl;
-    QDir dir( dirPath );
-    dir.setFilter( QDir::AllEntries | QDir::NoDotAndDotDot );
-    int total_files = dir.count();
-
-    QDirIterator it (dirPath,QDir::Files | QDir::NoDotAndDotDot);
     boost::numeric::ublas::matrix<float> translationMatrix (4,4);
     boost::numeric::ublas::matrix<float> scaleMatrix (4,4);
 
     auto displacement = mSWCImporter->getDisplacement();
 
     generateSquareTraslationMatrix(translationMatrix,-displacement[0],-displacement[1],-displacement[2]);
-
+    int total_files = neuron->getSpines().size();
     std::vector<SpinesSWC*> spinesMeshes(static_cast<size_t>(total_files), nullptr);
-
+    QFileInfo fi(mSWCFile);
+    Neuronize::bbdd.openTransaction();
     int i = 0;
-    while (it.hasNext()) {
-        auto filename = it.next();
+    for (const auto& spine:neuron->getSpines()) {
+        std::cout << i << std::endl;
+        std::string filename = spine->to_obj_without_base(dirPath,i);
+        Neuronize::bbdd.addSpineVRML(spine,filename,fi.baseName().toStdString(),tempPath,displacement);
         SpinesSWC* auxMesh = new SpinesSWC();
-        auxMesh->loadModel(filename.toStdString());
+        auxMesh->loadModel(filename);
         auxMesh->applyMatrixTransform(translationMatrix,4);
         auxMesh->updateBaseMesh();
         spinesMeshes[i] = auxMesh;
         i++;
     }
+    Neuronize::bbdd.closeTransaction();
 
     meshSpines = fusionAllSpines(spinesMeshes);
     for(int i = 0; i < spinesMeshes.size();i++) {

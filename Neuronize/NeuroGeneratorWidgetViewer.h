@@ -263,7 +263,7 @@ class NeuroGeneratorWidgetViewer: public QGLViewer
 
     void importSpinesInfo ( QString fileName );
 
-    void generateSpinesVrml(QString dirPath);
+    void generateSpinesVrml(skelgenerator::Neuron *neuron,const std::string& tempPath);
 
 
     void generateSpinesASC(std::vector<Spine>& spines,unsigned int pHorResol, unsigned int pVerResol, float pMinLongSpine,

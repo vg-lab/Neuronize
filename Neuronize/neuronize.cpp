@@ -21,8 +21,11 @@
 
 #include <QMessageBox>
 #include <QtCore/QDirIterator>
+#include <QSettings>
 
 #include "neuronize.h"
+
+BBDD::BBDD Neuronize::bbdd = BBDD::BBDD();
 
 Neuronize::Neuronize ( QWidget *parent )
   : QMainWindow ( parent )
@@ -56,6 +59,10 @@ Neuronize::Neuronize ( QWidget *parent )
   resetNeuronnizeInterface ( );
 
   mActiveTab = 0;
+  QSettings settings("Neuronize","preferences");
+  QString path = QFileInfo(settings.fileName()).absoluteDir().absolutePath() + "/neuronize.sqlite";
+  std::cout << path.toStdString() << std::endl;
+  Neuronize::bbdd = BBDD::BBDD(path.toStdString());
 
   this->showMaximized ( );
 

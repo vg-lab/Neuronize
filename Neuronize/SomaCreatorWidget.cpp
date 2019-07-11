@@ -655,7 +655,7 @@ void SomaCreatorWidget::generateXMLSoma ( ) {
 
         if ((ext == "asc") || (ext == "ASC")) {
           auto ascPath = lLocalFilePath.toStdString() + "/" + info1.fileName().toStdString();
-          fileName = lLocalFilePath + "/" + info1.fileName() + ".swc";
+          fileName = lLocalFilePath + "/" + info1.baseName() + ".swc";
           auto result = AS2SWCV2::asc2swc(ascPath, fileName.toStdString(),true);
           somaMesh = std::get<0>(result);
           this->spines = std::get<1>(result);

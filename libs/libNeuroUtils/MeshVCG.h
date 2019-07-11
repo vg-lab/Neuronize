@@ -26,6 +26,7 @@ class MyFace    : public vcg::Face<   MyUsedTypes, vcg::face::Mark ,vcg::face::F
     class NEUROUTILS_API MeshVCG {
         MyMesh mesh;
         std::string name;
+        std::string path;
 
     public:
         explicit MeshVCG(const std::string &filename);
@@ -65,10 +66,14 @@ class MyFace    : public vcg::Face<   MyUsedTypes, vcg::face::Mark ,vcg::face::F
 
         double getArea();
 
+        const std::string &getPath() const;
 
+        void applyMatrix(const vcg::Matrix44d& matrix);
 
+        MyMesh::VertContainer getVertex();
 
-    private:
+        int getNumVertex();
+
     };
 
 

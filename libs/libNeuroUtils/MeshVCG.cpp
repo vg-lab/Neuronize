@@ -28,6 +28,7 @@ MeshVCG::MeshVCG(const std::string &filename) {
     boost::filesystem::path path(filename);
     auto extension = path.extension().string();
     this->name = path.stem().string();
+    this->path = filename;
     std::setlocale(LC_NUMERIC, "en_US.UTF-8");
     if (extension == ".off") {
         if (vcg::tri::io::ImporterOFF<MyMesh>::Open(mesh, filename.c_str()) !=
@@ -138,6 +139,11 @@ OpenMesh::Vec3d MeshVCG::center() {
     return center;
 }
 
+void MeshVCG::applyMatrix(const vcg::Matrix44d& matrix) {
+    vcg::tri::UpdatePosition<MyMesh>::Matrix(mesh,matrix);
+    vcg::tri::UpdateNormal<MyMesh>::PerVertexNormalized(mesh);
+}
+
 bool MeshVCG::RayIntersectsTriangle(OpenMesh::Vec3d rayOrigin,
                            OpenMesh::Vec3d rayVector,
                            MyMesh::FacePointer face,
@@ -222,6 +228,19 @@ double MeshVCG::getVolume() {
 
 double MeshVCG::getArea() {
     return vcg::tri::Stat<MyMesh>::ComputeMeshArea(mesh);
+}
+
+const string &MeshVCG::getPath() const {
+    return path;
+}
+
+MyMesh::VertContainer MeshVCG::getVertex() {
+    return this->mesh.vert;
+
+}
+
+int MeshVCG::getNumVertex() {
+    return this->mesh.VN();
 }
 
 
