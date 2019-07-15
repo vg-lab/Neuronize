@@ -659,6 +659,7 @@ void SomaCreatorWidget::generateXMLSoma ( ) {
           auto result = AS2SWCV2::asc2swc(ascPath, fileName.toStdString(),true);
           somaMesh = std::get<0>(result);
           this->spines = std::get<1>(result);
+          this->contours = std::get<2>(result);
 
 
           // PREVIOUS VERSION
@@ -1224,6 +1225,10 @@ const QString &SomaCreatorWidget::getInputFile() const {
 
 const vector<Spine> &SomaCreatorWidget::getSpines() const {
   return spines;
+}
+
+const vector<vector<OpenMesh::Vec3d>> &SomaCreatorWidget::getContours() const {
+    return contours;
 }
 
 

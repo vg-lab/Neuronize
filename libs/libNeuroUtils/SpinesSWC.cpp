@@ -1772,7 +1772,9 @@ namespace NSSpinesSWC
                                                float pBasalMinDistance,
                                                float pBasalCteDistance,
                                                float pApicalMinDistance,
-                                               float pApicalCteDistance
+                                               float pApicalCteDistance,
+                                               BBDD::BBDD bbdd,
+                                               const std::string& neuronName
   )
   {
     SWCSpinesDistributor *lpSWCSpinesDistributor = new SWCSpinesDistributor ( );
@@ -1888,23 +1890,31 @@ namespace NSSpinesSWC
     initrand ( );
 
     lNumSegmentsWithSpines = lAuxSpinesDistrib.size ( );
+    //TODO IMPROVE PERFORMANCE: Montar el vector de espinas de una vez, es mucho mas rapido
 
+    std::cout << lNumSegmentsWithSpines << std::endl;
     //Auxiliar vectors
     for ( int k = 0; k < lNumSegmentsWithSpines; ++k )
     {
       lNumSpinesInSegment = lAuxSpinesDistrib.at ( k ).mSpinesSegmentContainer.size ( );
 
+        auto spines = bbdd.getRandomSpines(lNumSpinesInSegment);
+        int numSpines = spines.size();
+
       for ( i = 0; i < lNumSpinesInSegment; ++i )
       {
+          std::cout << k << "--" << i << std::endl;
 
+          auto spine = spines[lNumSpinesInSegment % numSpines];
         //Select the spine modelled
-        lSpineModelSelected = ( int ) randfloat ( 0, mSpinesModeledContainer->getContainer ( ).size ( ));
+        lSpineModelSelected = std::get<0>(spine);
 
 
         //New version
         //////!!!!!!
         tmpMesh = new BaseMesh ( );
-        tmpMesh->JoinBaseMesh ( mSpinesModeledContainer->getElementAt ( lSpineModelSelected ));
+        tmpMesh->loadModel(std::get<1>(spine));
+        //tmpMesh->JoinBaseMesh ( mSpinesModeledContainer->getElementAt ( lSpineModelSelected ));
         //tmpMesh->scaleBaseMesh(lSpineScale);
 
         MeshDef::ConstVertexFaceIter CVFIter;
@@ -2035,6 +2045,8 @@ namespace NSSpinesSWC
                                        XVector,
                                        YVector
         );
+
+          bbdd.addSpine(neuronName,lSpineModelSelected,{0,0,0},glb_mat);
 
         //Unimos la malla y calculamos los vertices antes y despues
         unsigned int lIniLimit = this->getNumVertex ( );
@@ -2916,7 +2928,7 @@ namespace NSSpinesSWC
     }
   }
 
-    void SpinesSWC::distributeSpines(const vector<Spine> &spines) {
+    void SpinesSWC::distributeSpines(const vector<Spine> &spines,const std::string& neuronName,const OpenMesh::Vec3f& diplacement, BBDD::BBDD bbdd) {
       mNumVerticesEnSpina = mSpinesModeledContainer->getContainer ( ).at ( 0 )->getNumVertex ( );
 
       SpineInfo lSpineInfo;
@@ -3015,17 +3027,21 @@ namespace NSSpinesSWC
       initrand ( );
 
 
+      auto spinesModels = bbdd.getRandomSpines(spines.size());
+      int numModels = spinesModels.size();
       //Auxiliar vectors
         for ( i = 0; i < spines.size(); ++i ) {
 
-          //Select the spine modelled
-          lSpineModelSelected = (int) randfloat(0, mSpinesModeledContainer->getContainer().size());
+            std::cout << i << std::endl;
+            auto spine = spinesModels[i % numModels];
 
+          //Select the spine modelled
+          lSpineModelSelected = std::get<0>(spine);
 
           //New version
           //////!!!!!!
           tmpMesh = new BaseMesh();
-          tmpMesh->JoinBaseMesh(mSpinesModeledContainer->getElementAt(lSpineModelSelected));
+          tmpMesh->loadModel(std::get<1>(spine));
           //tmpMesh->scaleBaseMesh(lSpineScale);
 
           MeshDef::ConstVertexFaceIter CVFIter;
@@ -3155,6 +3171,8 @@ namespace NSSpinesSWC
                                        XVector,
                                        YVector
           );
+
+          bbdd.addSpine(neuronName,lSpineModelSelected,diplacement,glb_mat);
 
           //Unimos la malla y calculamos los vertices antes y despues
           unsigned int lIniLimit = this->getNumVertex();

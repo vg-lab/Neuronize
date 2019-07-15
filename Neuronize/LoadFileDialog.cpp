@@ -159,6 +159,7 @@ void LoadFileDialog::onOkPressed() {
         this->file = tracePath->text().toStdString();
         accept();
     } else {
+
         QFuture<void> future = QtConcurrent::run([=]() { processSkel(tmpDir + "/temp.asc"); });
         futureWatcher->setFuture(future);
         progresDialog = new QProgressDialog("Operation in progress", "Cancel", 0, 0, this);

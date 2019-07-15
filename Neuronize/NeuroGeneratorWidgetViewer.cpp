@@ -840,13 +840,18 @@ void NeuroGeneratorWidgetViewer::generateSpinesInSegment ( unsigned int pNumSpin
 
   meshSpines->setSpinesContainer ( &mSpinesModelsContainers );
 
+  QFileInfo fi(mSWCFile);
+
   meshSpines->distributeSpinesInSegments ( mSpinesDesp,
                                            mBProgressionFactor,
                                            mAProgressionFactor,
                                            mBasalMinDistance,
                                            mBasalCteDistance,
                                            mApicalMinDistance,
-                                           mApicalCteDistance
+                                           mApicalCteDistance,
+                                           Neuronize::bbdd,
+                                           fi.baseName().toStdString()
+
   );
 
   int i = 0;
@@ -1843,7 +1848,9 @@ NeuroGeneratorWidgetViewer::generateSpinesASC(std::vector<Spine>& spines,unsigne
 
     meshSpines->setSpinesContainer ( &mSpinesModelsContainers );
 
-    meshSpines->distributeSpines (spines);
+    auto displacement = mSWCImporter->getDisplacement();
+    QFileInfo fi(mSWCFile);
+    meshSpines->distributeSpines (spines,fi.baseName().toStdString(),displacement,Neuronize::bbdd);
 
     int i = 0;
 
@@ -1876,7 +1883,6 @@ NeuroGeneratorWidgetViewer::generateSpinesASC(std::vector<Spine>& spines,unsigne
     spineMeshRend->setRenderOptions ( renderMask );
 
     boost::numeric::ublas::matrix<float> translationMatrix (4,4);
-    auto displacement = mSWCImporter->getDisplacement();
     generateSquareTraslationMatrix(translationMatrix,-displacement[0],-displacement[1],-displacement[2]);
     spineMeshRend->getBaseMesh()->applyMatrixTransform(translationMatrix,4);
 

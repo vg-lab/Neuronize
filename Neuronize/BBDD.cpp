@@ -3,6 +3,7 @@
 //
 
 #include "BBDD.h"
+#include "neuronize.h"
 #include <boost/format.hpp>
 #include <fstream>
 #include <boost/filesystem.hpp>
@@ -13,8 +14,14 @@
 #include <libs/libNeuroUtils/AS2SWCV2.h>
 
 #define ERRCHECK {if (_err!=NULL) {std::cerr << "BBDD Error : " << _err << "\n" << std::endl; sqlite3_free(_err);}}
-static int existCallback(void *exist, int columns, char **data, char **columnNames) {
-    std::cout << "sdsd"<<std::endl;
+static int getSpineCallback(void *spines, int columns, char **data, char **columnNames) {
+    std::vector<BBDD::Spine>* spinesCast = (std::vector<BBDD::Spine> *) spines;
+
+    BBDD::Spine spine;
+    spine.id = std::atoi(data[0]);
+    spine.file = std::string(data[4]);
+    spine.ext = (BBDD::FileType) std::atoi(data[6]);
+    spinesCast->push_back(spine);
     return 0;
 
 }
@@ -84,7 +91,6 @@ namespace BBDD {
                                    "                    X REAL,\n"
                                    "                    Y REAL,\n"
                                    "                    Z REAL,\n"
-                                   "                    R REAL,\n"
                                    "                    CONTOUR INTEGER,\n"
                                    "                    FOREIGN KEY(CONTOUR) REFERENCES CONTOURS(ID));";
 
@@ -220,15 +226,35 @@ namespace BBDD {
         ERRCHECK
     }
 
-    void BBDD::addSoma(const std::string& neuronName, MeshVCG& model,ReconstructionMethod reconstructionMethod) {
+    void BBDD::addSoma(const std::string& neuronName, MeshVCG& model,ReconstructionMethod reconstructionMethod,std::vector<std::vector<OpenMesh::Vec3d>> contours) {
         std::string query = "INSERT INTO SOMA (AREA, AREA_2D, VOLUME, NEURON, MODEL, RECONSTRUCTION_METHOD) VALUES (%f,%f,%f,'%s','%x',%i)";
         float area = model.getArea();
         float volume = model.getVolume();
         //float area2D = model.get2Darea(0.1f);
         std::string file = readBytes(model.getPath()).data();
-        std::string formatedQuery = str( boost::format(query) % area % area % volume % neuronName % file % reconstructionMethod); //TODO Area2d;
-        sqlite3_exec(_db, formatedQuery.c_str(), nullptr, nullptr,&_err);
+        std::string formatedQuery = str(
+                boost::format(query) % area % area % volume % neuronName % file % reconstructionMethod); //TODO Area2d;
+        sqlite3_exec(_db, formatedQuery.c_str(), nullptr, nullptr, &_err);
         ERRCHECK
+
+        if (!contours.empty()) {
+            openTransaction();
+
+            query = "INSERT INTO CONTOURS (SOMA) VALUES (" + sqlite3_last_insert_rowid(_db) + std::string(");");
+            std::string queryPoint = "INSERT INTO POINT (X, Y, Z, CONTOUR) VALUES (%f,%f,%f,%i);";
+            for (const auto &contour: contours) {
+                sqlite3_exec(_db, query.c_str(), nullptr, nullptr, &_err);
+                ERRCHECK
+                int contourId = sqlite3_last_insert_rowid(_db);
+                for (const auto &point: contour) {
+                    std::string formatedQuery = str(boost::format(queryPoint) % point[0] % point[1] % point[2] % contourId);
+                    sqlite3_exec(_db,formatedQuery.c_str(), nullptr, nullptr,&_err);
+                    ERRCHECK
+                }
+            }
+
+            closeTransaction();
+        }
     }
 
     void BBDD::addDendrite(const std::string &neuronName, int initCounter, int lastCounter, NSSWCImporter::DendriticType type) {
@@ -292,14 +318,30 @@ namespace BBDD {
         vcg::Quaterniond q;
         q.FromMatrix(transform);
         query = "INSERT INTO SPINES (NEURON, SPINE_MODEL, TRANSLATION_X, TRANSLATION_Y, TRANSLATION_Z, QUATERNION_1, QUATERNION_2, QUATERNION_3, QUATERNION_4) VALUES('%s',%i,%f,%f,%f,%f,%f,%f,%f);";
-        formatedQuery = str(boost::format(query) % "we" % sqlite3_last_insert_rowid(_db) % tranlation[0] % tranlation[1] % tranlation[2] % q[0] % q[1] %q[2] %q[3]);
+        formatedQuery = str(boost::format(query) % neuronName % sqlite3_last_insert_rowid(_db) % tranlation[0] % tranlation[1] % tranlation[2] % q[0] % q[1] %q[2] %q[3]);
         sqlite3_exec(_db,formatedQuery.c_str(), nullptr, nullptr,&_err);
         ERRCHECK
     }
 
 
-    void BBDD:: addSpine(const std::string& neuronName, int spineModel, MeshVCG& orientedMesh) {
+    void BBDD::addSpine(const std::string& neuronName, int spineModel, const OpenMesh::Vec3f& displacement,const boost::numeric::ublas::matrix<float>& transform) {
+        OpenMesh::Vec3f translation (transform(0,3),transform(1,3),transform(2,3));
+        translation -= displacement;
 
+        vcg::Matrix44f rot = vcg::Matrix44f::Identity();
+        for (int i =0; i < 3; i++) {
+            for (int j = 0 ; j < 3 ; j++) {
+                rot.ElementAt(i,j) = transform(i,j);
+            }
+        }
+
+        vcg::Quaternionf q;
+        q.FromMatrix(rot);
+
+        std::string query = "INSERT INTO SPINES (NEURON, SPINE_MODEL, TRANSLATION_X, TRANSLATION_Y, TRANSLATION_Z, QUATERNION_1, QUATERNION_2, QUATERNION_3, QUATERNION_4) VALUES('%s',%i,%f,%f,%f,%f,%f,%f,%f);";
+        std::string formatedQuery = str(boost::format(query) % neuronName % spineModel % translation[0] % translation[1] % translation[2] % q[0] % q[1] %q[2] %q[3]);
+        sqlite3_exec(_db,formatedQuery.c_str(), nullptr, nullptr,&_err);
+        ERRCHECK
     }
 
     void BBDD::addDefaultSpinesModels() {
@@ -331,12 +373,27 @@ namespace BBDD {
     void BBDD::closeTransaction() {
         sqlite3_exec(_db,"COMMIT", nullptr, nullptr,&_err);
         ERRCHECK
-
     }
 
-    void BBDD::test() {
-        sqlite3_exec(_db,"SELECT * FROM SPINE_ORIGIN;", existCallback, nullptr,&_err);
+    std::vector<std::tuple<int,std::string>> BBDD::getRandomSpines(int n) {
+        std::string query = "SELECT * FROM SPINE_MODEL WHERE ORIGIN == 1 OR ORIGIN == 3 ORDER BY RANDOM() LIMIT " + std::to_string(n);
+        std::vector<Spine> spines;
+        spines.reserve(n);
+        sqlite3_exec(_db,query.c_str() ,getSpineCallback,&spines,&_err);
         ERRCHECK
+
+        std::vector<std::tuple<int,std::string>> spinesOut;
+        for (int i =0 ; i < spines.size(); i++) {
+            const auto& spine = spines[i];
+            std::string filePath = Neuronize::tmpPath.toStdString() + "/spine" + std::to_string(i) +  "." + fileTypeDesc[spine.ext];
+            std::ofstream file (filePath);
+            file << spine.file;
+            file.close();
+            spinesOut.emplace_back(spine.id,filePath);
+        }
+
+        return spinesOut;
+
     }
 
 

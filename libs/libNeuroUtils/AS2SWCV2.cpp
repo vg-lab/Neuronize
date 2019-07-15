@@ -10,7 +10,7 @@
 #include "AS2SWCV2.h"
 #include "MeshVCG.h"
 
-std::tuple<MeshVCG*,std::vector<Spine>> AS2SWCV2::asc2swc(const std::string &inputFile, const std::string &outFile, bool useSoma) {
+std::tuple<MeshVCG*,std::vector<Spine>,std::vector<std::vector<OpenMesh::Vec3d>>> AS2SWCV2::asc2swc(const std::string &inputFile, const std::string &outFile, bool useSoma) {
         std::setlocale(LC_ALL, "en_US.UTF-8");
         std::vector<std::vector<OpenMesh::Vec3d>> contours;
         std::vector<Spine> spines;
@@ -101,7 +101,7 @@ std::tuple<MeshVCG*,std::vector<Spine>> AS2SWCV2::asc2swc(const std::string &inp
             soma = calcSoma2(dendrites);
         }
         toSWC(outFile,dendrites,soma);
-    return std::make_tuple(finalSoma,spines);
+    return std::make_tuple(finalSoma,spines,contours);
 
 }
 

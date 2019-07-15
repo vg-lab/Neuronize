@@ -11,10 +11,9 @@
 #include <map>
 #include <libs/libNeuroUtils/MeshVCG.h>
 #include <libs/libNeuroUtils/SWCImporter.h>
-#include <SkelGeneratorUtil/Spine.h>
+#include "../SkelGenerator/SkelGeneratorUtil/Spine.h"
 
 namespace BBDD {
-
     enum FileType {
         Obj, Stl
     };
@@ -24,6 +23,12 @@ namespace BBDD {
 
     enum ReconstructionMethod {
         Spring_Mass,FEM
+    };
+
+    struct Spine {
+        int id;
+        std::string file;
+        FileType ext;
     };
 
     class BBDD {
@@ -37,19 +42,19 @@ namespace BBDD {
                       const std::string &file);
         void addNeuron(const std::string& name, const std::string& swcFile);
 
-        void addSoma(const std::string& neuronName, MeshVCG& model,ReconstructionMethod reconstructionMethod);
+        void addSoma(const std::string& neuronName, MeshVCG& model,ReconstructionMethod reconstructionMethod,std::vector<std::vector<OpenMesh::Vec3d>> contours);
 
         void addDendrite(const std::string& neuronName,int initCounter,int lastCounter,NSSWCImporter::DendriticType type);
 
         void addSpineVRML(const skelgenerator::Spine* const spine,const std::string& meshPath,const std::string& neuronName, const std::string& tmpDir, const OpenMesh::Vec3f& displacement);
 
-        void addSpine(const std::string& neuronName, int spineModel, MeshVCG& orientedMesh);
+        void addSpine(const std::string& neuronName, int spineModel, const OpenMesh::Vec3f& displacement,const boost::numeric::ublas::matrix<float>& transform);
+
+        std::vector<std::tuple<int,std::string>> getRandomSpines(int n);
 
         void openTransaction();
 
         void closeTransaction();
-
-        void test();
 
         static const std::vector<std::string> neuriteTypeDesc;
         static const std::vector<std::string> fileTypeDesc;

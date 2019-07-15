@@ -55,6 +55,7 @@ class Neuronize: public QMainWindow
     ~Neuronize ( );
 
     static BBDD::BBDD bbdd;
+    static QString tmpPath;
 
   private:
 

@@ -268,7 +268,7 @@ void NeuroGeneratorWidget::loadNeuronDefinitionAndGenerateMesh ( )
   QFileInfo fi (mSWCFleName);
   Neuronize::bbdd.addNeuron(fi.baseName().toStdString(),mSWCFleName.toStdString());
   MeshVCG somaMesh (mTempDir.toStdString() + "/RealSize.obj");
-  Neuronize::bbdd.addSoma(fi.baseName().toStdString(),somaMesh, BBDD::Spring_Mass);
+  Neuronize::bbdd.addSoma(fi.baseName().toStdString(),somaMesh, BBDD::Spring_Mass,this->contours);
 
   SWCImporter* importer = this->viewer->getNeuroSWC()->getImporter();
   for (const auto& dendritic : importer->getDendritics()) {
@@ -1199,5 +1199,9 @@ void NeuroGeneratorWidget::setNeuron(skelgenerator::Neuron *neuron) {
 
 void NeuroGeneratorWidget::setSpines(const vector<Spine> &spines) {
   NeuroGeneratorWidget::spines = spines;
+}
+
+void NeuroGeneratorWidget::setContours(const vector<vector<OpenMesh::Vec3d>> &contours) {
+    NeuroGeneratorWidget::contours = contours;
 }
 
