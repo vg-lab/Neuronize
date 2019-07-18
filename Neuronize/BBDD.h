@@ -40,7 +40,7 @@ namespace BBDD {
 
         void addSpine(const std::string &name, float area, float volume, const std::string &neuronName, int origin,
                       const std::string &file);
-        void addNeuron(const std::string& name, const std::string& swcFile);
+        bool addNeuron(const std::string& name, const std::string& swcFile);
 
         void addSoma(const std::string& neuronName, MeshVCG& model,ReconstructionMethod reconstructionMethod,std::vector<std::vector<OpenMesh::Vec3d>> contours);
 
@@ -55,6 +55,8 @@ namespace BBDD {
         void openTransaction();
 
         void closeTransaction();
+
+        bool haveSpinesNeuron(const std::string& neuronName);
 
         static const std::vector<std::string> neuriteTypeDesc;
         static const std::vector<std::string> fileTypeDesc;

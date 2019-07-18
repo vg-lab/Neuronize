@@ -266,13 +266,17 @@ void NeuroGeneratorWidget::loadNeuronDefinitionAndGenerateMesh ( )
 
 
   QFileInfo fi (mSWCFleName);
-  Neuronize::bbdd.addNeuron(fi.baseName().toStdString(),mSWCFleName.toStdString());
-  MeshVCG somaMesh (mTempDir.toStdString() + "/RealSize.obj");
-  Neuronize::bbdd.addSoma(fi.baseName().toStdString(),somaMesh, BBDD::Spring_Mass,this->contours);
+  bool neuronAdded = Neuronize::bbdd.addNeuron(fi.baseName().toStdString(),mSWCFleName.toStdString());
 
-  SWCImporter* importer = this->viewer->getNeuroSWC()->getImporter();
-  for (const auto& dendritic : importer->getDendritics()) {
-      Neuronize::bbdd.addDendrite(fi.baseName().toStdString(),dendritic.initialNode,dendritic.finalNode,dendritic.type);
+  if (!neuronAdded) {
+      MeshVCG somaMesh(mTempDir.toStdString() + "/RealSize.obj");
+      Neuronize::bbdd.addSoma(fi.baseName().toStdString(), somaMesh, BBDD::Spring_Mass, this->contours);
+
+      SWCImporter *importer = this->viewer->getNeuroSWC()->getImporter();
+      for (const auto &dendritic : importer->getDendritics()) {
+          Neuronize::bbdd.addDendrite(fi.baseName().toStdString(), dendritic.initialNode, dendritic.finalNode,
+                                      dendritic.type);
+      }
   }
 
 

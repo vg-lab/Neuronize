@@ -1729,12 +1729,15 @@ void NeuroGeneratorWidgetViewer::generateSpinesVrml(skelgenerator::Neuron *neuro
     int total_files = neuron->getSpines().size();
     std::vector<SpinesSWC*> spinesMeshes(static_cast<size_t>(total_files), nullptr);
     QFileInfo fi(mSWCFile);
+    bool haveSpinesNeuron = Neuronize::bbdd.haveSpinesNeuron(fi.baseName().toStdString());
     Neuronize::bbdd.openTransaction();
     int i = 0;
     for (const auto& spine:neuron->getSpines()) {
         std::cout << i << std::endl;
         std::string filename = spine->to_obj_without_base(dirPath,i);
-        Neuronize::bbdd.addSpineVRML(spine,filename,fi.baseName().toStdString(),tempPath,displacement);
+        if (!haveSpinesNeuron) {
+            Neuronize::bbdd.addSpineVRML(spine, filename, fi.baseName().toStdString(), tempPath, displacement);
+        }
         SpinesSWC* auxMesh = new SpinesSWC();
         auxMesh->loadModel(filename);
         auxMesh->applyMatrixTransform(translationMatrix,4);

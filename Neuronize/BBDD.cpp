@@ -14,6 +14,7 @@
 #include <libs/libNeuroUtils/AS2SWCV2.h>
 
 #define ERRCHECK {if (_err!=NULL) {std::cerr << "BBDD Error : " << _err << "\n" << std::endl; sqlite3_free(_err);}}
+
 static int getSpineCallback(void *spines, int columns, char **data, char **columnNames) {
     std::vector<BBDD::Spine>* spinesCast = (std::vector<BBDD::Spine> *) spines;
 
@@ -23,8 +24,13 @@ static int getSpineCallback(void *spines, int columns, char **data, char **colum
     spine.ext = (BBDD::FileType) std::atoi(data[6]);
     spinesCast->push_back(spine);
     return 0;
-
 }
+
+static int countCallback(void *count, int columns, char **data, char **columnNames) {
+   int* countCast = (int *) count;
+   *countCast = std::atoi(data[0]);
+}
+
 namespace BBDD {
 
     const std::vector<std::string> BBDD::neuriteTypeDesc = {"Basal","Apical","Axon"};
@@ -218,12 +224,24 @@ namespace BBDD {
 
     }
 
-    void BBDD::addNeuron(const std::string &name, const std::string& swcFile) {
+    bool BBDD::addNeuron(const std::string &name, const std::string& swcFile) {
         std::string query = "INSERT INTO NEURON (ID,SWC_FILE) VALUES ('%s','%x');";
         std::string file = readBytes(swcFile).data();
         std::string formatedQuery = str( boost::format(query) % name % file);
         sqlite3_exec(_db,formatedQuery.c_str(), nullptr, nullptr,&_err);
-        ERRCHECK
+        if (_err!=NULL) {
+            std::string err (_err);
+            if (err.find("UNIQUE constraint failed: NEURON.ID") != std::string::npos)  {
+                sqlite3_free(_err);
+                return true;
+            } else {
+                std::cerr << "BBDD Error : " << _err << "\n" << std::endl;
+                sqlite3_free(_err);
+                return false;
+            }
+        }
+
+        return false;
     }
 
     void BBDD::addSoma(const std::string& neuronName, MeshVCG& model,ReconstructionMethod reconstructionMethod,std::vector<std::vector<OpenMesh::Vec3d>> contours) {
@@ -394,6 +412,14 @@ namespace BBDD {
 
         return spinesOut;
 
+    }
+
+    bool BBDD::haveSpinesNeuron(const std::string &neuronName) {
+        std::string query = "SELECT COUNT(ID) from SPINES WHERE NEURON == %s';";
+        std::string formatedQuery = str(boost::format(query) % neuronName);
+        int count;
+        sqlite3_exec(_db,formatedQuery.c_str(),countCallback,&count,&_err);
+        return count == 0;
     }
 
 

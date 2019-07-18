@@ -47,6 +47,8 @@ private:
     QProgressDialog *progresDialog;
     skelgenerator::Neuron* neuron;
 
+    QString getNeuronName();
+
 
 private slots:
     void openSelectFileDialog(QLineEdit* target,const QString& title,const QString &types,bool multiFile);
@@ -60,6 +62,7 @@ private slots:
 
     void showWarningDialogIncorrectConnections(int &newThreshold);
     void showWarningDialogReaminingSegments(int sobrantes, int &newThreshold);
+
 
 
 

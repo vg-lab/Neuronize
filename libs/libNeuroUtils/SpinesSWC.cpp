@@ -1890,22 +1890,25 @@ namespace NSSpinesSWC
     initrand ( );
 
     lNumSegmentsWithSpines = lAuxSpinesDistrib.size ( );
-    //TODO IMPROVE PERFORMANCE: Montar el vector de espinas de una vez, es mucho mas rapido
+    int total_spines = 0;
+    for (int i = 0; i < lNumSegmentsWithSpines; i++) {
+        total_spines += lAuxSpinesDistrib.at ( k ).mSpinesSegmentContainer.size ( );
+    }
 
-    std::cout << lNumSegmentsWithSpines << std::endl;
+    auto spines = bbdd.getRandomSpines(total_spines);
+    int numSpines = spines.size();
+    int counter = 0;
+    bool haveSpinesNeuron = bbdd.haveSpinesNeuron(neuronName);
+
     //Auxiliar vectors
     for ( int k = 0; k < lNumSegmentsWithSpines; ++k )
     {
       lNumSpinesInSegment = lAuxSpinesDistrib.at ( k ).mSpinesSegmentContainer.size ( );
 
-        auto spines = bbdd.getRandomSpines(lNumSpinesInSegment);
-        int numSpines = spines.size();
-
       for ( i = 0; i < lNumSpinesInSegment; ++i )
       {
-          std::cout << k << "--" << i << std::endl;
-
-          auto spine = spines[lNumSpinesInSegment % numSpines];
+          auto spine = spines[counter % numSpines];
+        counter ++;
         //Select the spine modelled
         lSpineModelSelected = std::get<0>(spine);
 
@@ -2045,8 +2048,9 @@ namespace NSSpinesSWC
                                        XVector,
                                        YVector
         );
-
-          bbdd.addSpine(neuronName,lSpineModelSelected,{0,0,0},glb_mat);
+        if (!haveSpinesNeuron) {
+            bbdd.addSpine(neuronName, lSpineModelSelected, {0, 0, 0}, glb_mat);
+        }
 
         //Unimos la malla y calculamos los vertices antes y despues
         unsigned int lIniLimit = this->getNumVertex ( );
@@ -3026,7 +3030,7 @@ namespace NSSpinesSWC
 
       initrand ( );
 
-
+      bool haveSpinesNeuron = bbdd.haveSpinesNeuron(neuronName);
       auto spinesModels = bbdd.getRandomSpines(spines.size());
       int numModels = spinesModels.size();
       //Auxiliar vectors
@@ -3171,8 +3175,9 @@ namespace NSSpinesSWC
                                        XVector,
                                        YVector
           );
-
-          bbdd.addSpine(neuronName,lSpineModelSelected,diplacement,glb_mat);
+          if (!haveSpinesNeuron) {
+              bbdd.addSpine(neuronName, lSpineModelSelected, diplacement, glb_mat);
+          }
 
           //Unimos la malla y calculamos los vertices antes y despues
           unsigned int lIniLimit = this->getNumVertex();
