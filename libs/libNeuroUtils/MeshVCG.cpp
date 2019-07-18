@@ -246,7 +246,6 @@ float MeshVCG::getMax2DArea(float zStep) {
     for (auto& contour: contours) {
         MeshVCG meshAux;
         vcg::tri::CapEdgeMesh(contour->mesh,meshAux.mesh);
-        meshAux.toObj("contourDeformed" + std::to_string(cont) +".obj");
         minArea = std::max(minArea,meshAux.getArea());
         cont++;
         delete contour;
@@ -282,7 +281,6 @@ float MeshVCG::getMax2DArea(const std::vector<std::vector<OpenMesh::Vec3d>>& con
         MeshVCG meshAux;
         vcg::tri::CapEdgeMesh(mesh.mesh,meshAux.mesh);
         minArea = std::max(minArea,meshAux.getArea());
-        meshAux.toObj("contour" + std::to_string(cont) +".obj");
     }
 
 
