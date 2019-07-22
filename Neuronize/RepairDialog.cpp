@@ -15,7 +15,7 @@
 #include "RepairDialog.h"
 
 #ifdef _WIN32
-#define RUN "src/run.bat"
+#define RUN std::string("src\\run.bat")
 #else
 #define RUN std::string("src/run.sh")
 #endif
@@ -142,12 +142,12 @@ void RepairDialog::onOk() {
     }
     auto future = QtConcurrent::run([=](){
 
-        QSettings settings("Neuronize","preferences");
+		QSettings settings(QSettings::IniFormat, QSettings::SystemScope, "Neuronize", "preferences");
         QString path = QFileInfo(settings.fileName()).absoluteDir().absolutePath();
         QString envPath = path + "/" + "env";
 
         QStringList arguments;
-        arguments << "-a" << output << "-v" << input << "-s" << saveCombo->currentText() << "-p" << precisionBox->text()
+        arguments << "-a" << "\"" + output + "\"" << "-v" << "\"" + input + "\"" << "-s" << saveCombo->currentText() << "-p" << precisionBox->text()
                   << "-r" << QString::number(percentageBox->value()) << "-f" << QString::number(segmentsCheckBox->isChecked()) << "-k" << kernelSizeBox->text()
                   << "-c" << QString::number(cleanCheckBox->isChecked());
 
