@@ -20,27 +20,11 @@
 
 #include <QApplication>
 #include "neuronize.h"
-#include <QSettings>
-#define ENV "env"
-#ifdef _WIN32
-#define INSTALL std::string("src\\install.bat")
-#else
-#define INSTALL std::string("src/install.sh")
-#endif
+
 
 
 int main ( int argc, char *argv[] )
 {
-    QSettings settings(QSettings::IniFormat,QSettings::SystemScope,"Neuronize","preferences");
-    QString path = QFileInfo(settings.fileName()).absoluteDir().absolutePath();
-    QString envPath = path + "/" + ENV;
-
-    if (!QFileInfo(envPath).exists()) {
-        std::string command = INSTALL + " " + envPath.toStdString();
-        std::system(command.c_str());
-    }
-
-
   QApplication a ( argc, argv );
   Neuronize w;
   w.show ( );

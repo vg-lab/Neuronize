@@ -24,6 +24,16 @@
 
 #include "neuronize.h"
 
+#include <QSettings>
+#define ENV "env"
+#ifdef _WIN32
+#define INSTALL std::string("src\\install.bat")
+#else
+#define INSTALL std::string("src/install.sh")
+#endif
+
+QString Neuronize::configPath;
+
 Neuronize::Neuronize ( QWidget *parent )
   : QMainWindow ( parent )
 {
@@ -56,6 +66,24 @@ Neuronize::Neuronize ( QWidget *parent )
   resetNeuronnizeInterface ( );
 
   mActiveTab = 0;
+
+#ifdef _Win32
+    QSettings settings(QSettings::IniFormat,QSettings::SystemScope,"Neuronize","preferences");
+#else
+    QSettings settings("Neuronize","preferences");
+#endif
+
+    configPath = QFileInfo(settings.fileName()).absoluteDir().absolutePath();
+    QDir dir (configPath);
+    if (!dir.exists() ) {
+        dir.mkpath(configPath);
+    }
+    QString envPath = configPath + "/" + ENV;
+
+    if (!QFileInfo(envPath).exists()) {
+        std::string command = INSTALL + " " + envPath.toStdString();
+        std::system(command.c_str());
+    }
 
   this->showMaximized ( );
 

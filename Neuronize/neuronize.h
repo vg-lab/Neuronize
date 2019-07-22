@@ -53,6 +53,8 @@ class Neuronize: public QMainWindow
 
     ~Neuronize ( );
 
+    static QString configPath;
+
   private:
 
     Ui::NeuronizeClass ui;

@@ -13,6 +13,7 @@
 #include <QFormLayout>
 #include <iostream>
 #include "RepairDialog.h"
+#include "neuronize.h"
 
 #ifdef _WIN32
 #define RUN std::string("src\\run.bat")
@@ -142,15 +143,14 @@ void RepairDialog::onOk() {
     }
     auto future = QtConcurrent::run([=](){
 
-		QSettings settings(QSettings::IniFormat, QSettings::SystemScope, "Neuronize", "preferences");
-        QString path = QFileInfo(settings.fileName()).absoluteDir().absolutePath();
-        QString envPath = path + "/" + "env";
+        QString envPath = Neuronize::configPath + "/" + "env";
 
         QStringList arguments;
         arguments << "-a" << "\"" + output + "\"" << "-v" << "\"" + input + "\"" << "-s" << saveCombo->currentText() << "-p" << precisionBox->text()
                   << "-r" << QString::number(percentageBox->value()) << "-f" << QString::number(segmentsCheckBox->isChecked()) << "-k" << kernelSizeBox->text()
                   << "-c" << QString::number(cleanCheckBox->isChecked());
-
+        auto test = arguments.join(" ").toStdString();
+        std::cout << test << std::endl;
         std::string command = QCoreApplication::applicationDirPath().toStdString() + "/" + RUN + " " + envPath.toStdString() + " " + arguments.join(" ").toStdString();
         std::system(command.c_str());
 
