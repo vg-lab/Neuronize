@@ -354,9 +354,6 @@ void SomaDeformerWidget::exportModelWithSTDName ( )
 
   QString fileName = mtmpDir + "/SomaGenerated/SomaDeformed.obj";
   viewer->exportModel ( fileName );
-  viewer->setNormalizeExportedModel(false);
-  viewer->exportModel(mtmpDir + "/SomaGenerated/RealSize.obj");
-  viewer->setNormalizeExportedModel(true);
 
 
   //Export configuration name
