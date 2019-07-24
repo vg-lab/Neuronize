@@ -79,13 +79,3 @@ if (MSVC)
 else(MSVC)
 	common_application(neuronize GUI)
 endif ()
-
-add_custom_command(TARGET neuronize POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_directory
-		"${PROJECT_SOURCE_DIR}/Content/"
-		$<TARGET_FILE_DIR:neuronize>)
-
-add_custom_command(TARGET neuronize POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_directory
-		"${PROJECT_SOURCE_DIR}/MeshReconstruct/src"
-		$<TARGET_FILE_DIR:neuronize>/src)
