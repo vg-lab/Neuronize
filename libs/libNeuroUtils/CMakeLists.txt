@@ -23,6 +23,7 @@ set (NEUROUTILS_SOURCES
 		SWCSpinesDistributor.cpp
 		AS2SWCV2.cpp
 		MeshVCG.cpp
+		BBDD.cpp
 		)
 
 set(NEUROUTILS_HEADERS
@@ -55,6 +56,7 @@ set(NEUROUTILS_HEADERS
 		SWCSpinesDistributor.h
 		ASC2SWC.h
 		MeshVCG.h
+		BBDD.h
 		)
 
 set(NEUROUTILS_LINK_LIBRARIES
@@ -65,6 +67,8 @@ set(NEUROUTILS_LINK_LIBRARIES
 		${OPENMESH_LIBRARIES}
 		Qt5::Core
 		${SOIL_LIBRARIES}
+		skelgeneratorutil
+		${SQLite3_LIBRARIES}
 		)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})

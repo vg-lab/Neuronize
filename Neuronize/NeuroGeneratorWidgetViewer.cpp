@@ -850,7 +850,9 @@ void NeuroGeneratorWidgetViewer::generateSpinesInSegment ( unsigned int pNumSpin
                                            mApicalMinDistance,
                                            mApicalCteDistance,
                                            Neuronize::bbdd,
-                                           fi.baseName().toStdString()
+                                           fi.baseName().toStdString(),
+                                           Neuronize::tmpPath.toStdString()
+
 
   );
 
@@ -1853,7 +1855,7 @@ NeuroGeneratorWidgetViewer::generateSpinesASC(std::vector<Spine>& spines,unsigne
 
     auto displacement = mSWCImporter->getDisplacement();
     QFileInfo fi(mSWCFile);
-    meshSpines->distributeSpines (spines,fi.baseName().toStdString(),displacement,Neuronize::bbdd);
+    meshSpines->distributeSpines (spines,fi.baseName().toStdString(),displacement,Neuronize::bbdd,Neuronize::tmpPath.toStdString());
 
     int i = 0;
 

@@ -19,10 +19,7 @@
  */
 
 #include <QApplication>
-#include <boost/filesystem.hpp>
 #include "neuronize.h"
-#include "BBDD.h"
-
 
 int main ( int argc, char *argv[] )
 {

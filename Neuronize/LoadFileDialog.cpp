@@ -14,6 +14,7 @@
 #include <QInputDialog>
 #include <QProgressDialog>
 #include <QFutureWatcher>
+#include <cctype>
 
 
 LoadFileDialog::LoadFileDialog(const std::string &tmpDir,QWidget *parent): QDialog(parent) {

@@ -1774,7 +1774,8 @@ namespace NSSpinesSWC
                                                float pApicalMinDistance,
                                                float pApicalCteDistance,
                                                BBDD::BBDD bbdd,
-                                               const std::string& neuronName
+                                               const std::string& neuronName,
+                                               const std::string& tmpPath
   )
   {
     SWCSpinesDistributor *lpSWCSpinesDistributor = new SWCSpinesDistributor ( );
@@ -1895,7 +1896,7 @@ namespace NSSpinesSWC
         total_spines += lAuxSpinesDistrib.at ( k ).mSpinesSegmentContainer.size ( );
     }
 
-    auto spines = bbdd.getRandomSpines(total_spines);
+    auto spines = bbdd.getRandomSpines(total_spines,tmpPath);
     int numSpines = spines.size();
     int counter = 0;
     bool haveSpinesNeuron = bbdd.haveSpinesNeuron(neuronName);
@@ -2932,7 +2933,7 @@ namespace NSSpinesSWC
     }
   }
 
-    void SpinesSWC::distributeSpines(const vector<Spine> &spines,const std::string& neuronName,const OpenMesh::Vec3f& diplacement, BBDD::BBDD bbdd) {
+    void SpinesSWC::distributeSpines(const vector<Spine> &spines,const std::string& neuronName,const OpenMesh::Vec3f& diplacement, BBDD::BBDD bbdd, const std::string& tmpPath) {
       mNumVerticesEnSpina = mSpinesModeledContainer->getContainer ( ).at ( 0 )->getNumVertex ( );
 
       SpineInfo lSpineInfo;
@@ -3031,7 +3032,7 @@ namespace NSSpinesSWC
       initrand ( );
 
       bool haveSpinesNeuron = bbdd.haveSpinesNeuron(neuronName);
-      auto spinesModels = bbdd.getRandomSpines(spines.size());
+      auto spinesModels = bbdd.getRandomSpines(spines.size(),tmpPath);
       int numModels = spinesModels.size();
       //Auxiliar vectors
         for ( i = 0; i < spines.size(); ++i ) {

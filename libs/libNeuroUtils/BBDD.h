@@ -5,15 +5,17 @@
 #ifndef NEURONIZE_BBDD_H
 #define NEURONIZE_BBDD_H
 
+#include <neuroutils/api.h>
+
 #include <sqlite3.h>
 #include <string>
 #include <vector>
 #include <map>
 #include <libs/libNeuroUtils/MeshVCG.h>
 #include <libs/libNeuroUtils/SWCImporter.h>
-#include "../SkelGenerator/SkelGeneratorUtil/Spine.h"
+#include <SkelGeneratorUtil/Spine.h>
 
-namespace BBDD {
+namespace  BBDD {
     enum FileType {
         Obj, Stl
     };
@@ -31,7 +33,7 @@ namespace BBDD {
         FileType ext;
     };
 
-    class BBDD {
+    class NEUROUTILS_API BBDD {
         sqlite3 *_db;
         char *_err = NULL;
     public:
@@ -50,7 +52,7 @@ namespace BBDD {
 
         void addSpine(const std::string& neuronName, int spineModel, const OpenMesh::Vec3f& displacement,const boost::numeric::ublas::matrix<float>& transform);
 
-        std::vector<std::tuple<int,std::string>> getRandomSpines(int n);
+        std::vector<std::tuple<int,std::string>> getRandomSpines(int n,const std::string& tmpPath);
 
         void openTransaction();
 

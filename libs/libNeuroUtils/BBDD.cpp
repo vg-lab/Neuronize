@@ -3,7 +3,6 @@
 //
 
 #include "BBDD.h"
-#include "neuronize.h"
 #include <boost/format.hpp>
 #include <fstream>
 #include <boost/filesystem.hpp>
@@ -29,6 +28,7 @@ static int getSpineCallback(void *spines, int columns, char **data, char **colum
 static int countCallback(void *count, int columns, char **data, char **columnNames) {
    int* countCast = (int *) count;
    *countCast = std::atoi(data[0]);
+    return 0;
 }
 
 namespace BBDD {
@@ -393,7 +393,7 @@ namespace BBDD {
         ERRCHECK
     }
 
-    std::vector<std::tuple<int,std::string>> BBDD::getRandomSpines(int n) {
+    std::vector<std::tuple<int,std::string>> BBDD::getRandomSpines(int n,const std::string& tmpPath) {
         std::string query = "SELECT * FROM SPINE_MODEL WHERE ORIGIN == 1 OR ORIGIN == 3 ORDER BY RANDOM() LIMIT " + std::to_string(n);
         std::vector<Spine> spines;
         spines.reserve(n);
@@ -403,7 +403,7 @@ namespace BBDD {
         std::vector<std::tuple<int,std::string>> spinesOut;
         for (int i =0 ; i < spines.size(); i++) {
             const auto& spine = spines[i];
-            std::string filePath = Neuronize::tmpPath.toStdString() + "/spine" + std::to_string(i) +  "." + fileTypeDesc[spine.ext];
+            std::string filePath = tmpPath + "/spine" + std::to_string(i) +  "." + fileTypeDesc[spine.ext];
             std::ofstream file (filePath);
             file << spine.file;
             file.close();
