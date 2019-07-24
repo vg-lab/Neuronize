@@ -25,9 +25,15 @@
 
 int main ( int argc, char *argv[] )
 {
+
+    MeshVCG m1 ("knot_orig.obj");
+    MeshVCG m2 ("knot_vcg_simplified.obj");
+    m1.hausdorffDistance(m2,"color");
+    /*
   QApplication a ( argc, argv );
   Neuronize w;
   w.show ( );
   return a.exec ( );
+     */
 
 }
