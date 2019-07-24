@@ -106,10 +106,10 @@ include( CPackConfig )
 #Copy content (this must be improved)
 
 file(GLOB MY_CONTENT "Content/*")
-file(COPY ${MY_CONTENT} DESTINATION "${RUNTIME_OUTPUT_DIRECTORY}")
+file(COPY ${MY_CONTENT} DESTINATION "${CMAKE_BINARY_DIR}")
 
 file(GLOB MeshReconstruct "MeshReconstruct/src/*")
-file(COPY ${MeshReconstruct} DESTINATION "${RUNTIME_OUTPUT_DIRECTORY}/src"  FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE)
+file(COPY ${MeshReconstruct} DESTINATION "${CMAKE_BINARY_DIR}/src"  FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE)
 
 
 
