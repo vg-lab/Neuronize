@@ -234,16 +234,9 @@ double MeshVCG::getArea() {
 double MeshVCG::hausdorffDistance(MeshVCG& otherMesh, const std::string& colorMeshPath) {
     float                ColorMin=0, ColorMax=0.0;
     double                dist1_max, dist2_max;
-    unsigned long         n_samples_target, elapsed_time;
-    double								n_samples_per_area_unit;
+    unsigned long         n_samples_target;
+    double				  n_samples_per_area_unit;
     int                   flags;
-
-    // print program info
-    printf("-------------------------------\n"
-           "         Metro V.4.07 \n"
-           "     http://vcg.isti.cnr.it\n"
-           "   release date: " __DATE__ "\n"
-           "-------------------------------\n\n");
 
     // default parameters
     flags = vcg::SamplingFlags::VERTEX_SAMPLING |
@@ -285,68 +278,29 @@ double MeshVCG::hausdorffDistance(MeshVCG& otherMesh, const std::string& colorMe
     S1.bbox = bbox;
     S2.bbox = bbox;
 
-    // initialize time info.
-    int t0=clock();
-
     vcg::Sampling<MyMesh> ForwardSampling(S1,S2);
     vcg::Sampling<MyMesh> BackwardSampling(S2,S1);
 
-    // print mesh info.
-    printf("Mesh info:\n");
-    printf(" M1: '%s'\n\tvertices  %7i\n\tfaces     %7i\n\tarea      %12.4f\n", this->name.c_str(), S1.vn, S1.fn, ForwardSampling.GetArea());
-    printf("\tbbox (%7.4f %7.4f %7.4f)-(%7.4f %7.4f %7.4f)\n", tmp_bbox_M1.min[0], tmp_bbox_M1.min[1], tmp_bbox_M1.min[2], tmp_bbox_M1.max[0], tmp_bbox_M1.max[1], tmp_bbox_M1.max[2]);
-    printf("\tbbox diagonal %f\n", (float)tmp_bbox_M1.Diag());
-    printf(" M2: '%s'\n\tvertices  %7i\n\tfaces     %7i\n\tarea      %12.4f\n", otherMesh.name.c_str(), S2.vn, S2.fn, BackwardSampling.GetArea());
-    printf("\tbbox (%7.4f %7.4f %7.4f)-(%7.4f %7.4f %7.4f)\n", tmp_bbox_M2.min[0], tmp_bbox_M2.min[1], tmp_bbox_M2.min[2], tmp_bbox_M2.max[0], tmp_bbox_M2.max[1], tmp_bbox_M2.max[2]);
-    printf("\tbbox diagonal %f\n", (float)tmp_bbox_M2.Diag());
-
     // Forward distance.
-    printf("\nForward distance (M1 -> M2):\n");
     ForwardSampling.SetFlags(flags);
+    ForwardSampling.SetSamplesTarget(n_samples_target);
+    n_samples_per_area_unit = ForwardSampling.GetNSamplesPerAreaUnit();
 
-        ForwardSampling.SetSamplesTarget(n_samples_target);
-        n_samples_per_area_unit = ForwardSampling.GetNSamplesPerAreaUnit();
-
-    printf("target # samples      : %lu\ntarget # samples/area : %f\n", n_samples_target, n_samples_per_area_unit);
     ForwardSampling.Hausdorff();
     dist1_max  = ForwardSampling.GetDistMax();
-    printf("\ndistances:\n  max  : %f (%f  wrt bounding box diagonal)\n", (float)dist1_max, (float)dist1_max/bbox.Diag());
-    printf("  mean : %f\n", ForwardSampling.GetDistMean());
-    printf("  RMS  : %f\n", ForwardSampling.GetDistRMS());
-    printf("# vertex samples %9lu\n", ForwardSampling.GetNVertexSamples());
-    printf("# edge samples   %9lu\n", ForwardSampling.GetNEdgeSamples());
-    printf("# area samples   %9lu\n", ForwardSampling.GetNAreaSamples());
-    printf("# total samples  %9lu\n", ForwardSampling.GetNSamples());
-    printf("# samples per area unit: %f\n\n", ForwardSampling.GetNSamplesPerAreaUnit());
 
     // Backward distance.
-    printf("\nBackward distance (M2 -> M1):\n");
     BackwardSampling.SetFlags(flags);
+    BackwardSampling.SetSamplesTarget(n_samples_target);
+    n_samples_per_area_unit = BackwardSampling.GetNSamplesPerAreaUnit();
 
-        BackwardSampling.SetSamplesTarget(n_samples_target);
-        n_samples_per_area_unit = BackwardSampling.GetNSamplesPerAreaUnit();
 
-
-    printf("target # samples      : %lu\ntarget # samples/area : %f\n", n_samples_target, n_samples_per_area_unit);
     BackwardSampling.Hausdorff();
     dist2_max  = BackwardSampling.GetDistMax();
-    printf("\ndistances:\n  max  : %f (%f  wrt bounding box diagonal)\n", (float)dist2_max, (float)dist2_max/bbox.Diag());
-    printf("  mean : %f\n", BackwardSampling.GetDistMean());
-    printf("  RMS  : %f\n", BackwardSampling.GetDistRMS());
-    printf("# vertex samples %9lu\n", BackwardSampling.GetNVertexSamples());
-    printf("# edge samples   %9lu\n", BackwardSampling.GetNEdgeSamples());
-    printf("# area samples   %9lu\n", BackwardSampling.GetNAreaSamples());
-    printf("# total samples  %9lu\n", BackwardSampling.GetNSamples());
-    printf("# samples per area unit: %f\n\n", BackwardSampling.GetNSamplesPerAreaUnit());
 
-    // compute time info.
-    elapsed_time = clock() - t0;
     int n_total_sample=ForwardSampling.GetNSamples()+BackwardSampling.GetNSamples();
     double mesh_dist_max  = max(dist1_max , dist2_max);
 
-    printf("\nHausdorff distance: %f (%f  wrt bounding box diagonal)\n",(float)mesh_dist_max,(float)mesh_dist_max/bbox.Diag());
-    printf("  Computation time  : %d ms\n",(int)(1000.0*elapsed_time/CLOCKS_PER_SEC));
-    printf("  # samples/second  : %f\n\n", (float)n_total_sample/((float)elapsed_time/CLOCKS_PER_SEC));
 
     // save error files.
     if(flags & vcg::SamplingFlags::SAVE_ERROR)
@@ -365,7 +319,7 @@ double MeshVCG::hausdorffDistance(MeshVCG& otherMesh, const std::string& colorMe
         vcg::tri::io::ExporterOBJ<MyMesh>::Save( S2,s2Name.c_str(),saveMask);
     }
 
-    return 0;
+    return mesh_dist_max;
 }
 
 
