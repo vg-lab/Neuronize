@@ -23,14 +23,6 @@ set(SYSNEUROUTILS_LINK_LIBRARIES
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR}/src)
 
-add_definitions("-w")
-
-if (MSVC)
-    add_definitions("-W4")
-    # Static build
-    # add_definitions(-DSYSNEUROUTILS_STATIC)
-endif ()
-
 set( SYSNEUROUTILS_INCLUDE_NAME sysneuroutils )
 set( SYSNEUROUTILS_NAMESPACE sysneuroutils )
 

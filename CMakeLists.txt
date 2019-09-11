@@ -54,7 +54,7 @@ common_find_package(Qt5OpenGL SYSTEM REQUIRED)
 common_find_package(Qt5Xml SYSTEM REQUIRED)
 common_find_package(GLM SYSTEM REQUIRED)
 common_find_package(Eigen3 SYSTEM REQUIRED)
-common_find_package(SkelGenerator REQUIRED )
+common_find_package(SkelGenerator SYSTEM REQUIRED)
 common_find_package(SOIL REQUIRED)
 common_find_package(OpenMesh SYSTEM REQUIRED)
 common_find_package(QGLViewer SYSTEM REQUIRED)
@@ -78,8 +78,8 @@ list( APPEND NEURONIZE_DEPENDENT_LIBRARIES
         SOIL
         )
 
-if (MSVC)
-  add_definitions("-W4")
+if( NOT MSVC )
+  add_definitions("-w")
 endif()
 
 add_subdirectory( libs/libSysNeuroUtils )
@@ -105,5 +105,3 @@ include( CPackConfig )
 #Copy content (this must be improved)
 file(GLOB MY_CONTENT "Content/*")
 file(COPY ${MY_CONTENT} DESTINATION "${CMAKE_BINARY_DIR}/bin")
-
-
