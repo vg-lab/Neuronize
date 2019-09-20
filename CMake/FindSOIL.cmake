@@ -20,6 +20,7 @@ IF(WIN32)
             ${SOIL_ROOT_DIR}/lib
             $ENV{SOIL_ROOT_DIR}/lib
             $ENV{SOIL_ROOT_DIR}/x64/Release
+            $ENV{SOIL_ROOT_DIR}/libs
             DOC "The SOIL library")
 ELSE(WIN32)
     FIND_PATH( SOIL_INCLUDE_PATH SOIL/SOIL.h
@@ -49,7 +50,7 @@ IF(SOIL_INCLUDE_PATH AND SOIL_LIBRARY)
     SET(SOIL_INCLUDE_DIRS ${SOIL_INCLUDE_PATH})
     SET(SOIL_LIBRARIES ${SOIL_LIBRARY})
     SET(SOIL_FOUND "YES")
-    message(STATUS "Found SOIL")
+    message(STATUS "Found SOIL (${SOIL_LIBRARY})")
 ENDIF(SOIL_INCLUDE_PATH AND SOIL_LIBRARY)
 
 INCLUDE(FindPackageHandleStandardArgs)

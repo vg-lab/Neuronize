@@ -28,7 +28,7 @@ set(GLNEUROUTILS_HEADERS
 set(GLNEUROUTILS_LINK_LIBRARIES
 		SysNeuroUtils
 		NeuroUtils
-		SOIL
+		${SOIL_LIBRARIES}
 		${GLEW_LIBRARIES}
 		${OPENGL_LIBRARIES}
 		${GLUT_LIBRARY}
@@ -39,12 +39,7 @@ set(GLNEUROUTILS_LINK_LIBRARIES
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR}/src)
 
-add_definitions("-w")
-
 if (MSVC)
-	add_definitions("/W4")
-	# Static build
-	# add_definitions(-DLIBGLNEUROUTILS_STATIC)
 	add_definitions(-D_USE_MATH_DEFINES)
 endif ()
 
