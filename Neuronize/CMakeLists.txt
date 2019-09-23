@@ -14,6 +14,7 @@ set (NEURONIZE_SOURCES
 		SomaCreatorWidget.cpp
 		SomaDeformerWidget.cpp
 		SomaDeformerWidgetViewer.cpp
+		RepairDialog.cpp
 		)
 
 set(NEURONIZE_HEADERS
@@ -34,6 +35,7 @@ set(NEURONIZE_HEADERS
 		SomaDeformerWidgetViewer.h
 		xneuron.qrc
 		xneuron.ui
+		RepairDialog.h
 		)
 
 set(NEURONIZE_LINK_LIBRARIES
