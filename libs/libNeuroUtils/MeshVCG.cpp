@@ -231,8 +231,7 @@ double MeshVCG::getArea() {
     return vcg::tri::Stat<MyMesh>::ComputeMeshArea(mesh);
 }
 
-double MeshVCG::hausdorffDistance(MeshVCG& otherMesh, const std::string& colorMeshPath) {
-    float                ColorMin=0, ColorMax=0.0;
+std::tuple<double, double> MeshVCG::hausdorffDistance(MeshVCG& otherMesh, const std::string& colorMeshPath) {
     double                dist1_max, dist2_max;
     unsigned long         n_samples_target;
     double				  n_samples_per_area_unit;
@@ -307,10 +306,11 @@ double MeshVCG::hausdorffDistance(MeshVCG& otherMesh, const std::string& colorMe
     {
         int saveMask = vcg::tri::io::Mask::IOM_VERTCOLOR | vcg::tri::io::Mask::IOM_VERTQUALITY /* | vcg::ply::PLYMask::PM_VERTQUALITY*/ ;
         //p.mask|=vcg::ply::PLYMask::PM_VERTCOLOR|vcg::ply::PLYMask::PM_VERTQUALITY;
-        if(ColorMax!=0 || ColorMin != 0){
-            vcg::tri::UpdateColor<MyMesh>::PerVertexQualityRamp(S1,ColorMin,ColorMax);
-            vcg::tri::UpdateColor<MyMesh>::PerVertexQualityRamp(S2,ColorMin,ColorMax);
-        }
+        std::pair<MyMesh::ScalarType , MyMesh::ScalarType> minmax = Stat<MyMesh>::ComputePerVertexQualityMinMax(S1);
+        vcg::tri::UpdateColor<MyMesh>::PerVertexQualityRamp(S1,minmax.second,minmax.first);
+        minmax = Stat<MyMesh>::ComputePerVertexQualityMinMax(S2);
+        vcg::tri::UpdateColor<MyMesh>::PerVertexQualityRamp(S2,minmax.second,minmax.first);
+
 
         std::string s1Name = colorMeshPath + "/" + this->name+".obj";
         std::string s2Name = colorMeshPath + "/" + otherMesh.name+".obj";
@@ -319,8 +319,17 @@ double MeshVCG::hausdorffDistance(MeshVCG& otherMesh, const std::string& colorMe
         vcg::tri::io::ExporterOBJ<MyMesh>::Save( S2,s2Name.c_str(),saveMask);
     }
 
-    return mesh_dist_max;
+    return {dist1_max,dist2_max};
 }
+
+ QColor MeshVCG::getColor(float value) {
+    vcg::Color4f color;
+    color.SetColorRamp(0.0f,1.0f,value);
+    return QColor::fromRgbF(color[0],color[1],color[2],color[3]);
+
+}
+
+
 
 
 

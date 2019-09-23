@@ -13,7 +13,7 @@
 #include <vcg/complex/all_types.h>
 #include <OpenMesh/Core/Mesh/Traits.hh>
 #include <vcg/simplex/face/component_ep.h>
-
+#include <QColor>
 
 class MyVertex; class MyEdge; class MyFace;
     struct MyUsedTypes : public vcg::UsedTypes<vcg::Use<MyVertex>   ::AsVertexType,
@@ -66,7 +66,9 @@ class MyFace    : public vcg::Face<   MyUsedTypes, vcg::face::Mark ,vcg::face::F
 
         double getArea();
 
-        double hausdorffDistance(MeshVCG& otherMesh, const std::string& colorMeshPath = "");
+        std::tuple<double, double> hausdorffDistance(MeshVCG& otherMesh, const std::string& colorMeshPath = "");
+
+        static QColor getColor(float value);
 
 
 

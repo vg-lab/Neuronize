@@ -15,6 +15,8 @@ set (NEURONIZE_SOURCES
 		SomaDeformerWidget.cpp
 		SomaDeformerWidgetViewer.cpp
 		RepairDialog.cpp
+		CompareMeshesWidget.cpp
+		CompareMeshWidgetViewer.cpp
 		)
 
 set(NEURONIZE_HEADERS
@@ -36,6 +38,8 @@ set(NEURONIZE_HEADERS
 		xneuron.qrc
 		xneuron.ui
 		RepairDialog.h
+		CompareMeshesWidget.h
+		CompareMeshWidgetViewer.h
 		)
 
 set(NEURONIZE_LINK_LIBRARIES

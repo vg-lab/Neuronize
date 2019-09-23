@@ -164,7 +164,8 @@ namespace NSBaseMesh
   void BaseMesh::loadModel ( string meshName )
   {
     OpenMesh::IO::Options opt;
-    if ( !OpenMesh::IO::read_mesh ( *Mesh, meshName, opt ))
+    opt += OpenMesh::IO::Options::VertexColor;
+      if ( !OpenMesh::IO::read_mesh ( *Mesh, meshName, opt ))
     {
       std::cerr << "Error Reading File\n";
       delete Mesh;
