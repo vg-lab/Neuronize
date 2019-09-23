@@ -73,6 +73,7 @@ private:
     static double calcSommaRadius(OpenMesh::Vec3d center,std::vector<Dendrite> &dentrites);
 
     static void joinApicals(std::vector<Dendrite>& apicals,const OpenMesh::Vec3d& somaCenter);
+    static bool checkPointInsideSoma(MeshVCG& soma, const OpenMesh::Vec3d& point,std::vector<OpenMesh::Vec3d>& intersectionPoints);
 };
 
 
