@@ -9,18 +9,22 @@
 #include <wrap/io_trimesh/import_obj.h>
 #include <wrap/io_trimesh/export_obj.h>
 #include <wrap/io_trimesh/export_off.h>
+#include <GL/gl.h>
+#include <wrap/gl/glu_tessellator_cap.h>
 #include <vcg/complex/algorithms/update/topology.h>
 #include <vcg/complex/algorithms/update/position.h>
 #include <vcg/complex/algorithms/convex_hull.h>
 #include <iomanip>
-#include <libs/libNeuroUtils/AS2SWCV2.h>
 #include <vcg/complex/algorithms/refine_loop.h>
 #include <vcg/complex/algorithms/inertia.h>
 #include <vcg/complex/algorithms/isotropic_remeshing.h>
 #include <vcg/complex/algorithms/voronoi_remesher.h>
 #include <vcg/complex/algorithms/stat.h>
+#include <vcg/complex/algorithms/intersection.h>
 #include <QtCore/QFile>
 #include <clocale>
+#include <queue>
+#include <unordered_set>
 
 
 MeshVCG::MeshVCG(const std::string &filename) {
@@ -41,6 +45,7 @@ MeshVCG::MeshVCG(const std::string &filename) {
     }
     vcg::tri::UpdateTopology<MyMesh>::FaceFace(mesh);
     vcg::tri::UpdateTopology<MyMesh>::VertexFace(mesh);
+
     vcg::tri::UpdateNormal<MyMesh>::PerVertexNormalized(mesh);
 }
 
@@ -137,53 +142,35 @@ OpenMesh::Vec3d MeshVCG::center() {
     return center;
 }
 
-bool MeshVCG::RayIntersectsTriangle(OpenMesh::Vec3d rayOrigin,
-                           OpenMesh::Vec3d rayVector,
-                           MyMesh::FacePointer face,
-                           OpenMesh::Vec3d& outIntersectionPoint) {
-    OpenMesh::Vec3d v0 = {face->V(0)->P()[0],face->V(0)->P()[1],face->V(0)->P()[2]};
-    OpenMesh::Vec3d v1 = {face->V(1)->P()[0],face->V(1)->P()[1],face->V(1)->P()[2]};
-    OpenMesh::Vec3d v2 = {face->V(2)->P()[0],face->V(2)->P()[1],face->V(2)->P()[2]};
-
-    double kEpsilon = 0.00001;
-
-    OpenMesh::Vec3d v0v1 = v1 - v0;
-    OpenMesh::Vec3d v0v2 = v2 - v0;
-    OpenMesh::Vec3d pvec = rayVector % v0v2;
-    float det = OpenMesh::dot(v0v1,pvec);
-    // ray and triangle are parallel if det is close to 0
-    if (fabs(det) < kEpsilon) return false;
-    float invDet = 1 / det;
-
-    OpenMesh::Vec3d tvec = rayOrigin - v0;
-    auto u = OpenMesh::dot(tvec,pvec) * invDet;
-    if (u < 0 || u > 1) return false;
-
-    OpenMesh::Vec3d qvec = tvec % v0v1;
-    auto v = OpenMesh::dot(rayVector,qvec) * invDet;
-    if (v < 0 || u + v > 1) return false;
-
-    auto t = OpenMesh::dot(v0v2,qvec) * invDet;
-    outIntersectionPoint = rayOrigin + rayVector * t;
-
-    return true;
-
-}
 
 bool
-MeshVCG::RayIntersects(OpenMesh::Vec3d rayOrigin, OpenMesh::Vec3d rayVector, std::vector<OpenMesh::Vec3d> &outIntersectionPoint, std::vector<MyMesh::FacePointer> &intersectTriangles) {
-    OpenMesh::Vec3d intersectPointAux;
-    auto center = getCenter();
-    bool intersect = false;
-    for (auto fi = mesh.face.begin(); fi != mesh.face.end(); fi++) {
-        auto fp = &(*fi);
-        intersect = RayIntersectsTriangle(center, rayVector, fp, intersectPointAux);
-        if (intersect) {
-           outIntersectionPoint.push_back(intersectPointAux);
-           intersectTriangles.push_back(fp);
+MeshVCG::rayIntersects(OpenMesh::Vec3d rayOrigin, OpenMesh::Vec3d rayVector, std::vector<OpenMesh::Vec3d> &outIntersectionPoint) {
+
+    vcg::Point3d origin (rayOrigin[0],rayOrigin[1],rayOrigin[2]);
+    vcg::Point3d dir (rayVector[0],rayVector[1],rayVector[2]);
+    vcg::Line3d ray(origin,dir);
+
+    bool hit = false;
+    double bar1,bar2,dist;
+    vcg::Point3d p1;
+    vcg::Point3d p2;
+    vcg::Point3d p3;
+    for ( auto fi = mesh.face.begin(); fi != mesh.face.end(); ++fi) {
+        p1 = vcg::Point3d( (*fi).P(0).X() ,(*fi).P(0).Y(),(*fi).P(0).Z() );
+        p2 = vcg::Point3d( (*fi).P(1).X() ,(*fi).P(1).Y(),(*fi).P(1).Z() );
+        p3 = vcg::Point3d( (*fi).P(2).X() ,(*fi).P(2).Y(),(*fi).P(2).Z() );
+        if(vcg::IntersectionLineTriangle<double>(ray,p1,p2,p3,dist,bar1,bar2)) {
+            if (dist > 0) { // Direccion del rayo.
+                auto hitPoint = p1 * (1 - bar1 - bar2) + p2 * bar1 + p3 * bar2;
+                OpenMesh::Vec3d aux(hitPoint.X(), hitPoint.Y(), hitPoint.Z());
+                outIntersectionPoint.push_back(aux);
+                hit = true;
+            }
         }
     }
-    return intersect;
+
+    return hit;
+
 }
 
 
@@ -222,6 +209,85 @@ double MeshVCG::getVolume() {
 double MeshVCG::getArea() {
     return vcg::tri::Stat<MyMesh>::ComputeMeshArea(mesh);
 }
+
+MeshVCG* MeshVCG::sliceAux(float z) {
+   vcg::Point3d planeCenter(0,0,z);
+   vcg::Point3d planeDir(0,0,1);
+   vcg::Plane3d plane;
+   plane.Init(planeCenter,planeDir);
+
+   MeshVCG* sliceContour = new MeshVCG();
+   vcg::IntersectionPlaneMesh<MyMesh,MyMesh,double>(this->mesh,plane,sliceContour->mesh);
+   vcg::tri::Clean<MyMesh>::RemoveDuplicateVertex(sliceContour->mesh);
+    return sliceContour;
+}
+
+
+std::vector<MeshVCG*> MeshVCG::slice(float zStep) {
+    vcg::tri::UpdateBounding<MyMesh>::Box(mesh);
+    auto min = mesh.bbox.P(0);
+    float minZ = min[2];
+    auto max = mesh.bbox.P(7);
+    float maxZ = max[2];
+    std::vector<MeshVCG* > contours;
+    for (float currentZ  = minZ + zStep; currentZ <= maxZ ; currentZ+=zStep) {
+        contours.push_back(sliceAux(currentZ));
+    }
+
+    return contours;
+}
+
+static int cont =0;
+float MeshVCG::getMax2DArea(float zStep) {
+
+    auto contours = this->slice(zStep);
+    double minArea = -1;
+    std::cout << contours.size() << std::endl;
+    for (auto& contour: contours) {
+        MeshVCG meshAux;
+        vcg::tri::CapEdgeMesh(contour->mesh,meshAux.mesh);
+        minArea = std::max(minArea,meshAux.getArea());
+        cont++;
+        delete contour;
+    }
+
+    return minArea;
+}
+
+float MeshVCG::getMax2DArea(const std::vector<std::vector<OpenMesh::Vec3d>>& contours) {
+    double minArea = -1;
+    for (const auto &contour: contours) {
+        MeshVCG mesh;
+        auto vi = vcg::tri::Allocator<MyMesh>::AddVertices(mesh.mesh, contour.size());
+        auto ei = vcg::tri::Allocator<MyMesh>::AddEdges(mesh.mesh, contour.size());
+        auto firstPoint = &*vi;
+        vi->P() = MyMesh::CoordType(contour[0][0], contour[0][1], contour[0][2]);
+        ++vi;
+        auto previusPoint = firstPoint;
+        for (int i = 1; i < contour.size(); i++) {
+            auto actualPoint = &*vi;
+            vi->P() = MyMesh::CoordType(contour[i][0], contour[i][1], contour[i][2]);
+            ++vi;
+            ei->V(0) = previusPoint;
+            ei->V(1) = actualPoint;
+            ++ei;
+
+            previusPoint = actualPoint;
+
+        }
+        ei->V(0) = previusPoint;
+        ei->V(1) = firstPoint;
+
+        MeshVCG meshAux;
+        vcg::tri::CapEdgeMesh(mesh.mesh,meshAux.mesh);
+        minArea = std::max(minArea,meshAux.getArea());
+    }
+
+
+    return minArea;
+
+}
+
 
 
 

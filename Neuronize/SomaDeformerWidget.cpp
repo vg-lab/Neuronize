@@ -355,6 +355,7 @@ void SomaDeformerWidget::exportModelWithSTDName ( )
   QString fileName = mtmpDir + "/SomaGenerated/SomaDeformed.obj";
   viewer->exportModel ( fileName );
 
+
   //Export configuration name
   QString result = viewer->configurationToString ( );
   strToFile ( result.toStdString ( ), ( fileName.toStdString ( ) + ".cfg" ));
@@ -483,6 +484,9 @@ void SomaDeformerWidget::useSphericalSoma() {
 void SomaDeformerWidget::setSomaCreator(SomaCreatorWidget *somaCreator) {
   this->somaCreator = somaCreator;
 }
+
+
+
 
 
 
