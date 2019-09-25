@@ -54,7 +54,7 @@ common_find_package(Qt5OpenGL SYSTEM REQUIRED)
 common_find_package(Qt5Xml SYSTEM REQUIRED)
 common_find_package(GLM SYSTEM REQUIRED)
 common_find_package(Eigen3 SYSTEM REQUIRED)
-common_find_package(SkelGenerator REQUIRED )
+common_find_package(SkelGenerator SYSTEM REQUIRED)
 common_find_package(SOIL REQUIRED)
 common_find_package(OpenMesh SYSTEM REQUIRED)
 common_find_package(QGLViewer SYSTEM REQUIRED)
@@ -80,8 +80,8 @@ list( APPEND NEURONIZE_DEPENDENT_LIBRARIES
         ${SQLite3_LIBRARIES}
         )
 
-if (MSVC)
-  add_definitions("-W4")
+if( NOT MSVC )
+  add_definitions("-w")
 endif()
 
 add_subdirectory( libs/libSysNeuroUtils )
@@ -89,6 +89,7 @@ add_subdirectory( libs/libNeuroUtils )
 add_subdirectory( libs/libGLNeuroUtils )
 add_subdirectory( libs/libQtNeuroUtils )
 add_subdirectory( Neuronize )
+
 
 if( MSVC )
   # Set DataCooking as startup project on Visual Studio, CMake v3.6
@@ -105,7 +106,12 @@ include( CPackConfig )
 
 
 #Copy content (this must be improved)
+
 file(GLOB MY_CONTENT "Content/*")
 file(COPY ${MY_CONTENT} DESTINATION "${CMAKE_BINARY_DIR}/bin")
+
+file(GLOB MeshReconstruct "MeshReconstruct/src/*")
+file(COPY ${MeshReconstruct} DESTINATION "${CMAKE_BINARY_DIR}/bin/src"  FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE)
+
 
 

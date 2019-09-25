@@ -25,6 +25,15 @@
 
 #include "neuronize.h"
 
+#include <QSettings>
+#define ENV "env"
+#ifdef _WIN32
+#define INSTALL std::string("src\\install.bat")
+#else
+#define INSTALL std::string("src/install.sh")
+#endif
+
+QString Neuronize::configPath;
 BBDD::BBDD Neuronize::bbdd = BBDD::BBDD();
 QString Neuronize::tmpPath;
 
@@ -60,7 +69,25 @@ Neuronize::Neuronize ( QWidget *parent )
   resetNeuronnizeInterface ( );
 
   mActiveTab = 0;
-  QSettings settings("Neuronize","preferences");
+
+#ifdef _WIN32
+    QSettings settings(QSettings::IniFormat,QSettings::SystemScope,"Neuronize","preferences");
+#else
+    QSettings settings("Neuronize","preferences");
+#endif
+
+    configPath = QFileInfo(settings.fileName()).absoluteDir().absolutePath();
+    QDir dir (configPath);
+    if (!dir.exists() ) {
+        dir.mkpath(configPath);
+    }
+    QString envPath = configPath + "/" + ENV;
+
+    if (!QFileInfo(envPath).exists()) {
+        std::string command = INSTALL + " " + envPath.toStdString();
+        std::system(command.c_str());
+    }
+
   QString path = QFileInfo(settings.fileName()).absoluteDir().absolutePath() + "/neuronize.sqlite";
   std::cout << path.toStdString() << std::endl;
   Neuronize::bbdd = BBDD::BBDD(path.toStdString());
@@ -102,7 +129,7 @@ void Neuronize::resetNeuronnizeInterface ( )
 
   mNeuroGeneratorWidget = new NeuroGeneratorWidget ( tempDir.path(), this );
   ui.verticalLayout_DendritesGenerator->addWidget ( mNeuroGeneratorWidget );
-  mNeuroGeneratorWidget->loadSpinesModelFromPath ( QDir::currentPath ( ) + "/Content/Spines/Low/" );
+  mNeuroGeneratorWidget->loadSpinesModelFromPath ( QCoreApplication::applicationDirPath() + "/Content/Spines/Low/" );
 
   //mNeuroGeneratorWidget ->getUI().tabWidget_RenderControl->removeTab(1);
 

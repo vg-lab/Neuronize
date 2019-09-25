@@ -493,3 +493,6 @@ void SomaDeformerWidget::setSomaCreator(SomaCreatorWidget *somaCreator) {
 
 
 
+
+
+

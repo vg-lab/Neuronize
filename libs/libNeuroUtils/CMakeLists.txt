@@ -67,6 +67,9 @@ set(NEUROUTILS_LINK_LIBRARIES
 		${OPENMESH_LIBRARIES}
 		Qt5::Core
 		${SOIL_LIBRARIES}
+		${GLEW_LIBRARIES}
+		${OPENGL_LIBRARIES}
+		${GLUT_LIBRARY}
 		skelgeneratorutil
 		${SQLite3_LIBRARIES}
 		)
@@ -74,12 +77,7 @@ set(NEUROUTILS_LINK_LIBRARIES
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR}/src)
 
-add_definitions("-w")
-
 if (MSVC)
-	add_definitions("/W4")
-	# Static build
-	# add_definitions(-DLIBNEUROUTILS_STATIC)
 	add_definitions(-D_USE_MATH_DEFINES)
 endif ()
 

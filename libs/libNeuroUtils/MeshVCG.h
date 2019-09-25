@@ -13,6 +13,7 @@
 #include <vcg/complex/all_types.h>
 #include <OpenMesh/Core/Mesh/Traits.hh>
 
+using Edge = std::tuple<int, int, float>;
 
 class MyVertex; class MyEdge; class MyFace;
     struct MyUsedTypes : public vcg::UsedTypes<vcg::Use<MyVertex>   ::AsVertexType,
@@ -20,7 +21,7 @@ class MyVertex; class MyEdge; class MyFace;
             vcg::Use<MyFace>     ::AsFaceType>{};
 class MyVertex  : public vcg::Vertex< MyUsedTypes,vcg::vertex::Coord3d, vcg::vertex::Normal3d,vcg::vertex::Qualityf, vcg::vertex::VFAdj ,vcg::vertex::BitFlags>{};
 class MyFace    : public vcg::Face<   MyUsedTypes, vcg::face::Mark ,vcg::face::FFAdj,vcg::face::VFAdj,  vcg::face::VertexRef,vcg::face::Normal3d , vcg::face::BitFlags > {};
-    class MyEdge    : public vcg::Edge<   MyUsedTypes, vcg::edge::EFAdj,vcg::edge::VertexRef> {};
+    class MyEdge    : public vcg::Edge<   MyUsedTypes, vcg::edge::EFAdj,vcg::edge::VertexRef, vcg::edge::BitFlags,vcg::edge::EEAdj> {};
     class MyMesh    : public vcg::tri::TriMesh< std::vector<MyVertex>, std::vector<MyFace> , std::vector<MyEdge>  > {};
 
     class NEUROUTILS_API MeshVCG {
@@ -30,7 +31,9 @@ class MyFace    : public vcg::Face<   MyUsedTypes, vcg::face::Mark ,vcg::face::F
 
     public:
         explicit MeshVCG(const std::string &filename);
+
         explicit MeshVCG(const std::vector<std::vector<OpenMesh::Vec3d>> &contours);
+
         MeshVCG() = default;
 
         void toObj(std::string filename);
@@ -38,7 +41,7 @@ class MyFace    : public vcg::Face<   MyUsedTypes, vcg::face::Mark ,vcg::face::F
         void calcGeodesicDistance(const std::vector<int> &vertex,
                                   const std::string &exportPath);
 
-        void convexHull(MeshVCG& destination);
+        void convexHull(MeshVCG &destination);
 
         void toOff(std::string filename);
 
@@ -52,25 +55,27 @@ class MyFace    : public vcg::Face<   MyUsedTypes, vcg::face::Mark ,vcg::face::F
 
         OpenMesh::Vec3d center();
 
-        bool RayIntersects(OpenMesh::Vec3d rayOrigin,
-                            OpenMesh::Vec3d rayVector,
-                           std::vector<OpenMesh::Vec3d> &outIntersectionPoint,
-                           std::vector<MyMesh::FacePointer> &intersectTriangles);
+        bool rayIntersects(OpenMesh::Vec3d rayOrigin,
+                           OpenMesh::Vec3d rayVector,
+                           std::vector<OpenMesh::Vec3d> &outIntersectionPoint);
 
-        bool RayIntersectsTriangle(OpenMesh::Vec3d rayOrigin,
-                                   OpenMesh::Vec3d rayVector,
-                                   MyMesh::FacePointer face,
-                                   OpenMesh::Vec3d& outIntersectionPoint);
 
         double getVolume();
 
         double getArea();
 
+        std::vector<MeshVCG*> slice(float zStep);
         const std::string &getPath() const;
 
+        float getMax2DArea(float zStep = 0.1f);
+        static float getMax2DArea(const std::vector<std::vector<OpenMesh::Vec3d>>& contours);
         void applyMatrix(const vcg::Matrix44d& matrix);
 
         MyMesh::VertContainer getVertex();
+
+    private:
+
+         MeshVCG*  sliceAux(float z);
 
         int getNumVertex();
 

@@ -1254,7 +1254,7 @@ void NeuroGeneratorWidgetViewer::setSpineScaleFactor ( float pScaleFactor )
   mSpineScaleFactor = pScaleFactor;
 
   mSpinesModelsContainers.destroyAllElementsInContainer ( );
-  loadSpinesContainer ( QDir ( QDir::currentPath ( ) + "/Content/Spines/Low" ));
+  loadSpinesContainer ( QDir ( QCoreApplication::applicationDirPath() + "/Content/Spines/Low" ));
 }
 
 void NeuroGeneratorWidgetViewer::setMultipleGroupsOfSpines ( bool pMultiGroup )
