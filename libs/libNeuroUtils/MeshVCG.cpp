@@ -28,7 +28,7 @@
 #ifdef _WIN32
 #include <Windows.h>
 #endif
-#include <GL/GL.h>
+#include <GL/gl.h>
 #include <wrap/gl/glu_tessellator_cap.h>
 
 MeshVCG::MeshVCG(const std::string &filename) {
