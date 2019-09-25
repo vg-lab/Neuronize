@@ -29,7 +29,7 @@
 #include <Windows.h>
 #endif
 
-#ifdef _MAC
+#ifdef __APPLE__
     #include <OpenGL/gl.h>
 #else
     #include <GL/gl.h>
