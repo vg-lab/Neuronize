@@ -28,8 +28,15 @@
 #ifdef _WIN32
 #include <Windows.h>
 #endif
-#include <GL/gl.h>
+
+#ifdef _MAC
+    #include <OpenGL/gl.h>
+#else
+    #include <GL/gl.h>
+#endif
+
 #include <wrap/gl/glu_tessellator_cap.h>
+
 
 MeshVCG::MeshVCG(const std::string &filename) {
     int loadMask = 0;
