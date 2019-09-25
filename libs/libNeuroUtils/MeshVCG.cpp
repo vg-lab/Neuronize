@@ -1,6 +1,7 @@
 //
 // Created by ivelascog on 20/09/18.
 //
+#define NOMINMAX
 
 #include "MeshVCG.h"
 #include <boost/filesystem/path.hpp>
@@ -9,8 +10,6 @@
 #include <wrap/io_trimesh/import_obj.h>
 #include <wrap/io_trimesh/export_obj.h>
 #include <wrap/io_trimesh/export_off.h>
-#include <GL/gl.h>
-#include <wrap/gl/glu_tessellator_cap.h>
 #include <vcg/complex/algorithms/update/topology.h>
 #include <vcg/complex/algorithms/update/position.h>
 #include <vcg/complex/algorithms/convex_hull.h>
@@ -25,6 +24,18 @@
 #include <clocale>
 #include <queue>
 #include <unordered_set>
+
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+
+#ifdef __APPLE__
+    #include <OpenGL/gl.h>
+#else
+    #include <GL/gl.h>
+#endif
+
+#include <wrap/gl/glu_tessellator_cap.h>
 
 
 MeshVCG::MeshVCG(const std::string &filename) {
@@ -45,7 +56,6 @@ MeshVCG::MeshVCG(const std::string &filename) {
     }
     vcg::tri::UpdateTopology<MyMesh>::FaceFace(mesh);
     vcg::tri::UpdateTopology<MyMesh>::VertexFace(mesh);
-
     vcg::tri::UpdateNormal<MyMesh>::PerVertexNormalized(mesh);
 }
 

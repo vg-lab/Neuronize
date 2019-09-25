@@ -65,6 +65,10 @@ set(NEUROUTILS_LINK_LIBRARIES
 		${OPENMESH_LIBRARIES}
 		Qt5::Core
 		${SOIL_LIBRARIES}
+		${GLEW_LIBRARIES}
+		${OPENGL_LIBRARIES}
+		${GLUT_LIBRARY}
+		skelgeneratorutil
 		)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
