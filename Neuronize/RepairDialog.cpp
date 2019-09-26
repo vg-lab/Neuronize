@@ -51,9 +51,9 @@ RepairDialog::RepairDialog(QWidget *parent):QDialog(parent) {
 
     saveCombo = new QComboBox( advancedWidget );
     saveCombo->addItem("None");
-    saveCombo->addItem("STL");
-    saveCombo->addItem("VRML");
-    
+    saveCombo->addItem("Obj");
+    saveCombo->addItem("Stl");
+
     advancedButton = new QPushButton("Advanced Options" );
     advancedButton->setStyleSheet(tr("border:1px"));
 
@@ -144,18 +144,38 @@ void RepairDialog::onOk() {
     auto future = QtConcurrent::run([=](){
 
         QString envPath = Neuronize::configPath + "/" + "env";
-
+        QFileInfo fi (input);
         QStringList arguments;
-        arguments << "-a" << "\"" + output + "\"" << "-v" << "\"" + input + "\"" << "-s" << saveCombo->currentText() << "-p" << precisionBox->text()
+        QString saveFormat;
+        QString outputPath;
+
+        if (saveCombo->currentIndex() == 0) {
+            saveFormat = "Obj";
+            arguments << "-e" << Neuronize::tmpPath;
+            outputPath = Neuronize::tmpPath + "/" + fi.baseName();
+        } else {
+            saveFormat = saveCombo->currentText();
+            outputPath = fi.dir().absolutePath()+ "/" + fi.baseName();
+        }
+
+        arguments << "-a" << "\"" + output + "\"" << "-s" << saveFormat << "-p" << precisionBox->text()
                   << "-r" << QString::number(percentageBox->value()) << "-f" << QString::number(segmentsCheckBox->isChecked()) << "-k" << kernelSizeBox->text()
                   << "-c" << QString::number(cleanCheckBox->isChecked());
-        auto test = arguments.join(" ").toStdString();
-        std::cout << test << std::endl;
+
+        if (fi.suffix().toLower() == "vrml" || fi.suffix().toLower() == "wrl" ) {
+            arguments << "-v";
+        } else if ( fi.suffix().toLower() == "imx") {
+            arguments << "-i";
+        }
+        arguments << "\"" + input + "\"";
+
         std::string command = QCoreApplication::applicationDirPath().toStdString() + "/" + RUN + " " + envPath.toStdString() + " " + arguments.join(" ").toStdString();
+        std::cout << command << std::endl;
         std::system(command.c_str());
 
-
+        addToBBDD(outputPath, saveFormat);
     });
+
     futureWatcher->setFuture(future);
 
     progressDialog = new QProgressDialog("Operation in progress", "Cancel", 0, 0, this);
@@ -195,4 +215,17 @@ void RepairDialog::onAdvancedPress() {
         mainLayout->setSizeConstraint(QLayout::SetFixedSize);
     }
 
+}
+
+void RepairDialog::addToBBDD(const QString& path,const QString& extension) {
+    QDirIterator it(path,QStringList() << "*_O." + extension, QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+    Neuronize::bbdd.openTransaction();
+    while (it.hasNext()) {
+        auto originalFile = it.next();
+        int pos = originalFile.lastIndexOf('.');
+        auto repairedFile = originalFile;
+        repairedFile.replace(pos-1,1,"R");
+        Neuronize::bbdd.addSpineImaris(originalFile.toStdString(),repairedFile.toStdString(),extension.toStdString());
+    }
+    Neuronize::bbdd.closeTransaction();
 }

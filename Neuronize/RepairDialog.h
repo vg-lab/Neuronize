@@ -46,6 +46,8 @@ private slots:
     void onProcessFinish();
     void onAdvancedPress();
     void saveFileDialog(QLineEdit *dest, const QString &message, const QString &formats);
+
+    void addToBBDD(const QString& string,const QString& qString);
 };
 
 

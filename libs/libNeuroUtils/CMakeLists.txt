@@ -24,6 +24,7 @@ set (NEUROUTILS_SOURCES
 		AS2SWCV2.cpp
 		MeshVCG.cpp
 		BBDD.cpp
+		../../VCG/wrap/ply/plylib.cpp
 		)
 
 set(NEUROUTILS_HEADERS

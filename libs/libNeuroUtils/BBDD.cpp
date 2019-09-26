@@ -248,10 +248,10 @@ namespace BBDD {
         std::string query = "INSERT INTO SOMA (AREA, AREA_2D, VOLUME, NEURON, MODEL, RECONSTRUCTION_METHOD) VALUES (%f,%f,%f,'%s','%x',%i)";
         float area = model.getArea();
         float volume = model.getVolume();
-        //float area2D = model.get2Darea(0.1f);
+        float area2D = model.getMax2DArea(0.1f);
         std::string file = readBytes(model.getPath()).data();
         std::string formatedQuery = str(
-                boost::format(query) % area % area % volume % neuronName % file % reconstructionMethod); //TODO Area2d;
+                boost::format(query) % area % area2D % volume % neuronName % file % reconstructionMethod);
         sqlite3_exec(_db, formatedQuery.c_str(), nullptr, nullptr, &_err);
         ERRCHECK
 
@@ -314,6 +314,31 @@ namespace BBDD {
         mesh.applyMatrix(transform);
         return transform;
     }
+
+    void BBDD::addSpineImaris(const std::string& originalSpine, const std::string& repairedSpine, const std::string& ext) {
+        std::string query = "INSERT INTO SPINE_MODEL (AREA, VOLUME, ORIGIN, MODEL, MODEL_NR, FILE_TYPE) VALUES (%f,%f,%i,'%x','%x',%i);";
+        MeshVCG mesh (repairedSpine);
+        float area = mesh.getArea();
+        float volume = mesh.getVolume();
+
+        auto bytes = readBytes(repairedSpine);
+        std::string repairedFile (bytes.begin(), bytes.end());
+        bytes = readBytes(originalSpine);
+        std::string originalFile (bytes.begin(), bytes.end());
+
+        FileType fileType;
+
+        if (ext == "Obj") {
+            fileType = Obj;
+        } else if (ext == "Stl") {
+            fileType = Stl;
+        }
+
+        std::string formatedQuery = str(boost::format(query) % area % volume % Imaris % repairedFile % originalFile % fileType);
+        sqlite3_exec(_db,formatedQuery.c_str(), nullptr, nullptr,&_err);
+        ERRCHECK
+    }
+
 
     void BBDD::addSpineVRML(const skelgenerator::Spine* const spine,const std::string& meshPath,const std::string& neuronName, const std::string& tmpDir, const OpenMesh::Vec3f& displacement) {
         std::string query = "INSERT INTO SPINE_MODEL (AREA, VOLUME, ORIGIN, MODEL, File_TYPE) VALUES (%f,%f,%i,'%x',%i);";

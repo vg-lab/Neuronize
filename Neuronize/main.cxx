@@ -19,7 +19,10 @@
  */
 
 #include <QApplication>
+#include <QDirIterator>
+#include <QDir>
 #include "neuronize.h"
+
 
 int main ( int argc, char *argv[] )
 {

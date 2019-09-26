@@ -6,19 +6,15 @@
 #include "MeshVCG.h"
 #include <boost/filesystem/path.hpp>
 #include <vcg/complex/algorithms/geodesic.h>
-#include <wrap/io_trimesh/import_off.h>
-#include <wrap/io_trimesh/import_obj.h>
-#include <wrap/io_trimesh/export_obj.h>
-#include <wrap/io_trimesh/export_off.h>
+#include <wrap/io_trimesh/import.h>
+#include <wrap/io_trimesh/export.h>
 #include <vcg/complex/algorithms/update/topology.h>
 #include <vcg/complex/algorithms/update/position.h>
 #include <vcg/complex/algorithms/convex_hull.h>
 #include <iomanip>
-#include <libs/libNeuroUtils/AS2SWCV2.h>
 #include <vcg/complex/algorithms/refine_loop.h>
 #include <vcg/complex/algorithms/inertia.h>
 #include <vcg/complex/algorithms/isotropic_remeshing.h>
-#include <vcg/complex/algorithms/voronoi_remesher.h>
 #include <vcg/complex/algorithms/stat.h>
 #include <vcg/complex/algorithms/intersection.h>
 #include <QtCore/QFile>
@@ -46,16 +42,10 @@ MeshVCG::MeshVCG(const std::string &filename) {
     this->name = path.stem().string();
     this->path = filename;
     std::setlocale(LC_NUMERIC, "en_US.UTF-8");
-    if (extension == ".off") {
-        if (vcg::tri::io::ImporterOFF<MyMesh>::Open(mesh, filename.c_str()) !=
-            vcg::tri::io::ImporterOFF<MyMesh>::NoError) {
-          printf("Error reading file  %s\n", filename.c_str());
-        }
-    } else {
-        if (extension == ".obj") {
-            vcg::tri::io::ImporterOBJ<MyMesh>::Open(mesh, filename.c_str(), loadMask);
-        }
+    if (vcg::tri::io::Importer<MyMesh>::Open(mesh,filename.c_str()) != 0) {
+        throw "Error to read Mesh";
     }
+
     vcg::tri::UpdateTopology<MyMesh>::FaceFace(mesh);
     vcg::tri::UpdateTopology<MyMesh>::VertexFace(mesh);
     vcg::tri::UpdateNormal<MyMesh>::PerVertexNormalized(mesh);
@@ -117,12 +107,12 @@ MeshVCG::MeshVCG(const std::vector<std::vector<OpenMesh::Vec3d>> &contours) {
 }
 
 void MeshVCG::toObj(std::string filename) {
-    vcg::tri::io::ExporterOBJ<MyMesh>::Save(mesh, filename.c_str(), 0);
+    vcg::tri::io::Exporter<MyMesh>::Save(mesh, filename.c_str(), 0);
 
 }
 
 void MeshVCG::toOff(std::string filename) {
-    vcg::tri::io::ExporterOFF<MyMesh>::Save(mesh, filename.c_str(), 0);
+    vcg::tri::io::Exporter<MyMesh>::Save(mesh, filename.c_str(), 0);
 }
 
 void MeshVCG::subdivide() {
