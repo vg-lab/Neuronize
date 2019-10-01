@@ -5,8 +5,8 @@
 #include "CompareMeshesWidget.h"
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QFileDialog>
-#include <libs/libNeuroUtils/MeshVCG.h>
 #include <QtWidgets/QLabel>
+#include <QtWidgets/QMessageBox>
 
 CompareMeshesWidget::CompareMeshesWidget(const std::string& tmpPath_ ,QWidget *parent): QDialog(parent) {
     this->tmpPath = tmpPath_;
@@ -57,13 +57,31 @@ void CompareMeshesWidget::initUi() {
     header2layout->addWidget(selectMesh2Button);
     header2layout->addWidget(mesh2Path);
 
+    auto stats1layout = new QHBoxLayout(this);
+    auto stats2layout = new QHBoxLayout(this);
+
+    maxLabel1 = new QLabel("Max Dist: 0", this);
+    maxLabel2 = new QLabel("Max Dist: 0", this);
+    meanLabe1 = new QLabel("Mean Dist: 0", this);
+    meanLabel2 = new QLabel("Mean Dist: 0", this);
+    minLabel1 = new QLabel("Min Dist: 0", this);
+    minLabel2 = new QLabel("Min Dist: 0", this);
+
+    stats1layout->addWidget(maxLabel1);
+    stats1layout->addWidget(minLabel1);
+    stats1layout->addWidget(meanLabe1);
+    stats2layout->addWidget(maxLabel2);
+    stats2layout->addWidget(minLabel2);
+    stats2layout->addWidget(meanLabel2);
 
     auto gridLayout = new QGridLayout(this);
     gridLayout->setSpacing(8);
     gridLayout->addItem(header1layout,0,0);
     gridLayout->addItem(header2layout,0,1);
-    gridLayout->addItem(render1,1,0);
-    gridLayout->addItem(render2,1,1);
+    gridLayout->addItem(stats1layout, 1, 0);
+    gridLayout->addItem(stats2layout, 1, 1);
+    gridLayout->addItem(render1, 2, 0);
+    gridLayout->addItem(render2, 2, 1);
 
     mainLayout->addItem(gridLayout);
 
@@ -71,8 +89,10 @@ void CompareMeshesWidget::initUi() {
 }
 
 void CompareMeshesWidget::initConnections() {
-    connect(selectMesh1Button,&QPushButton::released,this,[=]() { loadFileDialog(mesh1Path,"Select Mesh File","Mesh(*.obj *.off *.ply)");});
-    connect(selectMesh2Button,&QPushButton::released,this,[=]() { loadFileDialog(mesh2Path,"Select Mesh File","Mesh(*.obj *.off *.ply)");});
+    connect(selectMesh1Button, &QPushButton::released, this,
+            [=]() { loadFileDialog(mesh1Path, "Select Mesh File", "Mesh(*.obj *.off *.ply *.stl)"); });
+    connect(selectMesh2Button, &QPushButton::released, this,
+            [=]() { loadFileDialog(mesh2Path, "Select Mesh File", "Mesh(*.obj *.off *.ply *.stl)"); });
 
     connect(viewer1,&CompareMeshWidgetViewer::viewChanged,viewer2,&CompareMeshWidgetViewer::onViewChanged);
     connect(viewer2,&CompareMeshWidgetViewer::viewChanged,viewer1,&CompareMeshWidgetViewer::onViewChanged);
@@ -87,15 +107,30 @@ void CompareMeshesWidget::loadFileDialog(QLineEdit *target, const QString &title
 
 }
 
+
 void CompareMeshesWidget::initRender() {
     auto mesh1text = mesh1Path->text();
     auto mes2text = mesh2Path->text();
     MeshVCG mesh1 (mesh1text.toStdString());
     MeshVCG mesh2 (mes2text.toStdString());
-    std::cout << tmpPath << std::endl;
-    auto dists = mesh1.hausdorffDistance(mesh2,tmpPath);
-    auto maxDist1 = std::get<0>(dists);
-    auto maxDist2 = std::get<1>(dists);
+    auto hausdorffResult = mesh1.hausdorffDistance(mesh2, tmpPath);
+
+
+    if (hausdorffResult.max1 > 1.0f) {
+        auto messageBox = new QMessageBox(this);
+        messageBox->setText("A distance too large has been found");
+        messageBox->setInformativeText(
+                "This may be because the meshes are not in the same place, do you want to center them?");
+        messageBox->setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        messageBox->setDefaultButton(QMessageBox::Yes);
+        auto buttton = messageBox->exec();
+
+        if (buttton == QMessageBox::Yes) {
+            mesh1.center();
+            mesh2.center();
+            hausdorffResult = mesh1.hausdorffDistance(mesh2, tmpPath);
+        }
+    }
 
     QFileInfo fi (mesh1text);
     auto mesh1Filename = fi.fileName().toStdString();
@@ -103,14 +138,9 @@ void CompareMeshesWidget::initRender() {
     auto mesh2Filemane = fi2.fileName().toStdString();
 
     viewer1->setMesh(tmpPath + "/" + mesh1Filename );
-    viewer1->setMaxDist(maxDist1);
     viewer2->setMesh(tmpPath + "/" + mesh2Filemane );
-    viewer2->setMaxDist(maxDist2);
 
-    updateLabels(maxDist1,maxDist2);
-
-
-
+    updateLabels(hausdorffResult);
 }
 
 void CompareMeshesWidget::generateTransfer() {
@@ -175,19 +205,24 @@ void CompareMeshesWidget::generateTransfer() {
 
 }
 
-void CompareMeshesWidget::updateLabels(float max1,float max2) {
+void CompareMeshesWidget::updateLabels(HausdorffRet dists) {
 
-    float inc1 = max1 / (NUMBER_OF_TEXT - 1);
-    float inc2 = max2 / (NUMBER_OF_TEXT - 1);
-    float value1 = max1;
-    float value2 = max2;
-    for (int i = 0; i < NUMBER_OF_TEXT - 1; i++ ) {
+    double inc1 = (dists.max1 - dists.min1) / (NUMBER_OF_TEXT - 1);
+    double inc2 = (dists.max2 - dists.min2) / (NUMBER_OF_TEXT - 1);
+    double value1 = dists.max1;
+    double value2 = dists.max2;
+    for (int i = 0; i < NUMBER_OF_TEXT; i++) {
         labels1[i]->setText(QString::number(value1));
         labels2[i]->setText(QString::number(value2));
         value1 -= inc1;
         value2 -= inc2;
     }
 
-    labels1[NUMBER_OF_TEXT - 1]->setText("0");
-    labels2[NUMBER_OF_TEXT - 1]->setText("0");
+    maxLabel1->setText(tr("Max Dist: ") + QString::number(dists.max1));
+    minLabel1->setText(tr("Min Dist: ") + QString::number(dists.min1));
+    meanLabe1->setText(tr("Mean Dist: ") + QString::number(dists.mean1));
+
+    maxLabel2->setText(tr("Max Dist: ") + QString::number(dists.max2));
+    minLabel2->setText(tr("Min Dist: ") + QString::number(dists.min2));
+    meanLabel2->setText(tr("Mean Dist: ") + QString::number(dists.mean2));
 }

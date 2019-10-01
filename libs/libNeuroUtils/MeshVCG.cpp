@@ -7,7 +7,6 @@
 #include <vcg/complex/algorithms/geodesic.h>
 #include <wrap/io_trimesh/import_off.h>
 #include <wrap/io_trimesh/import_obj.h>
-#include <wrap/io_trimesh/import_ply.h>
 #include <wrap/io_trimesh/export_obj.h>
 #include <wrap/io_trimesh/export_off.h>
 #include <wrap/io_trimesh/export_ply.h>
@@ -15,21 +14,17 @@
 #include <vcg/complex/algorithms/update/position.h>
 #include <vcg/complex/algorithms/convex_hull.h>
 #include <iomanip>
-#include <libs/libNeuroUtils/AS2SWCV2.h>
 #include <vcg/complex/algorithms/refine_loop.h>
 #include <vcg/complex/algorithms/inertia.h>
 #include <vcg/complex/algorithms/isotropic_remeshing.h>
-#include <vcg/complex/algorithms/voronoi_remesher.h>
 #include <vcg/complex/algorithms/stat.h>
 #include <QtCore/QFile>
 #include <clocale>
-#include <time.h>
 #include <vcg/math/histogram.h>
 #include <vcg/complex/complex.h>
+#include <vcg/simplex/face/distance.h>
 #include <vcg/simplex/face/component_ep.h>
-#include <vcg/complex/algorithms/update/component_ep.h>
 #include <vcg/complex/algorithms/update/bounding.h>
-#include "sampling.h"
 
 MeshVCG::MeshVCG(const std::string &filename) {
     int loadMask = 0;
@@ -231,97 +226,62 @@ double MeshVCG::getArea() {
     return vcg::tri::Stat<MyMesh>::ComputeMeshArea(mesh);
 }
 
-std::tuple<double, double> MeshVCG::hausdorffDistance(MeshVCG& otherMesh, const std::string& colorMeshPath) {
-    double                dist1_max, dist2_max;
-    unsigned long         n_samples_target;
-    double				  n_samples_per_area_unit;
-    int                   flags;
+HausdorffRet MeshVCG::hausdorffDistance(MeshVCG &otherMesh, const std::string &colorMeshPath) {
+    double meanDist1 = 0;
+    for (auto &vp : mesh.vert) {
+        double minDist = 1000.0f;
+        for (auto &fp : otherMesh.mesh.face) {
+            vcg::Point3d q(0, 0, 0);
+            MyFace::ScalarType dist = 1000.0f;
+            vcg::face::PointDistanceBase(fp, vp.P(), minDist, q);
+            minDist = minDist < dist ? minDist : dist;
+        }
+        vp.Q() = minDist;
+        meanDist1 += minDist;
+    }
+    meanDist1 /= mesh.VN();
 
-    // default parameters
-    flags = vcg::SamplingFlags::VERTEX_SAMPLING |
-            vcg::SamplingFlags::EDGE_SAMPLING |
-            vcg::SamplingFlags::FACE_SAMPLING |
-            vcg::SamplingFlags::SIMILAR_SAMPLING;
+    double meanDist2 = 0;
+    for (auto &vp :otherMesh.mesh.vert) {
+        double minDist = 1000.0f;
+        for (auto &fp : mesh.face) {
+            vcg::Point3d q(0, 0, 0);
+            MyFace::ScalarType dist = 1000.0f;
+            vcg::face::PointDistanceBase(fp, vp.P(), minDist, q);
+            minDist = minDist < dist ? minDist : dist;
+        }
+        vp.Q() = minDist;
+        meanDist2 += minDist;
+    }
+    meanDist2 /= otherMesh.mesh.VN();
 
-    flags &= ~vcg::SamplingFlags::EDGE_SAMPLING;
-    flags &= ~vcg::SamplingFlags::FACE_SAMPLING;
 
+    std::pair<MyMesh::ScalarType, MyMesh::ScalarType> minmaxS1 = Stat<MyMesh>::ComputePerVertexQualityMinMax(mesh);
+    std::pair<MyMesh::ScalarType, MyMesh::ScalarType> minmaxS2 = Stat<MyMesh>::ComputePerVertexQualityMinMax(
+            otherMesh.mesh);
+
+    vcg::tri::UpdateColor<MyMesh>::PerVertexQualityRamp(mesh, minmaxS1.second, minmaxS1.first);
+    vcg::tri::UpdateColor<MyMesh>::PerVertexQualityRamp(otherMesh.mesh, minmaxS2.second, minmaxS2.first);
     if (!colorMeshPath.empty()) {
-        flags |= vcg::SamplingFlags::SAVE_ERROR;
+        vcg::tri::Inertia<MyMesh> Ib(mesh);
+        auto cc = Ib.CenterOfMass();
+        vcg::Matrix44d trans;
+        trans.SetTranslate(-cc[0], -cc[1], -cc[2]);
+        vcg::tri::UpdatePosition<MyMesh>::Matrix(mesh, trans);
+        vcg::tri::UpdatePosition<MyMesh>::Matrix(otherMesh.mesh, trans);
+
+        std::string s1Name = colorMeshPath + "/" + this->name + ".obj";
+        std::string s2Name = colorMeshPath + "/" + otherMesh.name + ".obj";
+
+        int saveMask = vcg::tri::io::Mask::IOM_VERTCOLOR | vcg::tri::io::Mask::IOM_VERTQUALITY;
+        vcg::tri::io::ExporterOBJ<MyMesh>::Save(mesh, s1Name.c_str(), saveMask);
+        vcg::tri::io::ExporterOBJ<MyMesh>::Save(otherMesh.mesh, s2Name.c_str(), saveMask);
     }
 
+    HausdorffRet hausdorffRet{minmaxS1.second, minmaxS2.second, meanDist1, meanDist2, minmaxS1.first, minmaxS2.first};
 
-    if(!(flags & vcg::SamplingFlags::USE_HASH_GRID) && !(flags & vcg::SamplingFlags::USE_AABB_TREE) && !(flags & vcg::SamplingFlags::USE_OCTREE))
-        flags |= vcg::SamplingFlags::USE_STATIC_GRID;
-
-    // load input meshes.
-    MyMesh& S1 = this->mesh;
-    MyMesh& S2 = otherMesh.mesh;
-
-    n_samples_target = 10 * max(S1.fn,S2.fn);// take 10 samples per face
-
-
-    // compute face information
-    vcg::tri::UpdateComponentEP<MyMesh>::Set(S1);
-    vcg::tri::UpdateComponentEP<MyMesh>::Set(S2);
-
-    // set bounding boxes for S1 and S2
-    vcg::tri::UpdateBounding<MyMesh>::Box(S1);
-    vcg::tri::UpdateBounding<MyMesh>::Box(S2);
-
-    // set Bounding Box.
-    vcg::Box3<MyMesh::ScalarType>    bbox, tmp_bbox_M1=S1.bbox, tmp_bbox_M2=S2.bbox;
-    bbox.Add(S1.bbox);
-    bbox.Add(S2.bbox);
-    bbox.Offset(bbox.Diag()*0.02);
-    S1.bbox = bbox;
-    S2.bbox = bbox;
-
-    vcg::Sampling<MyMesh> ForwardSampling(S1,S2);
-    vcg::Sampling<MyMesh> BackwardSampling(S2,S1);
-
-    // Forward distance.
-    ForwardSampling.SetFlags(flags);
-    ForwardSampling.SetSamplesTarget(n_samples_target);
-    n_samples_per_area_unit = ForwardSampling.GetNSamplesPerAreaUnit();
-
-    ForwardSampling.Hausdorff();
-    dist1_max  = ForwardSampling.GetDistMax();
-
-    // Backward distance.
-    BackwardSampling.SetFlags(flags);
-    BackwardSampling.SetSamplesTarget(n_samples_target);
-    n_samples_per_area_unit = BackwardSampling.GetNSamplesPerAreaUnit();
-
-
-    BackwardSampling.Hausdorff();
-    dist2_max  = BackwardSampling.GetDistMax();
-
-    int n_total_sample=ForwardSampling.GetNSamples()+BackwardSampling.GetNSamples();
-    double mesh_dist_max  = max(dist1_max , dist2_max);
-
-
-    // save error files.
-    if(flags & vcg::SamplingFlags::SAVE_ERROR)
-    {
-        int saveMask = vcg::tri::io::Mask::IOM_VERTCOLOR | vcg::tri::io::Mask::IOM_VERTQUALITY /* | vcg::ply::PLYMask::PM_VERTQUALITY*/ ;
-        //p.mask|=vcg::ply::PLYMask::PM_VERTCOLOR|vcg::ply::PLYMask::PM_VERTQUALITY;
-        std::pair<MyMesh::ScalarType , MyMesh::ScalarType> minmax = Stat<MyMesh>::ComputePerVertexQualityMinMax(S1);
-        vcg::tri::UpdateColor<MyMesh>::PerVertexQualityRamp(S1,minmax.second,minmax.first);
-        minmax = Stat<MyMesh>::ComputePerVertexQualityMinMax(S2);
-        vcg::tri::UpdateColor<MyMesh>::PerVertexQualityRamp(S2,minmax.second,minmax.first);
-
-
-        std::string s1Name = colorMeshPath + "/" + this->name+".obj";
-        std::string s2Name = colorMeshPath + "/" + otherMesh.name+".obj";
-
-        vcg::tri::io::ExporterOBJ<MyMesh>::Save( S1,s1Name.c_str(),saveMask);
-        vcg::tri::io::ExporterOBJ<MyMesh>::Save( S2,s2Name.c_str(),saveMask);
-    }
-
-    return {dist1_max,dist2_max};
+    return hausdorffRet;
 }
-
  QColor MeshVCG::getColor(float value) {
     vcg::Color4f color;
     color.SetColorRamp(0.0f,1.0f,value);

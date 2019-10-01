@@ -1753,6 +1753,8 @@ void NeuroGeneratorWidgetViewer::generateSpinesVrml(QString dirPath) {
 
     meshSpines->setVertexColor ( iniLimit, finLimit, MeshDef::Color ( 1.0, 0.0, 0.0, 1.0 ));
 
+    meshSpines->exportMesh("test.obj");
+
 
     if ( spineMeshRend != NULL )
     {

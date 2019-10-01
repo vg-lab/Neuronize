@@ -15,6 +15,15 @@
 #include <vcg/simplex/face/component_ep.h>
 #include <QColor>
 
+struct HausdorffRet {
+    double max1;
+    double max2;
+    double mean1;
+    double mean2;
+    double min1;
+    double min2;
+};
+
 class MyVertex; class MyEdge; class MyFace;
     struct MyUsedTypes : public vcg::UsedTypes<vcg::Use<MyVertex>   ::AsVertexType,
             vcg::Use<MyEdge>     ::AsEdgeType,
@@ -66,14 +75,16 @@ class MyFace    : public vcg::Face<   MyUsedTypes, vcg::face::Mark ,vcg::face::F
 
         double getArea();
 
-        std::tuple<double, double> hausdorffDistance(MeshVCG& otherMesh, const std::string& colorMeshPath = "");
 
         static QColor getColor(float value);
+
+        HausdorffRet hausdorffDistance(MeshVCG &otherMesh, const std::string &path = "");
 
 
 
 
     private:
+
     };
 
 

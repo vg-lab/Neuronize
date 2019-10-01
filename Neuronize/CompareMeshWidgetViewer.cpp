@@ -13,11 +13,9 @@ CompareMeshWidgetViewer::CompareMeshWidgetViewer(int number,QWidget *parent): QG
 }
 
 void CompareMeshWidgetViewer::setupViewer() {
-
-    camera ()->setZClippingCoefficient(500.0);
+    camera()->setZClippingCoefficient(50.0);
     initLight();
     updateGL();
-
 }
 
 void CompareMeshWidgetViewer::draw() {

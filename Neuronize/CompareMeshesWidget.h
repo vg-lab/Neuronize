@@ -12,6 +12,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <libs/libNeuroUtils/MeshVCG.h>
 #include "CompareMeshWidgetViewer.h"
 
 class CompareMeshesWidget: public QDialog {
@@ -33,12 +34,19 @@ private:
     CompareMeshWidgetViewer* viewer1;
     CompareMeshWidgetViewer* viewer2;
     std::string tmpPath;
+    QLabel *maxLabel1;
+    QLabel *meanLabe1;
+    QLabel *minLabel1;
+    QLabel *maxLabel2;
+    QLabel *meanLabel2;
+    QLabel *minLabel2;
     std::vector<QLabel*> labels1;
     std::vector<QLabel*> labels2;
 
     void initUi();
     void generateTransfer();
-    void updateLabels(float max1,float max2);
+
+    void updateLabels(HausdorffRet dists);
     void initConnections();
 
 private slots:
