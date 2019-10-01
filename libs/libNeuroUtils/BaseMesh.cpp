@@ -18,6 +18,11 @@
  *
  */
 
+// WAR for Windows building
+#ifdef _MSC_VER
+#pragma warning( disable : 4244 )
+#endif
+
 #include "BaseMesh.h"
 
 #include "BSphere.h"
@@ -59,6 +64,7 @@ namespace NSBaseMesh
     //subdivider_[SOP_UniformCompositeSqrt3]     = new OpenMesh::Subdivider::Uniform::CompositeSqrt3T<CMesh>;
 
     subdivider_[SOP_UniformLoop] = new OpenMesh::Subdivider::Uniform::LoopT < MeshDef >;
+
     subdivider_[SOP_ModifiedButterfly] = new OpenMesh::Subdivider::Uniform::ModifiedButterflyT < MeshDef >;
 
     subdivider_[SOP_UniformSqrt3] = new OpenMesh::Subdivider::Uniform::Sqrt3T < MeshDef >;

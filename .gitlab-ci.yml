@@ -55,23 +55,22 @@ OSX-subproject:
 Win7-VS14-x64-subproject:
   stage: build
   script:
-    - set WINAPP_REPO=gitlabci@gmrv.es:apps.private
-    - call %ENVFILESDIR%\Qt-5.9-vs14.bat
-    - call %ENVFILESDIR%\eigen-3.1.2-vs12-x64.bat
-    - call %ENVFILESDIR%\OpenMesh-6.3-vs14-x64.bat
-    - call %ENVFILESDIR%\QGLViewer-2.6.3-vs14-x64.bat
-    - call %ENVFILESDIR%\Boost-1.64-vs14-x64.bat
-    - call %ENVFILESDIR%\soil-vs14-x64.bat
-    - call %ENVFILESDIR%\glm.bat
-    - call %ENVFILESDIR%\glew-1.11.0.bat
-    - call %ENVFILESDIR%\glut.bat
-    - set PATH=%PATH%;"c:\Program Files\Git\bin"
-    - set BUILD_GENERATOR=Visual Studio 14 Win64
-    - set GLEW_ROOT=c:\libs\glew-1.11.0
-    - set CMAKE_EXTRA_ARGS=-DCLONE_SUBPROJECTS=ON -DGLEW_INCLUDE_DIR=%GLEW_INCLUDE_DIR% -DOPENGL_LIBRARY_DIR=c:\libs\freeglut\lib\x64 -DGLUT_INCLUDE_DIR=%GLUT_INCLUDE_DIR% -DGLM_ROOT_DIR=%GLM_ROOT_DIR%
-    - bash --login .gitlab-ci.sh
+  - set WINAPP_REPO=gitlabci@gmrv.es:apps.private
+  - call %ENVFILESDIR%\Qt-5.9-vs14.bat
+  - call %ENVFILESDIR%\eigen-3.1.2-vs12-x64.bat
+  - call %ENVFILESDIR%\OpenMesh-6.3-vs14-x64.bat
+  - call %ENVFILESDIR%\QGLViewer-2.6.3-vs14-x64.bat
+  - call %ENVFILESDIR%\Boost-1.64-vs14-x64.bat
+  - call %ENVFILESDIR%\soil-vs14-x64.bat
+  - call %ENVFILESDIR%\glm.bat
+  - call %ENVFILESDIR%\glew-1.11.0.bat
+  - call %ENVFILESDIR%\glut.bat
+  - set PATH=%PATH%;"c:\Program Files\Git\bin"
+  - set BUILD_GENERATOR=Visual Studio 14 Win64
+  - set GLEW_ROOT=c:\libs\glew-1.11.0
+  - set CMAKE_EXTRA_ARGS=-DCLONE_SUBPROJECTS=ON -DGLEW_INCLUDE_DIR=%GLEW_INCLUDE_DIR% -DOPENGL_LIBRARY_DIR=c:\libs\freeglut\lib\x64 -DGLUT_INCLUDE_DIR=%GLUT_INCLUDE_DIR% -DGLM_ROOT_DIR=%GLM_ROOT_DIR%
+  - bash --login .gitlab-ci.sh
   tags:
-    - win7
+  - win7
   except:
-    - tags
-
+  - tags

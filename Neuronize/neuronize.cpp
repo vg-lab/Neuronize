@@ -67,7 +67,7 @@ Neuronize::Neuronize ( QWidget *parent )
 
   mActiveTab = 0;
 
-#ifdef _Win32
+#ifdef _WIN32
     QSettings settings(QSettings::IniFormat,QSettings::SystemScope,"Neuronize","preferences");
 #else
     QSettings settings("Neuronize","preferences");

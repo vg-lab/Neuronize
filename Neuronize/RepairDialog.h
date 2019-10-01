@@ -45,6 +45,7 @@ private slots:
     void openSelectFileDialog(QLineEdit* dest, const QString& message, const QString& formats);
     void onProcessFinish();
     void onAdvancedPress();
+    void saveFileDialog(QLineEdit *dest, const QString &message, const QString &formats);
 };
 
 

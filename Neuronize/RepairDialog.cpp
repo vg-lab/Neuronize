@@ -114,7 +114,7 @@ RepairDialog::RepairDialog(QWidget *parent):QDialog(parent) {
     futureWatcher = new QFutureWatcher<void>();
 
     connect(inputButton, &QPushButton::released,[=]() {openSelectFileDialog(inputPath,"Select Input File","Imaris Filament Tracer(*.vrml *.wrl *.imx)");});
-    connect(csvButton, &QPushButton::released,[=](){openSelectFileDialog(csvPath, "Select output File", "CSV(*.csv)");});
+    connect(csvButton, &QPushButton::released,[=](){saveFileDialog(csvPath, "Select output File", "CSV(*.csv)");});
     connect(buttonBox, &QDialogButtonBox::accepted, this, &RepairDialog::onOk);
     connect(buttonBox, &QDialogButtonBox::rejected,[=](){this->close();});
     connect(futureWatcher, &QFutureWatcher<void>::finished,this,&RepairDialog::onProcessFinish);
@@ -168,6 +168,11 @@ void RepairDialog::onOk() {
 
 void RepairDialog::openSelectFileDialog(QLineEdit *dest,const QString& message,const QString& formats) {
     auto file = QFileDialog::getOpenFileName(this,message,QString(),formats);
+    dest->setText(file);
+}
+
+void RepairDialog::saveFileDialog(QLineEdit* dest,const QString& message,const QString& formats) {
+    auto file = QFileDialog::getSaveFileName(this,message,QString(),formats);
     dest->setText(file);
 }
 
