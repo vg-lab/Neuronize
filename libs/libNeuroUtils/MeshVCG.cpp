@@ -22,7 +22,6 @@
 #include <vcg/complex/algorithms/intersection.h>
 #include <QtCore/QFile>
 #include <clocale>
-#include <vcg/math/histogram.h>
 #include <vcg/complex/complex.h>
 #include <vcg/simplex/face/distance.h>
 #include <vcg/simplex/face/component_ep.h>

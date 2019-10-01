@@ -30,8 +30,14 @@ class MyVertex; class MyEdge; class MyFace;
     struct MyUsedTypes : public vcg::UsedTypes<vcg::Use<MyVertex>   ::AsVertexType,
             vcg::Use<MyEdge>     ::AsEdgeType,
             vcg::Use<MyFace>     ::AsFaceType>{};
-class MyVertex  : public vcg::Vertex< MyUsedTypes,vcg::vertex::Coord3d, vcg::vertex::Normal3d, vcg::vertex::Color4b,vcg::vertex::Qualityf, vcg::vertex::VFAdj ,vcg::vertex::BitFlags>{};
-class MyFace    : public vcg::Face<   MyUsedTypes, vcg::face::Mark ,vcg::face::FFAdj,vcg::face::VFAdj,  vcg::face::VertexRef,vcg::face::Normal3d , vcg::face::BitFlags,vcg::face::EdgePlane > {};
+
+class MyVertex
+        : public vcg::Vertex<MyUsedTypes, vcg::vertex::Coord3d, vcg::vertex::Normal3d, vcg::vertex::Color4b, vcg::vertex::Qualityf, vcg::vertex::VFAdj, vcg::vertex::BitFlags> {
+};
+
+class MyFace
+        : public vcg::Face<MyUsedTypes, vcg::face::Mark, vcg::face::FFAdj, vcg::face::VFAdj, vcg::face::VertexRef, vcg::face::Normal3d, vcg::face::BitFlags> {
+};
     class MyEdge    : public vcg::Edge<   MyUsedTypes, vcg::edge::EFAdj,vcg::edge::VertexRef, vcg::edge::BitFlags,vcg::edge::EEAdj> {};
     class MyMesh    : public vcg::tri::TriMesh< std::vector<MyVertex>, std::vector<MyFace> , std::vector<MyEdge>  > {};
 
@@ -76,17 +82,15 @@ class MyFace    : public vcg::Face<   MyUsedTypes, vcg::face::Mark ,vcg::face::F
 
         std::vector<MeshVCG*> slice(float zStep);
 
+        float getMax2DArea(float zStep = 0.1f);
+
+        static float getMax2DArea(const std::vector<std::vector<OpenMesh::Vec3d>>& contours);
+
         static QColor getColor(float value);
 
         HausdorffRet hausdorffDistance(MeshVCG &otherMesh, const std::string &path = "");
 
-
-
-        float getMax2DArea(float zStep = 0.1f);
-        static float getMax2DArea(const std::vector<std::vector<OpenMesh::Vec3d>>& contours);
-
     private:
-
          MeshVCG*  sliceAux(float z);
 
     };
