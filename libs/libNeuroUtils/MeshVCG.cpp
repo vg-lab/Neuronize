@@ -28,6 +28,7 @@
 #include <vcg/complex/algorithms/update/bounding.h>
 #include <queue>
 #include <unordered_set>
+#include <QtConcurrent/QtConcurrent>
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -304,32 +305,48 @@ float MeshVCG::getMax2DArea(const std::vector<std::vector<OpenMesh::Vec3d>>& con
 
 
 HausdorffRet MeshVCG::hausdorffDistance(MeshVCG &otherMesh, const std::string &colorMeshPath) {
+    QThreadPool pool;
+    QSemaphore sem1(1);
+    QSemaphore sem2(1);
     double meanDist1 = 0;
     for (auto &vp : mesh.vert) {
-        double minDist = 1000.0f;
-        for (auto &fp : otherMesh.mesh.face) {
-            vcg::Point3d q(0, 0, 0);
-            MyFace::ScalarType dist = 1000.0f;
-            vcg::face::PointDistanceBase(fp, vp.P(), minDist, q);
-            minDist = minDist < dist ? minDist : dist;
-        }
-        vp.Q() = minDist;
-        meanDist1 += minDist;
+        QtConcurrent::run(&pool, [&]() {
+            double minDist = 1000.0f;
+            for (auto &fp : otherMesh.mesh.face) {
+                vcg::Point3d q(0, 0, 0);
+                MyFace::ScalarType dist = 1000.0f;
+                vcg::face::PointDistanceBase(fp, vp.P(), minDist, q);
+                minDist = minDist < dist ? minDist : dist;
+            }
+            vp.Q() = minDist;
+
+            sem1.acquire();
+            meanDist1 += minDist;
+            sem1.release();
+        });
     }
-    meanDist1 /= mesh.VN();
 
     double meanDist2 = 0;
     for (auto &vp :otherMesh.mesh.vert) {
-        double minDist = 1000.0f;
-        for (auto &fp : mesh.face) {
-            vcg::Point3d q(0, 0, 0);
-            MyFace::ScalarType dist = 1000.0f;
-            vcg::face::PointDistanceBase(fp, vp.P(), minDist, q);
-            minDist = minDist < dist ? minDist : dist;
-        }
-        vp.Q() = minDist;
-        meanDist2 += minDist;
+        QtConcurrent::run(&pool, [&]() {
+            double minDist = 1000.0f;
+            for (auto &fp : mesh.face) {
+                vcg::Point3d q(0, 0, 0);
+                MyFace::ScalarType dist = 1000.0f;
+                vcg::face::PointDistanceBase(fp, vp.P(), minDist, q);
+                minDist = minDist < dist ? minDist : dist;
+            }
+            vp.Q() = minDist;
+
+            sem2.acquire();
+            meanDist2 += minDist;
+            sem2.release();
+        });
     }
+
+    pool.waitForDone();
+
+    meanDist1 /= mesh.VN();
     meanDist2 /= otherMesh.mesh.VN();
 
 
