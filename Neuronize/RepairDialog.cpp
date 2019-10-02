@@ -66,9 +66,18 @@ RepairDialog::RepairDialog(QWidget *parent):QDialog(parent) {
     cleanCheckBox->setChecked(true);
 
     auto formLayout1 = new QFormLayout( advancedWidget  );
-    formLayout1->addRow(tr("Export: "),saveCombo);
-    formLayout1->addRow(tr("OutputResolutionPercentage"),percentageBox);
-    formLayout1->addRow(tr("Clean Vrml"),cleanCheckBox);
+
+    auto exportLabel = new QLabel("Export: ");
+    exportLabel->setToolTip("Determine the format of output meshes");
+    formLayout1->addRow(exportLabel, saveCombo);
+
+    auto resolutionLabel = new QLabel("OutputResolutionPercentage");
+    resolutionLabel->setToolTip("Level of simplification applied to exported meshes");
+    formLayout1->addRow(resolutionLabel, percentageBox);
+
+    auto cleanLabel = new QLabel("Clean VRML");
+    cleanLabel->setToolTip("Decide if the file is preprocessed. This can be useful for non-Imaris files");
+    formLayout1->addRow(cleanLabel, cleanCheckBox);
     formLayout1->setSpacing(6);
 
 
@@ -86,9 +95,18 @@ RepairDialog::RepairDialog(QWidget *parent):QDialog(parent) {
     kernelSizeBox->setMaximum(8);
 
     auto formLayout2 = new QFormLayout( advancedWidget );
-    formLayout2->addRow(tr("Precision"),precisionBox);
-    formLayout2->addRow(tr("Include Segments"),segmentsCheckBox);
-    formLayout2->addRow(tr("Kernel Size"),kernelSizeBox);
+
+    auto precisionLabel = new QLabel("Precision");
+    precisionLabel->setToolTip("Determines the accuracy of the meshes repaired. But higher values need more memory");
+    formLayout2->addRow(precisionLabel, precisionBox);
+
+    auto includeLabel = new QLabel("Include Segments");
+    includeLabel->setToolTip("Decide if dendritics segments are included");
+    formLayout2->addRow(includeLabel, segmentsCheckBox);
+
+    auto kernelLabel = new QLabel("Kernel Size");
+    kernelLabel->setToolTip("Controls the aggressiveness of smoothing and merge of disconex parts");
+    formLayout2->addRow(kernelLabel, kernelSizeBox);
     formLayout2->setSpacing(6);
 
 
