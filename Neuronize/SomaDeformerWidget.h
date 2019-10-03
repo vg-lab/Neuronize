@@ -124,6 +124,8 @@ private:
 
     void showContinueMsg ( );
 
+    void hideAdvancedOptions();
+
 };
 
 #endif // QTSOMADEFORMER_H

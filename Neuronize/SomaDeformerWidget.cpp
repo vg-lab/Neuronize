@@ -27,6 +27,7 @@ SomaDeformerWidget::SomaDeformerWidget (const QString &tempDir, QWidget *parent 
   : QWidget ( parent )
 {
   ui.setupUi ( this );
+    hideAdvancedOptions();
 
   viewer = new SomaDeformerWidgetViewer ( this );
 
@@ -483,6 +484,12 @@ void SomaDeformerWidget::useSphericalSoma() {
 
 void SomaDeformerWidget::setSomaCreator(SomaCreatorWidget *somaCreator) {
   this->somaCreator = somaCreator;
+}
+
+void SomaDeformerWidget::hideAdvancedOptions() {
+    ui.tabWidget_Controls->removeTab(3);
+    ui.tabWidget_Controls->removeTab(2);
+
 }
 
 

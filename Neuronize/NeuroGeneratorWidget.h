@@ -196,6 +196,8 @@ public slots:
 
     void showMsjDendritesGeneration ( );
 
+    void hideAdvancedOptions();
+
     void exportSpinesInfo ( );
 
     void importSpinesInfo ( );

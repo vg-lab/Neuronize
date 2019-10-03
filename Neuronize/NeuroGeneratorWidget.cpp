@@ -40,6 +40,8 @@ NeuroGeneratorWidget::NeuroGeneratorWidget (const QString &tmpDir, QWidget *pare
   mTempDir = tmpDir;
   mSWCFleName = "";
 
+    hideAdvancedOptions();
+
   setSpinesDistributionParams ( );
 
   QObject::connect ( ui.pushButton_OpenNeuron, SIGNAL( clicked ( )), this, SLOT( loadNeuronModel ( )) );
@@ -184,8 +186,9 @@ NeuroGeneratorWidget::NeuroGeneratorWidget (const QString &tmpDir, QWidget *pare
   ui.comboBox_SubdividerType->addItem ( "U. I. Sqrt3" );
   ui.comboBox_SubdividerType->addItem ( "M. Butterfly" );
 
-  for ( int i = 0; i < 5; ++i )
+    for (int i = 0; i < 6; ++i)
     ui.tabWidget_RenderControl->removeTab ( 0 );
+
 
   QObject::connect ( ui.pushButton_SpinesCtrl_Rebuild, SIGNAL( clicked ( )), this, SLOT( destroyAllGroupsSpines ( )) );
   QObject::connect ( ui.pushButton_SpinesCtrl_Save, SIGNAL( clicked ( )), this, SLOT( exportNeuronAndSpines ( )) );
@@ -1090,7 +1093,7 @@ void NeuroGeneratorWidget::emitFinishSpinesAndRestart ( )
 
 void NeuroGeneratorWidget::showDendirtesTab ( )
 {
-  if ( ui.tabWidget_RenderControl->count ( ) > 2 )
+    if (ui.tabWidget_RenderControl->count() >= 2)
   {
     ui.tabWidget_RenderControl->removeTab ( 0 );
     ui.tabWidget_RenderControl->removeTab ( 0 );
@@ -1098,13 +1101,13 @@ void NeuroGeneratorWidget::showDendirtesTab ( )
 
   ui.tabWidget_RenderControl->insertTab ( 0, ui.tab_DendritesCtrl, "Dendrites builder." );
   ui.tabWidget_RenderControl->insertTab ( 1, ui.tab_AdvanceDendritesCtrl, "Advanced dendrites options." );
-  ui.tabWidget_RenderControl->insertTab ( 2, ui.tab_ModifiersCtrl, "Modifiers Ctrl." );
+    //ui.tabWidget_RenderControl->insertTab ( 2, ui.tab_ModifiersCtrl, "Modifiers Ctrl." );
 }
 
 void NeuroGeneratorWidget::showSpinesTab ( )
 {
 
-  if ( ui.tabWidget_RenderControl->count ( ) > 2 )
+    if (ui.tabWidget_RenderControl->count() >= 2)
   {
     ui.tabWidget_RenderControl->removeTab ( 0 );
     ui.tabWidget_RenderControl->removeTab ( 0 );
@@ -1112,7 +1115,7 @@ void NeuroGeneratorWidget::showSpinesTab ( )
 
   ui.tabWidget_RenderControl->insertTab ( 0, ui.tab_SpinesCtrl, "Spines builder." );
   ui.tabWidget_RenderControl->insertTab ( 1, ui.tab_AdvanceSpinesCtrl, "Advanced spines options." );
-  ui.tabWidget_RenderControl->insertTab ( 2, ui.tab_MoreAdvanceSpinesCtrl, "More Advanced spines options." );
+    //ui.tabWidget_RenderControl->insertTab ( 2, ui.tab_MoreAdvanceSpinesCtrl, "More Advanced spines options." );
 }
 
 void NeuroGeneratorWidget::RebuildWithAdvancedOptions ( )
@@ -1191,3 +1194,15 @@ void NeuroGeneratorWidget::setSpines(const vector<Spine> &spines) {
   NeuroGeneratorWidget::spines = spines;
 }
 
+void NeuroGeneratorWidget::hideAdvancedOptions() {
+    //Spine Section
+    ui.pushButton_exportSpinesInfo->hide();
+    ui.pushButton_importSpinesInfo->hide();
+    ui.groupBox_SpinesCtrlHide->hide();
+
+    // Dendrite section
+    ui.groupBox_ModifiersCtrlHide->hide();
+    ui.groupBox_NeuronCtrlHide->hide();
+    ui.groupBox_SpinesCtrlHide->hide();
+    ui.groupBox_RenderCtrlHide->hide();
+}
