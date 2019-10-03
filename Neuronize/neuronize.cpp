@@ -67,7 +67,6 @@ Neuronize::Neuronize ( QWidget *parent )
     mPythonVersion = checkPython();
 
     resetNeuronnizeInterface();
-
     mActiveTab = 0;
 
 #ifdef _WIN32
@@ -615,17 +614,25 @@ void Neuronize::NewNeuronQuestionAndRestart ( )
 }
 
 int Neuronize::checkPython() {
+#ifdef _WIN32
+    std::string pythonName = "py";
+#else
+    std::string pythonName = "python3";
+#endif
     std::string version;
     std::string token;
     boost::process::ipstream inputStream;
-    int result = boost::process::system("python3 --version", boost::process::std_out > inputStream);
+    int result = boost::process::system(pythonName + " --version", boost::process::std_out > inputStream);
     if (result != 0) {
         return 0;
     }
-
     while (inputStream >> token) {
         version += token;
     }
+	if (version.empty())
+	{
+		return 0;
+	}
     version = version.substr(6);
     int versionMajor = version[0] - '0';
     return versionMajor;
