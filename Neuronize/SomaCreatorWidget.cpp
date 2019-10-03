@@ -1233,4 +1233,9 @@ void SomaCreatorWidget::showRepairDialog(){
     dialog.exec();
 }
 
+void SomaCreatorWidget::disableRepair() {
+    ui.pushButton_RepairMeshes->setDisabled(true);
+
+}
+
 

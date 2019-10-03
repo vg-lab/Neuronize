@@ -23,6 +23,9 @@
 #include <QtCore/QDirIterator>
 
 #include "neuronize.h"
+#include <boost/process.hpp>
+#include <QtConcurrent/QtConcurrent>
+#include <QFutureWatcher>
 
 #include <QSettings>
 #define ENV "env"
@@ -35,59 +38,89 @@
 QString Neuronize::configPath;
 
 Neuronize::Neuronize ( QWidget *parent )
-  : QMainWindow ( parent )
-{
-  ui.setupUi ( this );
+        : QMainWindow(parent) {
+    ui.setupUi(this);
 
-  //Init glut
-  int argc = 0;
-  char **argv = NULL;
-  glutInit ( &argc, argv );
-  if (!tempDir.isValid()) {
-      throw "Cant create temporary dir";
-  }
-  std::cout << "TmpDir: " << tempDir.path().toStdString() << std::endl ;
+    //Init glut
+    int argc = 0;
+    char **argv = NULL;
+    glutInit(&argc, argv);
+    if (!tempDir.isValid()) {
+        throw "Cant create temporary dir";
+    }
+    std::cout << "TmpDir: " << tempDir.path().toStdString() << std::endl;
 
-  //QObject::connect(ui.actionGenerateNewNeuron	,SIGNAL(triggered())	,this,SLOT(generateNewNeuron()));
-  QObject::connect ( ui.actionGenerateNewNeuron, SIGNAL( triggered ( )), this, SLOT( actionNewNeuron ( )) );
-  QObject::connect ( ui.actionTake_a_snapshot, SIGNAL( triggered ( )), this, SLOT( takeASnapshot ( )) );
-  QObject::connect ( ui.actionHelp, SIGNAL( triggered ( )), this, SLOT( showHelp ( )) );
-  QObject::connect ( ui.actionQuit, SIGNAL( triggered ( )), this, SLOT( actionQuit ( )) );
-  QObject::connect ( ui.actionAbout_Neuronize, SIGNAL( triggered ( )), this, SLOT( actionAbout ( )) );
-  QObject::connect ( ui.actionUndo, SIGNAL( triggered ( )), this, SLOT( actionBack ( )) );
+    //QObject::connect(ui.actionGenerateNewNeuron	,SIGNAL(triggered())	,this,SLOT(generateNewNeuron()));
+    QObject::connect(ui.actionGenerateNewNeuron, SIGNAL(triggered()), this, SLOT(actionNewNeuron()));
+    QObject::connect(ui.actionTake_a_snapshot, SIGNAL(triggered()), this, SLOT(takeASnapshot()));
+    QObject::connect(ui.actionHelp, SIGNAL(triggered()), this, SLOT(showHelp()));
+    QObject::connect(ui.actionQuit, SIGNAL(triggered()), this, SLOT(actionQuit()));
+    QObject::connect(ui.actionAbout_Neuronize, SIGNAL(triggered()), this, SLOT(actionAbout()));
+    QObject::connect(ui.actionUndo, SIGNAL(triggered()), this, SLOT(actionBack()));
 
-  QObject::connect ( ui.actionBatchBuilder, SIGNAL( triggered ( )), this, SLOT( showBatchBuilder ( )) );
+    QObject::connect(ui.actionBatchBuilder, SIGNAL(triggered()), this, SLOT(showBatchBuilder()));
 
-  mSomaCreatorWidget = NULL;
-  mSomaDeformerWidget = NULL;
-  mNeuroGeneratorWidget = NULL;
-  mBatchBuilder = NULL;
+    mSomaCreatorWidget = NULL;
+    mSomaDeformerWidget = NULL;
+    mNeuroGeneratorWidget = NULL;
+    mBatchBuilder = NULL;
+    mPythonVersion = checkPython();
 
-  resetNeuronnizeInterface ( );
+    resetNeuronnizeInterface();
 
-  mActiveTab = 0;
+    mActiveTab = 0;
 
 #ifdef _WIN32
     QSettings settings(QSettings::IniFormat,QSettings::SystemScope,"Neuronize","preferences");
 #else
-    QSettings settings("Neuronize","preferences");
+    QSettings settings("Neuronize", "preferences");
 #endif
 
+
     configPath = QFileInfo(settings.fileName()).absoluteDir().absolutePath();
-    QDir dir (configPath);
-    if (!dir.exists() ) {
+    QDir dir(configPath);
+    if (!dir.exists()) {
         dir.mkpath(configPath);
     }
-    QString envPath = configPath + "/" + ENV;
+    std::cout << configPath.toStdString() << std::endl;
 
-    if (!QFileInfo(envPath).exists()) {
-        std::string command = INSTALL + " " + envPath.toStdString();
-        std::system(command.c_str());
+
+    this->showMaximized();
+
+    if (mPythonVersion == 3) {
+        QString envPath = configPath + "/" + ENV;
+
+        if (!QFileInfo(envPath).exists()) {
+            std::string command = INSTALL + " " + envPath.toStdString();
+
+            QFuture<void> future = QtConcurrent::run([=]() { std::system(command.c_str()); });
+            QFutureWatcher<void> watcher;
+            watcher.setFuture(future);
+
+            QProgressDialog progress(this);
+            connect(&watcher, SIGNAL(finished()), &progress, SLOT(close()));
+            progress.setLabelText("Installing python dependencies");
+            progress.setCancelButton(0);
+            progress.setMaximum(0);
+            progress.setMinimum(0);
+            progress.exec();
+        }
+    } else {
+        QString message("Python 3 not found. Mesh repair is disabled");
+        QString informativeText;
+
+        QMessageBox msgBox(this);
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setDefaultButton(QMessageBox::Ok);
+        msgBox.setText(message);
+        if (mPythonVersion == 2) {
+            msgBox.setInformativeText("Python 2 found, but not compatible");
+        }
+        msgBox.exec();
     }
 
-  this->showMaximized ( );
-
-  initrand ( );
+    initrand();
 }
 
 Neuronize::~Neuronize ( )
@@ -114,6 +147,9 @@ void Neuronize::resetNeuronnizeInterface ( )
     delete mBatchBuilder;
 
   mSomaCreatorWidget = new SomaCreatorWidget (tempDir.path(), this );
+    if (mPythonVersion != 3) {
+        mSomaCreatorWidget->disableRepair();
+    }
   ui.verticalLayout_SomaCreator->addWidget ( mSomaCreatorWidget );
   QObject::connect ( mSomaCreatorWidget, SIGNAL( somaCreated ( )), this, SLOT( showSomaDeformer ( )) );
 
@@ -576,4 +612,21 @@ void Neuronize::NewNeuronQuestionAndRestart ( )
   {
     showSomaCreator ( );
   }
+}
+
+int Neuronize::checkPython() {
+    std::string version;
+    std::string token;
+    boost::process::ipstream inputStream;
+    int result = boost::process::system("python3 --version", boost::process::std_out > inputStream);
+    if (result != 0) {
+        return 0;
+    }
+
+    while (inputStream >> token) {
+        version += token;
+    }
+    version = version.substr(6);
+    int versionMajor = version[0] - '0';
+    return versionMajor;
 }

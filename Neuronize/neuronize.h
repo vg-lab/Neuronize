@@ -26,6 +26,7 @@
 
 #include <QMainWindow>
 #include <QTemporaryDir>
+#include <QtWidgets/QProgressDialog>
 
 #include "ui_neuronize.h"
 
@@ -71,6 +72,8 @@ class Neuronize: public QMainWindow
 
     unsigned int mActiveTab;
 
+    int mPythonVersion;
+
   public slots:
 
     void genetareNeuronsInBatch ( );
@@ -101,6 +104,8 @@ class Neuronize: public QMainWindow
     void actionBack ( );
 
     void NewNeuronQuestionAndRestart ( );
+
+    int checkPython();
 
 };
 

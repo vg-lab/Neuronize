@@ -95,6 +95,8 @@ class SomaCreatorWidget: public QWidget, public Ui::SomaCreatorWidget
 
     void showRepairDialog ( );
 
+    void disableRepair();
+
   signals:
 
     void somaCreated ( );
