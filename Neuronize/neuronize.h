@@ -112,6 +112,8 @@ class Neuronize: public QMainWindow
 
     int checkPython();
 
+    void onSomaBuildFinish();
+
 };
 
 #endif // XNEURON_H

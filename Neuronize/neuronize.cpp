@@ -84,7 +84,7 @@ Neuronize::Neuronize ( QWidget *parent )
     std::cout << configPath.toStdString() << std::endl;
 
 
-    this->showMaximized();
+    this->show();
 
     if (mPythonVersion == 3) {
         QString envPath = configPath + "/" + ENV;
@@ -154,7 +154,7 @@ void Neuronize::resetNeuronnizeInterface ( )
     ui.verticalLayout_RepairMeshes->addWidget(mRepairWidget);
 
 
-  QObject::connect ( mSomaCreatorWidget, SIGNAL( somaCreated ( )), this, SLOT( showSomaDeformer ( )) );
+    QObject::connect(mSomaCreatorWidget, SIGNAL(somaCreated()), this, SLOT(onSomaBuildFinish()));
 
   mSomaDeformerWidget = new SomaDeformerWidget ( tempDir.path(),this );
   ui.verticalLayout_SomaDeformer->addWidget ( mSomaDeformerWidget );
@@ -220,7 +220,7 @@ void Neuronize::showSomaCreator ( )
 
 void Neuronize::showSomaDeformer ( )
 {
-  mActiveTab = 1;
+    mActiveTab = 1;
   mSomaDeformerWidget->setSomaCreator(mSomaCreatorWidget);
 
   mFullSWCFilePath = mSomaCreatorWidget->getFullPathToSWCFile ( );
@@ -644,4 +644,10 @@ int Neuronize::checkPython() {
     version = version.substr(6);
     int versionMajor = version[0] - '0';
     return versionMajor;
+}
+
+void Neuronize::onSomaBuildFinish() {
+    this->showMaximized();
+    showSomaDeformer();
+
 }
