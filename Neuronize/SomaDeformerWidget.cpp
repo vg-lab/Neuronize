@@ -205,6 +205,7 @@ void SomaDeformerWidget::loadPredefinedXMLSomaDef ( )
 
   ui.pushButton_FinalizeSoma->setEnabled ( false );
   ui.pushButton_NextStep->setEnabled ( false );
+    ui.pushButton_ExportModel->setEnabled(false);
 }
 
 void SomaDeformerWidget::loadPredefinedXMLSomaDefAndGOAdvancedOptions ( )
@@ -339,6 +340,7 @@ void SomaDeformerWidget::exportModel ( )
   }
   else
   {
+      fileName += ".obj";
     viewer->setNormalizeExportedModel ( ui.checkBox_NormalizeModel->isChecked ( ));
     viewer->exportModel ( fileName );
 
@@ -464,6 +466,7 @@ void SomaDeformerWidget::showContinueMsg ( )
 
   ui.pushButton_FinalizeSoma->setEnabled ( true );
   ui.pushButton_NextStep->setEnabled ( true );
+    ui.pushButton_ExportModel->setEnabled(true);
 }
 
 void SomaDeformerWidget::setModeledSoma(std::string path) {

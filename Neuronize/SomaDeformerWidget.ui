@@ -64,18 +64,25 @@
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
+           <widget class="QPushButton" name="pushButton_ExportModel">
+               <property name="text">
+                   <string>Export Soma</string>
+               </property>
+           </widget>
        </item>
+          <item>
+              <spacer name="verticalSpacer">
+                  <property name="orientation">
+                      <enum>Qt::Vertical</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                      <size>
+                          <width>20</width>
+                          <height>40</height>
+                      </size>
+                  </property>
+              </spacer>
+          </item>
        <item>
         <widget class="QPushButton" name="pushButton_RebuildSoma">
          <property name="text">
@@ -253,13 +260,6 @@
          </property>
         </spacer>
        </item>
-       <item>
-        <widget class="QPushButton" name="pushButton_ExportModel">
-         <property name="text">
-          <string>Export soma mesh</string>
-         </property>
-        </widget>
-       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tab_MSDeformer_VeryAdvanceParams">
@@ -278,7 +278,7 @@
             <x>0</x>
             <y>0</y>
             <width>256</width>
-            <height>1027</height>
+               <height>1010</height>
            </rect>
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_3">
