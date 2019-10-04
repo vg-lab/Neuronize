@@ -1735,7 +1735,6 @@ void NeuroGeneratorWidgetViewer::generateSpinesVrml(skelgenerator::Neuron *neuro
     Neuronize::bbdd.openTransaction();
     int i = 0;
     for (const auto& spine:neuron->getSpines()) {
-        std::cout << i << std::endl;
         std::string filename = spine->to_obj_without_base(dirPath,i);
         if (!haveSpinesNeuron) {
             Neuronize::bbdd.addSpineVRML(spine, filename, fi.baseName().toStdString(), tempPath, displacement);
