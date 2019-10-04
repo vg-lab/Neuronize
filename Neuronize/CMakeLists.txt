@@ -3,8 +3,7 @@ source_group(\\ FILES CMakeLists.txt)
 set (NEURONIZE_SOURCES
 		batchbuilder.cpp
 		FrameConstrictor.cpp
-		LoadFileDialog.cpp
-		main.cxx
+        main.cxx
 		manipulatedFrameSetConstraint.cpp
 		NeuroGeneratorWidget.cpp
 		NeuroGeneratorWidget.cpp
@@ -14,15 +13,14 @@ set (NEURONIZE_SOURCES
 		SomaCreatorWidget.cpp
 		SomaDeformerWidget.cpp
 		SomaDeformerWidgetViewer.cpp
-		RepairDialog.cpp
+        RepairWidget.cpp
 		)
 
 set(NEURONIZE_HEADERS
 		batchbuilder.h
 		batchbuilder.ui
 		FrameConstrictor.h
-		LoadFileDialog.h
-		manipulatedFrameSetConstraint.h
+        manipulatedFrameSetConstraint.h
 		NeuroGeneratorWidget.h
 		NeuroGeneratorWidget.ui
 		NeuroGeneratorWidgetViewer.h
@@ -35,7 +33,7 @@ set(NEURONIZE_HEADERS
 		SomaDeformerWidgetViewer.h
 		xneuron.qrc
 		xneuron.ui
-		RepairDialog.h
+        RepairWidget.h
 		)
 
 set(NEURONIZE_LINK_LIBRARIES

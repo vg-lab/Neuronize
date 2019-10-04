@@ -2,8 +2,8 @@
 // Created by ivelascog on 6/06/19.
 //
 
-#ifndef NEURONIZE_REPAIRDIALOG_H
-#define NEURONIZE_REPAIRDIALOG_H
+#ifndef NEURONIZE_REPAIRWIDGET_H
+#define NEURONIZE_REPAIRWIDGET_H
 
 
 #include <QDialog>
@@ -17,10 +17,10 @@
 #include <QDoubleSpinBox>
 #include <QCheckBox>
 
-class RepairDialog: public QDialog {
+class RepairWidget : public QWidget {
     Q_OBJECT
 public:
-    RepairDialog(QWidget* parent = 0);
+    RepairWidget(QWidget *parent = 0);
 
 private:
     QLineEdit* csvPath;
@@ -28,8 +28,8 @@ private:
     QPushButton* csvButton;
     QPushButton* inputButton;
     QPushButton* advancedButton;
+    QPushButton *repairButton;
     QWidget* advancedWidget;
-    QDialogButtonBox* buttonBox;
     QComboBox* saveCombo;
     QFutureWatcher<void>* futureWatcher;
     QProgressDialog* progressDialog;
@@ -49,4 +49,4 @@ private slots:
 };
 
 
-#endif //NEURONIZE_REPAIRDIALOG_H
+#endif //NEURONIZE_REPAIRWIDGET_H

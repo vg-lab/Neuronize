@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>495</width>
-    <height>500</height>
+       <height>589</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,26 +15,135 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
-    <widget class="QPushButton" name="pushButton_LoadSWCFile">
-     <property name="text">
-      <string>Load file</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLabel" name="label_SomaGeneratedName">
-     <property name="text">
-      <string>Soma to build: ...</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
+       <layout class="QGridLayout" name="gridLayout">
+           <property name="topMargin">
+               <number>0</number>
+           </property>
+           <item row="2" column="0">
+               <widget class="QRadioButton" name="vrmls">
+                   <property name="text">
+                       <string>VRML FIles:</string>
+                   </property>
+               </widget>
+           </item>
+           <item row="5" column="1">
+               <widget class="QPushButton" name="ascButton">
+                   <property name="enabled">
+                       <bool>false</bool>
+                   </property>
+                   <property name="text">
+                       <string>Select Output File...</string>
+                   </property>
+               </widget>
+           </item>
+           <item row="0" column="0">
+               <widget class="QRadioButton" name="traces">
+                   <property name="sizePolicy">
+                       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                       </sizepolicy>
+                   </property>
+                   <property name="text">
+                       <string>Trace File:</string>
+                   </property>
+                   <property name="checked">
+                       <bool>true</bool>
+                   </property>
+               </widget>
+           </item>
+           <item row="2" column="1">
+               <widget class="QPushButton" name="basalPathButton">
+                   <property name="enabled">
+                       <bool>false</bool>
+                   </property>
+                   <property name="sizePolicy">
+                       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                       </sizepolicy>
+                   </property>
+                   <property name="text">
+                       <string>Select File...</string>
+                   </property>
+               </widget>
+           </item>
+           <item row="0" column="1">
+               <widget class="QPushButton" name="tracePathButton">
+                   <property name="sizePolicy">
+                       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                       </sizepolicy>
+                   </property>
+                   <property name="text">
+                       <string>Select File...</string>
+                   </property>
+               </widget>
+           </item>
+           <item row="0" column="2">
+               <widget class="QLineEdit" name="tracePath">
+                   <property name="placeholderText">
+                       <string>Trace file (SWC,ASC)</string>
+                   </property>
+               </widget>
+           </item>
+           <item row="5" column="2">
+               <widget class="QLineEdit" name="ascPath">
+                   <property name="enabled">
+                       <bool>false</bool>
+                   </property>
+                   <property name="placeholderText">
+                       <string>Export Tracing (ASC)</string>
+                   </property>
+               </widget>
+           </item>
+           <item row="2" column="2">
+               <widget class="QLineEdit" name="basalPath">
+                   <property name="enabled">
+                       <bool>false</bool>
+                   </property>
+                   <property name="placeholderText">
+                       <string>Basal/s VRML file/s</string>
+                   </property>
+               </widget>
+           </item>
+           <item row="4" column="1">
+               <widget class="QCheckBox" name="saveCheckBox">
+                   <property name="enabled">
+                       <bool>false</bool>
+                   </property>
+                   <property name="text">
+                       <string>Save Output File</string>
+                   </property>
+               </widget>
+           </item>
+           <item row="3" column="1">
+               <widget class="QPushButton" name="apiPathButton">
+                   <property name="enabled">
+                       <bool>false</bool>
+                   </property>
+                   <property name="text">
+                       <string>Select File...</string>
+                   </property>
+               </widget>
+           </item>
+           <item row="3" column="2">
+               <widget class="QLineEdit" name="apiPath">
+                   <property name="enabled">
+                       <bool>false</bool>
+                   </property>
+                   <property name="placeholderText">
+                       <string>Apical VRML file (if any)</string>
+                   </property>
+               </widget>
+           </item>
+       </layout>
    </item>
    <item>
     <widget class="QPushButton" name="pushButton_GoToSomaDeformer">
      <property name="text">
-      <string>Next step</string>
+         <string>Go to soma deformer</string>
      </property>
     </widget>
    </item>
@@ -42,13 +151,6 @@
     <widget class="Line" name="line_2">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QPushButton" name="pushButton_RepairMeshes">
-     <property name="text">
-      <string>Repair Meshes</string>
      </property>
     </widget>
    </item>
@@ -148,8 +250,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>415</width>
-               <height>550</height>
+                  <width>414</width>
+                  <height>545</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout">

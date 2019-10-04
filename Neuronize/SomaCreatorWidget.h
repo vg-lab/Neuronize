@@ -33,6 +33,8 @@
 #include <libs/libNeuroUtils/SWCImporter.h>
 #include <libs/libNeuroUtils/BaseMesh.h>
 #include <libs/libNeuroUtils/AS2SWCV2.h>
+#include <QtWidgets/QProgressDialog>
+#include <QFutureWatcher>
 
 #include "ui_SomaCreatorWidget.h"
 
@@ -83,8 +85,6 @@ class SomaCreatorWidget: public QWidget, public Ui::SomaCreatorWidget
     //Methods for magazine.
     void setExitDirectory ( );
 
-    void generateXMLSoma ( );
-
     void generateXMLSoma ( QString fileName, bool useSoma );
 
     void calcNearestVertex ( );
@@ -93,9 +93,25 @@ class SomaCreatorWidget: public QWidget, public Ui::SomaCreatorWidget
 
     void resetInterface ( );
 
-    void showRepairDialog ( );
-
     void disableRepair();
+
+    void openSaveFileDialog(QLineEdit *target, const QString &title, const QString &types);
+
+    void processSkel(const std::string &fileName);
+
+    void onProcessFinish();
+
+    void showWarningDialogIncorrectConnections(int &newThreshold);
+
+    void showWarningDialogReaminingSegments(int sobrantes, int &newThreshold);
+
+    void onOkPressed();
+
+    void onRadioChanged(bool b);
+
+    void onSaveChanged(int state);
+
+    void openSelectFileDialog(QLineEdit *target, const QString &title, const QString &types, bool multiFile);
 
   signals:
 
@@ -116,7 +132,6 @@ class SomaCreatorWidget: public QWidget, public Ui::SomaCreatorWidget
 
     bool isSomaContours();
 
-
 private:
 
     Ui::SomaCreatorWidget ui;
@@ -135,6 +150,7 @@ private:
     QString mMehsFileName;
     QString mExitDirectory;
     QString mInputFile;
+    QFutureWatcher<void> *futureWatcher;
 public:
     const QString &getInputFile() const;
 
@@ -144,6 +160,7 @@ private:
     skelgenerator::Neuron* neuron;
     bool somaContours;
     std::vector<Spine> spines;
+    QProgressDialog *progresDialog;
 public:
     const vector<Spine> &getSpines() const;
 

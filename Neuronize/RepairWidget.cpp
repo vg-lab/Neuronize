@@ -12,7 +12,7 @@
 #include <QSizePolicy>
 #include <QFormLayout>
 #include <iostream>
-#include "RepairDialog.h"
+#include "RepairWidget.h"
 #include "neuronize.h"
 
 #ifdef _WIN32
@@ -22,7 +22,7 @@
 #endif
 
 
-RepairDialog::RepairDialog(QWidget *parent):QDialog(parent) {
+RepairWidget::RepairWidget(QWidget *parent) : QWidget(parent) {
     inputPath = new QLineEdit( );
     inputPath->setPlaceholderText("Select input file");
 
@@ -31,9 +31,7 @@ RepairDialog::RepairDialog(QWidget *parent):QDialog(parent) {
     csvPath = new QLineEdit( );
     csvPath->setPlaceholderText("Select output file");
 
-    csvButton = new QPushButton("Select file");
-
-    buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    csvButton = new QPushButton("Select file...");
 
     auto grid = new QGridLayout();
     grid->setSpacing(6);
@@ -47,13 +45,11 @@ RepairDialog::RepairDialog(QWidget *parent):QDialog(parent) {
     advancedWidget = new QWidget();
     auto advacedGrid = new QHBoxLayout( advancedWidget );
 
-
-
     saveCombo = new QComboBox( advancedWidget );
     saveCombo->addItem("None");
     saveCombo->addItem("STL");
     saveCombo->addItem("VRML");
-    
+
     advancedButton = new QPushButton("Advanced Options" );
     advancedButton->setStyleSheet(tr("border:1px"));
 
@@ -109,14 +105,13 @@ RepairDialog::RepairDialog(QWidget *parent):QDialog(parent) {
     formLayout2->addRow(kernelLabel, kernelSizeBox);
     formLayout2->setSpacing(6);
 
-
-
     advacedGrid->addLayout(formLayout1);
     advacedGrid->addLayout(formLayout2);
     advacedGrid->setSpacing(25);
 
     advancedWidget->setLayout(advacedGrid);
 
+    repairButton = new QPushButton("Repair");
 
     QFrame* line = new QFrame();
     line->setFrameShape(QFrame::HLine);
@@ -126,24 +121,21 @@ RepairDialog::RepairDialog(QWidget *parent):QDialog(parent) {
     mainLayout->addWidget(line);
     mainLayout->addWidget(advancedWidget);
     mainLayout->addStretch(1);
-    mainLayout->addWidget(buttonBox);
+    mainLayout->addWidget(repairButton);
 
-    mainLayout->setSizeConstraint(QLayout::SetFixedSize);
     futureWatcher = new QFutureWatcher<void>();
 
     connect(inputButton, &QPushButton::released,[=]() {openSelectFileDialog(inputPath,"Select Input File","Imaris Filament Tracer(*.vrml *.wrl *.imx)");});
     connect(csvButton, &QPushButton::released,[=](){saveFileDialog(csvPath, "Select output File", "CSV(*.csv)");});
-    connect(buttonBox, &QDialogButtonBox::accepted, this, &RepairDialog::onOk);
-    connect(buttonBox, &QDialogButtonBox::rejected,[=](){this->close();});
-    connect(futureWatcher, &QFutureWatcher<void>::finished,this,&RepairDialog::onProcessFinish);
-    connect(advancedButton, &QPushButton::released,this,&RepairDialog::onAdvancedPress);
+    connect(repairButton, &QPushButton::released, this, &RepairWidget::onOk);
+    connect(futureWatcher, &QFutureWatcher<void>::finished, this, &RepairWidget::onProcessFinish);
+    connect(advancedButton, &QPushButton::released, this, &RepairWidget::onAdvancedPress);
 
     setLayout(mainLayout);
     advancedWidget->hide();
-    resize(600,100);
 }
 
-void RepairDialog::onOk() {
+void RepairWidget::onOk() {
     QString input;
     if (inputPath->text().isEmpty()) {
         QToolTip::showText(inputPath->mapToGlobal(QPoint()), tr("Need a input file"));
@@ -184,33 +176,25 @@ void RepairDialog::onOk() {
 
 }
 
-void RepairDialog::openSelectFileDialog(QLineEdit *dest,const QString& message,const QString& formats) {
+void RepairWidget::openSelectFileDialog(QLineEdit *dest, const QString &message, const QString &formats) {
     auto file = QFileDialog::getOpenFileName(this,message,QString(),formats);
     dest->setText(file);
 }
 
-void RepairDialog::saveFileDialog(QLineEdit* dest,const QString& message,const QString& formats) {
+void RepairWidget::saveFileDialog(QLineEdit *dest, const QString &message, const QString &formats) {
     auto file = QFileDialog::getSaveFileName(this,message,QString(),formats);
     dest->setText(file);
 }
 
-void RepairDialog::onProcessFinish() {
+void RepairWidget::onProcessFinish() {
     progressDialog->setMaximum(1);
     progressDialog->setValue(1);
     QMessageBox msgBox(this);
     msgBox.setText("Task Finished");
     msgBox.setIcon(QMessageBox::Information);
     msgBox.exec();
-    this->accept();
 }
 
-void RepairDialog::onAdvancedPress() {
+void RepairWidget::onAdvancedPress() {
     advancedWidget->setVisible(!advancedWidget->isVisible());
-    if (!advancedWidget->isVisible()) {
-        mainLayout->setSizeConstraint(QLayout::SetFixedSize);
-        resize(600,2);
-    } else {
-        mainLayout->setSizeConstraint(QLayout::SetFixedSize);
-    }
-
 }

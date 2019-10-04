@@ -34,6 +34,7 @@
 #include "SomaDeformerWidget.h"
 #include "NeuroGeneratorWidget.h"
 #include "batchbuilder.h"
+#include "RepairWidget.h"
 
 
 class Neuronize: public QMainWindow
@@ -66,6 +67,10 @@ class Neuronize: public QMainWindow
     SomaDeformerWidget *mSomaDeformerWidget;
 
     NeuroGeneratorWidget *mNeuroGeneratorWidget;
+
+    RepairWidget *mRepairWidget;
+
+
 
     BatchBuilder *mBatchBuilder;
     //NeuroGeneratorWidget	* mSpinesGeneratorWidget;

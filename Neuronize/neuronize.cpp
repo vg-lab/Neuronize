@@ -150,6 +150,10 @@ void Neuronize::resetNeuronnizeInterface ( )
         mSomaCreatorWidget->disableRepair();
     }
   ui.verticalLayout_SomaCreator->addWidget ( mSomaCreatorWidget );
+    mRepairWidget = new RepairWidget(this);
+    ui.verticalLayout_RepairMeshes->addWidget(mRepairWidget);
+
+
   QObject::connect ( mSomaCreatorWidget, SIGNAL( somaCreated ( )), this, SLOT( showSomaDeformer ( )) );
 
   mSomaDeformerWidget = new SomaDeformerWidget ( tempDir.path(),this );
@@ -195,7 +199,7 @@ void Neuronize::resetNeuronnizeInterface ( )
   mNeuroGeneratorWidget->getUI ( ).checkBox_SmoothSpines->setChecked ( false );
 
   //Close all tabs except the loader
-  for ( int i = 0; i < 4; ++i )
+    for (int i = 0; i < 6; ++i)
     ui.tabWidget_MainContainer->removeTab ( 0 );
 
   showSomaCreator ( );
@@ -205,8 +209,10 @@ void Neuronize::showSomaCreator ( )
 {
   mActiveTab = 0;
 
-  ui.tabWidget_MainContainer->removeTab ( 0 );
-  ui.tabWidget_MainContainer->insertTab ( 1, ui.tab_SomaCreator, "Load File" );
+    ui.tabWidget_MainContainer->removeTab(0);
+    ui.tabWidget_MainContainer->insertTab(1, ui.tab_SomaCreator, "Load File");
+    ui.tabWidget_MainContainer->insertTab(2, ui.tab_RepairMeshes, "Repair Meshes");
+    ui.tabWidget_MainContainer->insertTab(3, ui.tab_CompareMeshes, "Compare Meshes");
 
   mSomaCreatorWidget->deleteTreeViewer ( );
   mSomaCreatorWidget->resetInterface ( );
@@ -219,6 +225,8 @@ void Neuronize::showSomaDeformer ( )
 
   mFullSWCFilePath = mSomaCreatorWidget->getFullPathToSWCFile ( );
 
+    ui.tabWidget_MainContainer->removeTab(0);
+    ui.tabWidget_MainContainer->removeTab(0);
   ui.tabWidget_MainContainer->removeTab ( 0 );
   ui.tabWidget_MainContainer->insertTab ( 0, ui.tab_SomaGenerator, "Soma builder" );
 
