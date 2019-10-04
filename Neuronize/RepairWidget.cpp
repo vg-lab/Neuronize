@@ -56,7 +56,7 @@ RepairWidget::RepairWidget(QWidget *parent) : QWidget(parent) {
     percentageBox = new QDoubleSpinBox( advancedWidget );
     percentageBox->setValue(30.0f);
     percentageBox->setMinimum(5.0f);
-    percentageBox->setMinimum(100.0f);
+    percentageBox->setMaximum(100.0f);
 
     cleanCheckBox = new QCheckBox( advancedWidget );
     cleanCheckBox->setChecked(true);
