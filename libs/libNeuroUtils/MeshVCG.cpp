@@ -42,7 +42,7 @@ MeshVCG::MeshVCG(const std::string &filename) {
     this->name = path.stem().string();
     this->path = filename;
     std::setlocale(LC_NUMERIC, "en_US.UTF-8");
-    if (vcg::tri::io::Importer<MyMesh>::Open(mesh,filename.c_str()) != 0) {
+    if (vcg::tri::io::Importer<MyMesh>::Open(mesh, filename.c_str()) != 0, loadMask) {
         throw "Error to read Mesh";
     }
 
