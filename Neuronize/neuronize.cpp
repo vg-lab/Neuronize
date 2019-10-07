@@ -84,7 +84,8 @@ Neuronize::Neuronize ( QWidget *parent )
     std::cout << configPath.toStdString() << std::endl;
 
 
-    this->show();
+    this->showNormal();
+    resize(1200, 800);
 
     if (mPythonVersion == 3) {
         QString envPath = configPath + "/" + ENV;
@@ -150,9 +151,12 @@ void Neuronize::resetNeuronnizeInterface ( )
         mSomaCreatorWidget->disableRepair();
     }
   ui.verticalLayout_SomaCreator->addWidget ( mSomaCreatorWidget );
+
     mRepairWidget = new RepairWidget(this);
     ui.verticalLayout_RepairMeshes->addWidget(mRepairWidget);
 
+    mCompareMeshesWidget = new CompareMeshesWidget(tempDir.path().toStdString(), this);
+    ui.verticalLayout_CompareMeshes->addWidget(mCompareMeshesWidget);
 
     QObject::connect(mSomaCreatorWidget, SIGNAL(somaCreated()), this, SLOT(onSomaBuildFinish()));
 

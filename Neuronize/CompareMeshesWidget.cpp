@@ -8,7 +8,7 @@
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QMessageBox>
 
-CompareMeshesWidget::CompareMeshesWidget(const std::string& tmpPath_ ,QWidget *parent): QDialog(parent) {
+CompareMeshesWidget::CompareMeshesWidget(const std::string &tmpPath_, QWidget *parent) : QWidget(parent) {
     this->tmpPath = tmpPath_;
 
     initUi();

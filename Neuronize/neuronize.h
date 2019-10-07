@@ -35,6 +35,7 @@
 #include "NeuroGeneratorWidget.h"
 #include "batchbuilder.h"
 #include "RepairWidget.h"
+#include "CompareMeshesWidget.h"
 
 
 class Neuronize: public QMainWindow
@@ -69,6 +70,8 @@ class Neuronize: public QMainWindow
     NeuroGeneratorWidget *mNeuroGeneratorWidget;
 
     RepairWidget *mRepairWidget;
+
+    CompareMeshesWidget *mCompareMeshesWidget;
 
 
 

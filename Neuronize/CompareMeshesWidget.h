@@ -15,7 +15,7 @@
 #include <libs/libNeuroUtils/MeshVCG.h>
 #include "CompareMeshWidgetViewer.h"
 
-class CompareMeshesWidget: public QDialog {
+class CompareMeshesWidget : public QWidget {
     Q_OBJECT
     static int const NUMBER_OF_COLORS = 100;
     static int const NUMBER_OF_TEXT = 10;

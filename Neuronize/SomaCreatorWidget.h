@@ -113,8 +113,6 @@ class SomaCreatorWidget: public QWidget, public Ui::SomaCreatorWidget
 
     void openSelectFileDialog(QLineEdit *target, const QString &title, const QString &types, bool multiFile);
 
-    void compareMeshes( );
-
   signals:
 
     void somaCreated ( );

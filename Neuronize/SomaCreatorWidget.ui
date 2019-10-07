@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>495</width>
-       <height>589</height>
+       <height>655</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -151,20 +151,6 @@
     <widget class="Line" name="line_2">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QPushButton" name="pushButton_RepairMeshes">
-     <property name="text">
-      <string>Repair Meshes</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QPushButton" name="pushButton_CompareMeshes">
-     <property name="text">
-      <string>Compare Meshes</string>
      </property>
     </widget>
    </item>
