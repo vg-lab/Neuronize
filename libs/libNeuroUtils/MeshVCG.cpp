@@ -10,6 +10,7 @@
 #include <wrap/io_trimesh/import_obj.h>
 #include <wrap/io_trimesh/export_obj.h>
 #include <wrap/io_trimesh/export_off.h>
+#include <wrap/io_trimesh/export_ply.h>
 #include <vcg/complex/algorithms/update/topology.h>
 #include <vcg/complex/algorithms/update/position.h>
 #include <vcg/complex/algorithms/convex_hull.h>
@@ -17,13 +18,17 @@
 #include <vcg/complex/algorithms/refine_loop.h>
 #include <vcg/complex/algorithms/inertia.h>
 #include <vcg/complex/algorithms/isotropic_remeshing.h>
-#include <vcg/complex/algorithms/voronoi_remesher.h>
 #include <vcg/complex/algorithms/stat.h>
 #include <vcg/complex/algorithms/intersection.h>
 #include <QtCore/QFile>
 #include <clocale>
+#include <vcg/complex/complex.h>
+#include <vcg/simplex/face/distance.h>
+#include <vcg/simplex/face/component_ep.h>
+#include <vcg/complex/algorithms/update/bounding.h>
 #include <queue>
 #include <unordered_set>
+#include <QtConcurrent/QtConcurrent>
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -297,6 +302,88 @@ float MeshVCG::getMax2DArea(const std::vector<std::vector<OpenMesh::Vec3d>>& con
     return minArea;
 
 }
+
+
+HausdorffRet MeshVCG::hausdorffDistance(MeshVCG &otherMesh, const std::string &colorMeshPath) {
+    QThreadPool pool;
+    QSemaphore sem1(1);
+    QSemaphore sem2(1);
+    double meanDist1 = 0;
+    for (auto &vp : mesh.vert) {
+        QtConcurrent::run(&pool, [&]() {
+            double minDist = 1000.0f;
+            for (auto &fp : otherMesh.mesh.face) {
+                vcg::Point3d q(0, 0, 0);
+                MyFace::ScalarType dist = 1000.0f;
+                vcg::face::PointDistanceBase(fp, vp.P(), minDist, q);
+                minDist = minDist < dist ? minDist : dist;
+            }
+            vp.Q() = minDist;
+
+            sem1.acquire();
+            meanDist1 += minDist;
+            sem1.release();
+        });
+    }
+
+    double meanDist2 = 0;
+    for (auto &vp :otherMesh.mesh.vert) {
+        QtConcurrent::run(&pool, [&]() {
+            double minDist = 1000.0f;
+            for (auto &fp : mesh.face) {
+                vcg::Point3d q(0, 0, 0);
+                MyFace::ScalarType dist = 1000.0f;
+                vcg::face::PointDistanceBase(fp, vp.P(), minDist, q);
+                minDist = minDist < dist ? minDist : dist;
+            }
+            vp.Q() = minDist;
+
+            sem2.acquire();
+            meanDist2 += minDist;
+            sem2.release();
+        });
+    }
+
+    pool.waitForDone();
+
+    meanDist1 /= mesh.VN();
+    meanDist2 /= otherMesh.mesh.VN();
+
+
+    std::pair<MyMesh::ScalarType, MyMesh::ScalarType> minmaxS1 = Stat<MyMesh>::ComputePerVertexQualityMinMax(mesh);
+    std::pair<MyMesh::ScalarType, MyMesh::ScalarType> minmaxS2 = Stat<MyMesh>::ComputePerVertexQualityMinMax(
+            otherMesh.mesh);
+
+    vcg::tri::UpdateColor<MyMesh>::PerVertexQualityRamp(mesh, minmaxS1.second, minmaxS1.first);
+    vcg::tri::UpdateColor<MyMesh>::PerVertexQualityRamp(otherMesh.mesh, minmaxS2.second, minmaxS2.first);
+    if (!colorMeshPath.empty()) {
+        vcg::tri::Inertia<MyMesh> Ib(mesh);
+        auto cc = Ib.CenterOfMass();
+        vcg::Matrix44d trans;
+        trans.SetTranslate(-cc[0], -cc[1], -cc[2]);
+        vcg::tri::UpdatePosition<MyMesh>::Matrix(mesh, trans);
+        vcg::tri::UpdatePosition<MyMesh>::Matrix(otherMesh.mesh, trans);
+
+        std::string s1Name = colorMeshPath + "/" + this->name + ".obj";
+        std::string s2Name = colorMeshPath + "/" + otherMesh.name + ".obj";
+
+        int saveMask = vcg::tri::io::Mask::IOM_VERTCOLOR | vcg::tri::io::Mask::IOM_VERTQUALITY;
+        vcg::tri::io::ExporterOBJ<MyMesh>::Save(mesh, s1Name.c_str(), saveMask);
+        vcg::tri::io::ExporterOBJ<MyMesh>::Save(otherMesh.mesh, s2Name.c_str(), saveMask);
+    }
+
+    HausdorffRet hausdorffRet{minmaxS1.second, minmaxS2.second, meanDist1, meanDist2, minmaxS1.first, minmaxS2.first};
+
+    return hausdorffRet;
+}
+ QColor MeshVCG::getColor(float value) {
+    vcg::Color4f color;
+    color.SetColorRamp(0.0f,1.0f,value);
+    return QColor::fromRgbF(color[0],color[1],color[2],color[3]);
+
+}
+
+
 
 
 

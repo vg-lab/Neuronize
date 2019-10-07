@@ -19,6 +19,7 @@
  */
 
 #include "SomaCreatorWidget.h"
+#include "CompareMeshesWidget.h"
 #include "RepairWidget.h"
 
 #include <string>
@@ -856,6 +857,12 @@ const vector<Spine> &SomaCreatorWidget::getSpines() const {
   return spines;
 }
 
+
+void SomaCreatorWidget::compareMeshes() {
+    CompareMeshesWidget dialog (mExitDirectory.toStdString(), this);
+    dialog.exec();
+
+}
 void SomaCreatorWidget::onRadioChanged(bool b) {
     ui.tracePath->setDisabled(!b);
     ui.tracePathButton->setDisabled(!b);
