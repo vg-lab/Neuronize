@@ -30,5 +30,4 @@ int main ( int argc, char *argv[] )
   Neuronize w;
   w.show ( );
   return a.exec ( );
-
 }

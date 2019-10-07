@@ -1758,10 +1758,15 @@ void NeuroGeneratorWidgetViewer::generateSpinesVrml(skelgenerator::Neuron *neuro
     }
 
 
-    MeshDef::ConstVertexIter iniLimit = meshSpines->getMesh ( )->vertices_begin ( );
-    MeshDef::ConstVertexIter finLimit = meshSpines->getMesh ( )->vertices_end ( );
+    mSpinesSynthContainers.addElement(new BaseMesh());
+    mSpinesSynthContainers.getElementAt(0)->JoinBaseMesh(meshSpines);
 
-    meshSpines->setVertexColor ( iniLimit, finLimit, MeshDef::Color ( 1.0, 0.0, 0.0, 1.0 ));
+
+    MeshDef::ConstVertexIter iniLimit = mSpinesSynthContainers.getElementAt(0)->getMesh()->vertices_begin();
+    MeshDef::ConstVertexIter finLimit = mSpinesSynthContainers.getElementAt(0)->getMesh()->vertices_end();
+
+    mSpinesSynthContainers.getElementAt(0)->setVertexColor(iniLimit, finLimit, MeshDef::Color(0.6, 0.0, 0.0, 1.0)
+    );
 
 
     if ( spineMeshRend != NULL )
@@ -1771,7 +1776,7 @@ void NeuroGeneratorWidgetViewer::generateSpinesVrml(skelgenerator::Neuron *neuro
 
     spineMeshRend = new MeshRenderer ( );
 
-    spineMeshRend->setMeshToRender ( meshSpines );
+    spineMeshRend->setMeshToRender(mSpinesSynthContainers.getElementAt(0));
 
     spineMeshRend->setRenderOptions ( renderMask );
 

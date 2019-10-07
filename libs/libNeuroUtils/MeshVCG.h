@@ -12,15 +12,32 @@
 #include <vcg/complex/complex.h>
 #include <vcg/complex/all_types.h>
 #include <OpenMesh/Core/Mesh/Traits.hh>
+#include <vcg/simplex/face/component_ep.h>
+#include <QColor>
 
 using Edge = std::tuple<int, int, float>;
+
+struct HausdorffRet {
+    double max1;
+    double max2;
+    double mean1;
+    double mean2;
+    double min1;
+    double min2;
+};
 
 class MyVertex; class MyEdge; class MyFace;
     struct MyUsedTypes : public vcg::UsedTypes<vcg::Use<MyVertex>   ::AsVertexType,
             vcg::Use<MyEdge>     ::AsEdgeType,
             vcg::Use<MyFace>     ::AsFaceType>{};
-class MyVertex  : public vcg::Vertex< MyUsedTypes,vcg::vertex::Coord3d, vcg::vertex::Normal3d,vcg::vertex::Qualityf, vcg::vertex::VFAdj ,vcg::vertex::BitFlags>{};
-class MyFace    : public vcg::Face<   MyUsedTypes, vcg::face::Mark ,vcg::face::FFAdj,vcg::face::VFAdj,  vcg::face::VertexRef,vcg::face::Normal3d , vcg::face::BitFlags > {};
+
+class MyVertex
+        : public vcg::Vertex<MyUsedTypes, vcg::vertex::Coord3d, vcg::vertex::Normal3d, vcg::vertex::Color4b, vcg::vertex::Qualityf, vcg::vertex::VFAdj, vcg::vertex::BitFlags> {
+};
+
+class MyFace
+        : public vcg::Face<MyUsedTypes, vcg::face::Mark, vcg::face::FFAdj, vcg::face::VFAdj, vcg::face::VertexRef, vcg::face::Normal3d, vcg::face::BitFlags> {
+};
     class MyEdge    : public vcg::Edge<   MyUsedTypes, vcg::edge::EFAdj,vcg::edge::VertexRef, vcg::edge::BitFlags,vcg::edge::EEAdj> {};
     class MyMesh    : public vcg::tri::TriMesh< std::vector<MyVertex>, std::vector<MyFace> , std::vector<MyEdge>  > {};
 
@@ -68,13 +85,17 @@ class MyFace    : public vcg::Face<   MyUsedTypes, vcg::face::Mark ,vcg::face::F
         const std::string &getPath() const;
 
         float getMax2DArea(float zStep = 0.1f);
+
         static float getMax2DArea(const std::vector<std::vector<OpenMesh::Vec3d>>& contours);
         void applyMatrix(const vcg::Matrix44d& matrix);
 
         MyMesh::VertContainer getVertex();
 
-    private:
+        static QColor getColor(float value);
 
+        HausdorffRet hausdorffDistance(MeshVCG &otherMesh, const std::string &path = "");
+
+    private:
          MeshVCG*  sliceAux(float z);
 
         int getNumVertex();
