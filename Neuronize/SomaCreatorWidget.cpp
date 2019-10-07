@@ -934,10 +934,11 @@ void SomaCreatorWidget::processSkel(const std::string &fileName) {
     for (const auto &string: basalFiles) {
         basalFilesStd.push_back(string.toStdString());
     }
-    auto neuron = new skelgenerator::Neuron(apiFile, basalFilesStd);
+
+    int newThreshold = 3;
+    auto neuron = new skelgenerator::Neuron(apiFile, basalFilesStd, newThreshold);
     bool ignore = false;
     while (neuron->isIncorrectConecctions() || neuron->getReamingSegments() > 0 && !ignore) {
-        int newThreshold;
         if (neuron->isIncorrectConecctions()) {
             QMetaObject::invokeMethod(this, "showWarningDialogIncorrectConnections", Qt::BlockingQueuedConnection,
                                       Q_ARG(int &, newThreshold));
@@ -971,16 +972,22 @@ void SomaCreatorWidget::onProcessFinish() {
     progresDialog->setMaximum(1);
     progresDialog->setValue(1);
     QMessageBox msgBox(this);
-    if (saveCheckBox->checkState() == Qt::Checked && ascPath->text() != nullptr && ascPath->text() != "") {
-        std::ofstream file;
-        file.open(ascPath->text().toStdString());
-        file << this->neuron->to_asc();
-        file.close();
+    QString outPath;
+    if (ui.saveCheckBox->checkState() == Qt::Checked && ui.ascPath->text() != nullptr && ui.ascPath->text() != "") {
+        outPath = ui.ascPath->text();
+    } else {
+        outPath = this->mExitDirectory + "/" + "temp.asc";
     }
+
+    std::ofstream file;
+    file.open(outPath.toStdString());
+    file << this->neuron->to_asc();
+    file.close();
+
     msgBox.setText("Task Finished");
     msgBox.setIcon(QMessageBox::Information);
     msgBox.exec();
-    generateXMLSoma(ascPath->text(), true);
+    generateXMLSoma(outPath, true);
 }
 
 void SomaCreatorWidget::showWarningDialogIncorrectConnections(int &newThreshold) {
