@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>495</width>
-    <height>500</height>
+    <height>516</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -49,6 +49,13 @@
     <widget class="QPushButton" name="pushButton_RepairMeshes">
      <property name="text">
       <string>Repair Meshes</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="pushButton_CompareMeshes">
+     <property name="text">
+      <string>Compare Meshes</string>
      </property>
     </widget>
    </item>
@@ -148,8 +155,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>415</width>
-               <height>550</height>
+               <width>414</width>
+               <height>545</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout">

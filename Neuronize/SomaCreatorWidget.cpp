@@ -21,6 +21,7 @@
 #include "SomaCreatorWidget.h"
 #include "LoadFileDialog.h"
 #include "RepairDialog.h"
+#include "CompareMeshesWidget.h"
 
 
 #include <string>
@@ -102,6 +103,7 @@ SomaCreatorWidget::SomaCreatorWidget (const QString &tempDir, QWidget *parent )
   //connect(ui.pushButton_LoadSWCFile, &QPushButton::clicked,this, [=]() {generateXMLSoma ( QString("if6 cing porta 1 capa3 cel11 bis.ASC")); });
   QObject::connect ( ui.pushButton_GoToSomaDeformer, SIGNAL( clicked ( )), this, SIGNAL( somaCreated ( )) );
   QObject::connect ( ui.pushButton_RepairMeshes, SIGNAL( clicked ( )), this, SLOT( showRepairDialog () ));
+  QObject::connect ( ui.pushButton_CompareMeshes, SIGNAL(clicked( )),this, SLOT (compareMeshes() ));
 
   ui.tabWidget_Main->setVisible ( false );
 
@@ -1231,6 +1233,12 @@ const vector<Spine> &SomaCreatorWidget::getSpines() const {
 void SomaCreatorWidget::showRepairDialog(){
     RepairDialog dialog(this);
     dialog.exec();
+}
+
+void SomaCreatorWidget::compareMeshes() {
+    CompareMeshesWidget dialog (mExitDirectory.toStdString(), this);
+    dialog.exec();
+
 }
 
 
