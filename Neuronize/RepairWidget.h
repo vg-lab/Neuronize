@@ -16,6 +16,7 @@
 #include <QToolBox>
 #include <QDoubleSpinBox>
 #include <QCheckBox>
+#include <QtWidgets/QRadioButton>
 
 class RepairWidget : public QWidget {
     Q_OBJECT
@@ -39,13 +40,29 @@ private:
     QSpinBox* precisionBox;
     QCheckBox* segmentsCheckBox;
     QSpinBox* kernelSizeBox;
+    QRadioButton *fileRadio;
+    QRadioButton *folderRadio;
+    QPushButton *folderInputButton;
+    QPushButton *folderOutputButton;
+    QLineEdit *folderInputEdit;
+    QLineEdit *folderOutputEdit;
 
 private slots:
     void onOk();
     void openSelectFileDialog(QLineEdit* dest, const QString& message, const QString& formats);
+
+    void openFolder(QLineEdit *dest, const QString &message);
     void onProcessFinish();
     void onAdvancedPress();
     void saveFileDialog(QLineEdit *dest, const QString &message, const QString &formats);
+
+    void onRadioChanged(bool b);
+
+    void setupUi();
+
+    void setupConnections();
+
+    void initUi() const;
 };
 
 

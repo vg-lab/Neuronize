@@ -210,7 +210,7 @@ void Neuronize::showSomaCreator ( )
   mActiveTab = 0;
 
     ui.tabWidget_MainContainer->removeTab(0);
-    ui.tabWidget_MainContainer->insertTab(1, ui.tab_SomaCreator, "Load File");
+    ui.tabWidget_MainContainer->insertTab(1, ui.tab_SomaCreator, "Generate Neuron");
     ui.tabWidget_MainContainer->insertTab(2, ui.tab_RepairMeshes, "Repair Meshes");
     ui.tabWidget_MainContainer->insertTab(3, ui.tab_CompareMeshes, "Compare Meshes");
 

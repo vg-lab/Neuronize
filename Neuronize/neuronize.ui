@@ -28,14 +28,14 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-          <number>1</number>
+          <number>0</number>
       </property>
       <property name="usesScrollButtons">
        <bool>true</bool>
       </property>
       <widget class="QWidget" name="tab_SomaCreator">
        <attribute name="title">
-        <string>Load File</string>
+           <string>Generate Neuron</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>

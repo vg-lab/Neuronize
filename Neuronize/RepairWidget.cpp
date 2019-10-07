@@ -3,7 +3,6 @@
 //
 
 #include <QGridLayout>
-#include <QProcess>
 #include <QFileDialog>
 #include <QToolTip>
 #include <QtConcurrent/QtConcurrent>
@@ -23,6 +22,38 @@
 
 
 RepairWidget::RepairWidget(QWidget *parent) : QWidget(parent) {
+    setupUi();
+    setupConnections();
+    initUi();
+}
+
+void RepairWidget::initUi() const {
+    advancedWidget->hide();
+    folderOutputEdit->setEnabled(false);
+    folderOutputButton->setEnabled(false);
+    folderInputEdit->setEnabled(false);
+    folderInputButton->setEnabled(false);
+    fileRadio->setChecked(true);
+}
+
+void RepairWidget::setupConnections() {
+    futureWatcher = new QFutureWatcher<void>();
+
+    connect(inputButton, &QPushButton::released, [=]() {
+        openSelectFileDialog(inputPath, "Select Input File", "Imaris Filament Tracer(*.vrml *.wrl *.imx)");
+    });
+    connect(csvButton, &QPushButton::released, [=]() { saveFileDialog(csvPath, "Select output File", "CSV(*.csv)"); });
+    connect(repairButton, &QPushButton::released, this, &RepairWidget::onOk);
+    connect(futureWatcher, &QFutureWatcher<void>::finished, this, &RepairWidget::onProcessFinish);
+    connect(advancedButton, &QPushButton::released, this, &RepairWidget::onAdvancedPress);
+    connect(fileRadio, &QRadioButton::toggled, this, &RepairWidget::onRadioChanged);
+    connect(folderInputButton, &QPushButton::released, this,
+            [=]() { openFolder(folderInputEdit, "Open input folder"); });
+    connect(folderOutputButton, &QPushButton::released, this,
+            [=]() { openFolder(folderOutputEdit, "Open outout folder"); });
+}
+
+void RepairWidget::setupUi() {
     inputPath = new QLineEdit( );
     inputPath->setPlaceholderText("Select input file");
 
@@ -32,20 +63,41 @@ RepairWidget::RepairWidget(QWidget *parent) : QWidget(parent) {
     csvPath->setPlaceholderText("Select output file");
 
     csvButton = new QPushButton("Select file...");
+    fileRadio = new QRadioButton("File");
+    folderRadio = new QRadioButton("Folder");
+
+    folderInputButton = new QPushButton("Select folder...");
+    folderOutputButton = new QPushButton("Select folder...");
+
+    folderInputEdit = new QLineEdit();
+    folderInputEdit->setPlaceholderText("Select input folder");
+
+    folderOutputEdit = new QLineEdit();
+    folderOutputEdit->setPlaceholderText("Select output folder");
 
     auto grid = new QGridLayout();
     grid->setSpacing(6);
+    grid->addWidget(fileRadio, 0, 0);
 
-    grid->addWidget(inputButton,0,0);
-    grid->addWidget(inputPath,0,1);
+    grid->addWidget(inputButton, 0, 1);
+    grid->addWidget(inputPath, 0, 2);
 
-    grid->addWidget(csvButton,1,0);
-    grid->addWidget(csvPath,1,1);
+    grid->addWidget(csvButton, 1, 1);
+    grid->addWidget(csvPath, 1, 2);
+
+    grid->addWidget(folderRadio, 2, 0);
+
+    grid->addWidget(folderInputButton, 2, 1);
+    grid->addWidget(folderInputEdit, 2, 2);
+
+    grid->addWidget(folderOutputButton, 3, 1);
+    grid->addWidget(folderOutputEdit, 3, 2);
+
 
     advancedWidget = new QWidget();
-    auto advacedGrid = new QHBoxLayout( advancedWidget );
+    auto advacedGrid = new QHBoxLayout(advancedWidget);
 
-    saveCombo = new QComboBox( advancedWidget );
+    saveCombo = new QComboBox(advancedWidget);
     saveCombo->addItem("None");
     saveCombo->addItem("STL");
     saveCombo->addItem("VRML");
@@ -53,15 +105,15 @@ RepairWidget::RepairWidget(QWidget *parent) : QWidget(parent) {
     advancedButton = new QPushButton("Advanced Options" );
     advancedButton->setStyleSheet(tr("border:1px"));
 
-    percentageBox = new QDoubleSpinBox( advancedWidget );
+    percentageBox = new QDoubleSpinBox(advancedWidget);
     percentageBox->setValue(30.0f);
     percentageBox->setMinimum(5.0f);
     percentageBox->setMaximum(100.0f);
 
-    cleanCheckBox = new QCheckBox( advancedWidget );
+    cleanCheckBox = new QCheckBox(advancedWidget);
     cleanCheckBox->setChecked(true);
 
-    auto formLayout1 = new QFormLayout( advancedWidget  );
+    auto formLayout1 = new QFormLayout(advancedWidget);
 
     auto exportLabel = new QLabel("Export: ");
     exportLabel->setToolTip("Determine the format of output meshes");
@@ -77,20 +129,20 @@ RepairWidget::RepairWidget(QWidget *parent) : QWidget(parent) {
     formLayout1->setSpacing(6);
 
 
-    precisionBox = new QSpinBox( advancedWidget);
+    precisionBox = new QSpinBox(advancedWidget);
     precisionBox->setValue(50);
     precisionBox->setMinimum(5);
     precisionBox->setMaximum(150);
 
-    segmentsCheckBox = new QCheckBox( advancedWidget );
+    segmentsCheckBox = new QCheckBox(advancedWidget);
     segmentsCheckBox->setChecked(true);
 
-    kernelSizeBox = new QSpinBox(advancedWidget );
+    kernelSizeBox = new QSpinBox(advancedWidget);
     kernelSizeBox->setValue(3);
     kernelSizeBox->setMinimum(1);
     kernelSizeBox->setMaximum(8);
 
-    auto formLayout2 = new QFormLayout( advancedWidget );
+    auto formLayout2 = new QFormLayout(advancedWidget);
 
     auto precisionLabel = new QLabel("Precision");
     precisionLabel->setToolTip("Determines the accuracy of the meshes repaired. But higher values need more memory");
@@ -122,17 +174,8 @@ RepairWidget::RepairWidget(QWidget *parent) : QWidget(parent) {
     mainLayout->addWidget(advancedWidget);
     mainLayout->addStretch(1);
     mainLayout->addWidget(repairButton);
-
-    futureWatcher = new QFutureWatcher<void>();
-
-    connect(inputButton, &QPushButton::released,[=]() {openSelectFileDialog(inputPath,"Select Input File","Imaris Filament Tracer(*.vrml *.wrl *.imx)");});
-    connect(csvButton, &QPushButton::released,[=](){saveFileDialog(csvPath, "Select output File", "CSV(*.csv)");});
-    connect(repairButton, &QPushButton::released, this, &RepairWidget::onOk);
-    connect(futureWatcher, &QFutureWatcher<void>::finished, this, &RepairWidget::onProcessFinish);
-    connect(advancedButton, &QPushButton::released, this, &RepairWidget::onAdvancedPress);
-
     setLayout(mainLayout);
-    advancedWidget->hide();
+
 }
 
 void RepairWidget::onOk() {
@@ -197,4 +240,21 @@ void RepairWidget::onProcessFinish() {
 
 void RepairWidget::onAdvancedPress() {
     advancedWidget->setVisible(!advancedWidget->isVisible());
+}
+
+void RepairWidget::onRadioChanged(bool b) {
+    inputButton->setEnabled(b);
+    inputPath->setEnabled(b);
+    csvButton->setEnabled(b);
+    csvPath->setEnabled(b);
+
+    folderInputButton->setEnabled(!b);
+    folderInputEdit->setEnabled(!b);
+    folderOutputButton->setEnabled(!b);
+    folderOutputEdit->setEnabled(!b);
+}
+
+void RepairWidget::openFolder(QLineEdit *dest, const QString &message) {
+    auto folder = QFileDialog::getExistingDirectory(this, message, QString());
+    dest->setText(folder);
 }
