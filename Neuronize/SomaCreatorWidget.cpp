@@ -608,9 +608,11 @@ void SomaCreatorWidget::generateXMLSoma ( QString fileName, bool useSoma ) {
         QString destination = mExitDirectory + "/" + sourceInfo.fileName();
 
         //QFile::copy(mFullPathSWCFileName, destination)
-        if (!QFile::copy(mFullPathSWCFileName, destination)) {
-            QFile::remove(destination);
-            QFile::copy(mFullPathSWCFileName, destination);
+        if (mFullPathSWCFileName != destination) {
+            if (!QFile::copy(mFullPathSWCFileName, destination)) {
+                QFile::remove(destination);
+                QFile::copy(mFullPathSWCFileName, destination);
+            }
         }
 
         QFileInfo sourceInfoModel(mMehsFileName);
