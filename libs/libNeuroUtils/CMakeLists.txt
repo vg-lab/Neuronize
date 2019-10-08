@@ -25,6 +25,7 @@ set (NEUROUTILS_SOURCES
 		MeshVCG.cpp
 		BBDD.cpp
 		../../VCG/wrap/ply/plylib.cpp
+		sqlite3.c
 		)
 
 set(NEUROUTILS_HEADERS
@@ -58,6 +59,7 @@ set(NEUROUTILS_HEADERS
 		ASC2SWC.h
 		MeshVCG.h
 		BBDD.h
+		sqlite3.h
 		)
 
 set(NEUROUTILS_LINK_LIBRARIES
@@ -72,7 +74,6 @@ set(NEUROUTILS_LINK_LIBRARIES
 		${OPENGL_LIBRARIES}
 		${GLUT_LIBRARY}
 		skelgeneratorutil
-		${SQLite3_LIBRARIES}
 		)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})

@@ -1238,11 +1238,13 @@ void SomaCreatorWidget::showRepairDialog(){
 
 const vector<vector<OpenMesh::Vec3d>> &SomaCreatorWidget::getContours() const {
     return contours;
+}
 
 void SomaCreatorWidget::compareMeshes() {
-    CompareMeshesWidget dialog (mExitDirectory.toStdString(), this);
+    CompareMeshesWidget dialog(mExitDirectory.toStdString(), this);
     dialog.exec();
-
 }
+
+
 
 

@@ -7,11 +7,11 @@
 
 #include <neuroutils/api.h>
 
-#include <sqlite3.h>
 #include <string>
 #include <vector>
 #include <map>
 #include <libs/libNeuroUtils/MeshVCG.h>
+#include <libs/libNeuroUtils/sqlite3.h>
 #include <libs/libNeuroUtils/SWCImporter.h>
 #include <SkelGeneratorUtil/Spine.h>
 
