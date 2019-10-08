@@ -52,6 +52,8 @@ Neuronize::Neuronize ( QWidget *parent )
 
     //QObject::connect(ui.actionGenerateNewNeuron	,SIGNAL(triggered())	,this,SLOT(generateNewNeuron()));
     QObject::connect(ui.actionGenerateNewNeuron, SIGNAL(triggered()), this, SLOT(actionNewNeuron()));
+    connect(ui.actionRepair_Meshes,&QAction::triggered,[&](){resetNeuronnizeInterface(); ui.tabWidget_MainContainer->setCurrentIndex(1);});
+    connect(ui.actionCompare_Meshes,&QAction::triggered,[&](){resetNeuronnizeInterface(); ui.tabWidget_MainContainer->setCurrentIndex(2);});
     QObject::connect(ui.actionTake_a_snapshot, SIGNAL(triggered()), this, SLOT(takeASnapshot()));
     QObject::connect(ui.actionHelp, SIGNAL(triggered()), this, SLOT(showHelp()));
     QObject::connect(ui.actionQuit, SIGNAL(triggered()), this, SLOT(actionQuit()));
@@ -60,9 +62,11 @@ Neuronize::Neuronize ( QWidget *parent )
 
     QObject::connect(ui.actionBatchBuilder, SIGNAL(triggered()), this, SLOT(showBatchBuilder()));
 
-    mSomaCreatorWidget = NULL;
-    mSomaDeformerWidget = NULL;
-    mNeuroGeneratorWidget = NULL;
+    mSomaCreatorWidget = nullptr;
+    mSomaDeformerWidget = nullptr;
+    mNeuroGeneratorWidget = nullptr;
+    mRepairWidget = nullptr;
+    mCompareMeshesWidget = nullptr;
     mPythonVersion = checkPython();
 
     resetNeuronnizeInterface();
@@ -124,22 +128,18 @@ Neuronize::Neuronize ( QWidget *parent )
 
 Neuronize::~Neuronize ( )
 {
-  if ( mSomaCreatorWidget != NULL )
     delete mSomaCreatorWidget;
-  if ( mSomaDeformerWidget != NULL )
     delete mSomaDeformerWidget;
-  if ( mNeuroGeneratorWidget != NULL )
     delete mNeuroGeneratorWidget;
 }
 
 void Neuronize::resetNeuronnizeInterface ( )
 {
-  if ( mSomaCreatorWidget != NULL )
     delete mSomaCreatorWidget;
-  if ( mSomaDeformerWidget != NULL )
     delete mSomaDeformerWidget;
-  if ( mNeuroGeneratorWidget != NULL )
     delete mNeuroGeneratorWidget;
+    delete mRepairWidget;
+    delete mCompareMeshesWidget;
 
   mSomaCreatorWidget = new SomaCreatorWidget (tempDir.path(), this );
     if (mPythonVersion != 3) {
