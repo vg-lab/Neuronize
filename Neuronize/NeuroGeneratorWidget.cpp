@@ -437,7 +437,7 @@ void NeuroGeneratorWidget::generateNeuronSphereNodes ( )
 void NeuroGeneratorWidget::generateSpines ( )
 {
   QString text = QObject::tr (
-    "This proces can take several minutes.\n The result will be similar to the image.\n Do you still want to continue?" );
+    "This proces can take several minutes.\n Do you still want to continue?" );
   QMessageBox msgBox ( QObject::tr ( "Build spines" ),
                        text,
                        QMessageBox::Warning,

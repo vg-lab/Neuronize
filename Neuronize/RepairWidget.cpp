@@ -116,7 +116,7 @@ void RepairWidget::setupUi() {
     auto formLayout1 = new QFormLayout(advancedWidget);
 
     auto exportLabel = new QLabel("Export: ");
-    exportLabel->setToolTip("Determine the format of output meshes");
+    exportLabel->setToolTip("Determines the formats of the output meshes");
     formLayout1->addRow(exportLabel, saveCombo);
 
     auto resolutionLabel = new QLabel("OutputResolutionPercentage");
@@ -124,7 +124,7 @@ void RepairWidget::setupUi() {
     formLayout1->addRow(resolutionLabel, percentageBox);
 
     auto cleanLabel = new QLabel("Clean VRML");
-    cleanLabel->setToolTip("Decide if the file is preprocessed. This can be useful for non-Imaris files");
+    cleanLabel->setToolTip("Decides if the file is preprocessed. This can be useful for non-Imaris files");
     formLayout1->addRow(cleanLabel, cleanCheckBox);
     formLayout1->setSpacing(6);
 
@@ -145,15 +145,15 @@ void RepairWidget::setupUi() {
     auto formLayout2 = new QFormLayout(advancedWidget);
 
     auto precisionLabel = new QLabel("Precision");
-    precisionLabel->setToolTip("Determines the accuracy of the meshes repaired. But higher values need more memory");
+    precisionLabel->setToolTip("Determines the accuracy of the repaired meshes. Please, note that higher values require more memory.");
     formLayout2->addRow(precisionLabel, precisionBox);
 
     auto includeLabel = new QLabel("Include Segments");
-    includeLabel->setToolTip("Decide if dendritics segments are included");
+    includeLabel->setToolTip("Mark if you want to repair also the dendritics segments (not only the spines)");
     formLayout2->addRow(includeLabel, segmentsCheckBox);
 
     auto kernelLabel = new QLabel("Kernel Size");
-    kernelLabel->setToolTip("Controls the aggressiveness of smoothing and merge of disconex parts");
+    kernelLabel->setToolTip("Controls the aggressiveness of the smoothing and of the union of disconnected parts");
     formLayout2->addRow(kernelLabel, kernelSizeBox);
     formLayout2->setSpacing(6);
 

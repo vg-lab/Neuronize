@@ -118,7 +118,7 @@ Neuronize::Neuronize ( QWidget *parent )
         msgBox.setDefaultButton(QMessageBox::Ok);
         msgBox.setText(message);
         if (mPythonVersion == 2) {
-            msgBox.setInformativeText("Python 2 found, but not compatible");
+            msgBox.setInformativeText("Python 2 found, but not compatible. Mesh repair is disabled");
         }
         msgBox.exec();
     }
@@ -384,6 +384,13 @@ void Neuronize::showHelp ( )
 
 void Neuronize::genetareNeuronsInBatch (QString inputFilePath,QString outputFilePath,int subdivisions,QString baseName)
 {
+
+    int ret = QMessageBox::warning(this,"Neuronize","The process will take some time, please, do not close the interface (which could turn black). A notification will indicate the ending of the process.",QMessageBox::Ok | QMessageBox::Cancel);
+
+    if (ret == QMessageBox::Cancel) {
+        return;
+    }
+
   mInputFilePath = inputFilePath;
   mOuputFilePath = outputFilePath;
 
@@ -521,6 +528,7 @@ void Neuronize::genetareNeuronsInBatch (QString inputFilePath,QString outputFile
 
     //Luego volver al inicio
   }
+  QMessageBox::information(this,"Neuronize","Task Finished",QMessageBox::Ok);
 }
 
 
@@ -571,11 +579,7 @@ void Neuronize::actionAbout ( )
   lMsge += "	CSIC:Centro Superior de Investigaciones Cient�ficas.\n";
   lMsge += "	Cajal Blue Brain Project, Spanish partner of the Blue Brain Project initiative from EPFL\n\n";
 
-  lMsge += "Neuronize requires Matlab Runtime Compiler (MCR) 2012b .\n\n";
-  //lMsge += "You can use MATLAB Compiler Runtime (MCR) for this version.\n";
-
   lMsge += "Neuronize uses Qt, libQGLViwer, Boost, OpenMesh\n";
-  lMsge += "and Peyre Geodesic toolbox for Matlab.\n\n";
 
   Msgbox.setWindowTitle ( "Neuronize" );
   Msgbox.setText ( lMsge );

@@ -149,8 +149,7 @@
    <addaction name="actionGenerateNewNeuron"/>
    <addaction name="actionUndo"/>
    <addaction name="actionTake_a_snapshot"/>
-   <addaction name="actionHelp"/>
-   <addaction name="actionQuit"/>
+   <addaction name="separator"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QToolBar" name="toolBar">
