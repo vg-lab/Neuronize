@@ -1,7 +1,6 @@
 source_group(\\ FILES CMakeLists.txt)
 
 set (NEURONIZE_SOURCES
-		batchbuilder.cpp
 		FrameConstrictor.cpp
         main.cxx
 		manipulatedFrameSetConstraint.cpp
@@ -19,8 +18,6 @@ set (NEURONIZE_SOURCES
 		)
 
 set(NEURONIZE_HEADERS
-		batchbuilder.h
-		batchbuilder.ui
 		FrameConstrictor.h
         manipulatedFrameSetConstraint.h
 		NeuroGeneratorWidget.h

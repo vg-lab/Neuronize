@@ -63,7 +63,6 @@ Neuronize::Neuronize ( QWidget *parent )
     mSomaCreatorWidget = NULL;
     mSomaDeformerWidget = NULL;
     mNeuroGeneratorWidget = NULL;
-    mBatchBuilder = NULL;
     mPythonVersion = checkPython();
 
     resetNeuronnizeInterface();
@@ -131,8 +130,6 @@ Neuronize::~Neuronize ( )
     delete mSomaDeformerWidget;
   if ( mNeuroGeneratorWidget != NULL )
     delete mNeuroGeneratorWidget;
-  if ( mBatchBuilder != NULL )
-    delete mBatchBuilder;
 }
 
 void Neuronize::resetNeuronnizeInterface ( )
@@ -143,8 +140,6 @@ void Neuronize::resetNeuronnizeInterface ( )
     delete mSomaDeformerWidget;
   if ( mNeuroGeneratorWidget != NULL )
     delete mNeuroGeneratorWidget;
-  if ( mBatchBuilder != NULL )
-    delete mBatchBuilder;
 
   mSomaCreatorWidget = new SomaCreatorWidget (tempDir.path(), this );
     if (mPythonVersion != 3) {
@@ -159,6 +154,7 @@ void Neuronize::resetNeuronnizeInterface ( )
     ui.verticalLayout_CompareMeshes->addWidget(mCompareMeshesWidget);
 
     QObject::connect(mSomaCreatorWidget, SIGNAL(somaCreated()), this, SLOT(onSomaBuildFinish()));
+    connect(mSomaCreatorWidget,&SomaCreatorWidget::generateNeurons,this,&Neuronize::genetareNeuronsInBatch);
 
   mSomaDeformerWidget = new SomaDeformerWidget ( tempDir.path(),this );
   ui.verticalLayout_SomaDeformer->addWidget ( mSomaDeformerWidget );
@@ -386,24 +382,12 @@ void Neuronize::showHelp ( )
   mNeuroGeneratorWidget->getViewer ( )->help ( );
 }
 
-void Neuronize::showBatchBuilder ( )
+void Neuronize::genetareNeuronsInBatch (QString inputFilePath,QString outputFilePath,int subdivisions,QString baseName)
 {
-  if ( mBatchBuilder == NULL )
-  {
-    mBatchBuilder = new BatchBuilder ( );
-    QObject::connect ( mBatchBuilder, SIGNAL( directoriesReadies ( )), this, SLOT( genetareNeuronsInBatch ( )) );
-  }
+  mInputFilePath = inputFilePath;
+  mOuputFilePath = outputFilePath;
 
-  mBatchBuilder->show ( );
-  //QObject::connect(mBatchBuilder, SIGNAL(fileReady(QString pFile)), this, SLOT(mSomaCreatorWidget->loadSWCFile(pFile)));
-}
-
-void Neuronize::genetareNeuronsInBatch ( )
-{
-  mInputFilePath = mBatchBuilder->getInputDir ( );
-  mOuputFilePath = mBatchBuilder->getOutputDir ( );
-
-  QString lBaseName = mBatchBuilder->getBaseName ( );
+  QString lBaseName = baseName;
 
   //Cargar todos los ficheros del directorio de entrada
   /*QDir directory;
@@ -436,6 +420,7 @@ void Neuronize::genetareNeuronsInBatch ( )
         if (ext == "asc" || ext == "ASC" || ext == "swc" || ext == "SWC") {
           mFilesContainer.emplace_back(it.next(), nullptr);
         }
+
       } else if (current.isDir()) {
           QDir dir (current.absoluteFilePath());
           QDirIterator itFiles(dir.absolutePath(), QDir::AllEntries | QDir::NoDotAndDotDot);
@@ -498,7 +483,7 @@ void Neuronize::genetareNeuronsInBatch ( )
     std::cout << "Dendrites" << std::endl << std::flush;
 
     //Suavizado
-    mNeuroGeneratorWidget->applySmooth ( 2, 0, 0, 0 );
+    mNeuroGeneratorWidget->applySmooth ( subdivisions, 0, 0, 0 );
 
     QFileInfo f ( filePath );
     QString lFileName = f.fileName ( );
@@ -537,6 +522,7 @@ void Neuronize::genetareNeuronsInBatch ( )
     //Luego volver al inicio
   }
 }
+
 
 void Neuronize::actionNewNeuron ( )
 {

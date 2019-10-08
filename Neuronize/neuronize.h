@@ -33,7 +33,6 @@
 #include "SomaCreatorWidget.h"
 #include "SomaDeformerWidget.h"
 #include "NeuroGeneratorWidget.h"
-#include "batchbuilder.h"
 #include "RepairWidget.h"
 #include "CompareMeshesWidget.h"
 
@@ -75,7 +74,6 @@ class Neuronize: public QMainWindow
 
 
 
-    BatchBuilder *mBatchBuilder;
     //NeuroGeneratorWidget	* mSpinesGeneratorWidget;
 
     unsigned int mActiveTab;
@@ -84,7 +82,7 @@ class Neuronize: public QMainWindow
 
   public slots:
 
-    void genetareNeuronsInBatch ( );
+    void genetareNeuronsInBatch ( QString inputFilePath,QString outputFilePath,int subdivisions,QString baseName );
 
   private slots:
     void resetNeuronnizeInterface ( );
@@ -96,8 +94,6 @@ class Neuronize: public QMainWindow
     void showDendriteGenerator ( );
 
     void showSpinesGenerator ( );
-
-    void showBatchBuilder ( );
 
     void takeASnapshot ( );
 

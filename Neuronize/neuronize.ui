@@ -28,14 +28,14 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-          <number>0</number>
+       <number>0</number>
       </property>
       <property name="usesScrollButtons">
        <bool>true</bool>
       </property>
       <widget class="QWidget" name="tab_SomaCreator">
        <attribute name="title">
-           <string>Generate Neuron</string>
+        <string>Generate Neuron</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
@@ -43,26 +43,26 @@
         </item>
        </layout>
       </widget>
-         <widget class="QWidget" name="tab_RepairMeshes">
-             <attribute name="title">
-                 <string>Repair Meshes</string>
-             </attribute>
-             <layout class="QVBoxLayout" name="verticalLayout_6">
-                 <item>
-                     <layout class="QVBoxLayout" name="verticalLayout_RepairMeshes"/>
-                 </item>
-             </layout>
-         </widget>
-         <widget class="QWidget" name="tab_CompareMeshes">
-             <attribute name="title">
-                 <string>Compare Meshes</string>
-             </attribute>
-             <layout class="QVBoxLayout" name="verticalLayout_8">
-                 <item>
-                     <layout class="QVBoxLayout" name="verticalLayout_CompareMeshes"/>
-                 </item>
-             </layout>
-         </widget>
+      <widget class="QWidget" name="tab_RepairMeshes">
+       <attribute name="title">
+        <string>Repair Meshes</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_6">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_RepairMeshes"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_CompareMeshes">
+       <attribute name="title">
+        <string>Compare Meshes</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_8">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_CompareMeshes"/>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="tab_SomaGenerator">
        <attribute name="title">
         <string>Soma builder</string>
@@ -103,7 +103,7 @@
      <x>0</x>
      <y>0</y>
      <width>600</width>
-        <height>25</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -111,6 +111,8 @@
      <string>File</string>
     </property>
     <addaction name="actionGenerateNewNeuron"/>
+    <addaction name="actionRepair_Meshes"/>
+    <addaction name="actionCompare_Meshes"/>
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
@@ -149,20 +151,19 @@
    <addaction name="actionTake_a_snapshot"/>
    <addaction name="actionHelp"/>
    <addaction name="actionQuit"/>
-   <addaction name="actionBatchBuilder"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-     <widget class="QToolBar" name="toolBar">
-         <property name="windowTitle">
-             <string>toolBar</string>
-         </property>
-         <attribute name="toolBarArea">
-             <enum>TopToolBarArea</enum>
-         </attribute>
-         <attribute name="toolBarBreak">
-             <bool>false</bool>
-         </attribute>
-     </widget>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
   <action name="actionGenerateNewNeuron">
    <property name="icon">
     <iconset resource="neuronize.qrc">
@@ -216,6 +217,16 @@
   <action name="actionBatchBuilder">
    <property name="text">
     <string>BatchBuilder</string>
+   </property>
+  </action>
+  <action name="actionRepair_Meshes">
+   <property name="text">
+    <string>Repair Meshes</string>
+   </property>
+  </action>
+  <action name="actionCompare_Meshes">
+   <property name="text">
+    <string>Compare Meshes</string>
    </property>
   </action>
  </widget>

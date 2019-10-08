@@ -113,9 +113,17 @@ class SomaCreatorWidget: public QWidget, public Ui::SomaCreatorWidget
 
     void openSelectFileDialog(QLineEdit *target, const QString &title, const QString &types, bool multiFile);
 
+    void onRadioChanged2(bool b);
+
+    void openDir(QLineEdit* des,QString test);
+
+    void onGenerateNeurons();
+
   signals:
 
     void somaCreated ( );
+
+    void generateNeurons(QString inputDirectory,QString outputDirectory, int subdivisions,QString baseName);
 
   public:
     SomaCreatorWidget (const QString &tempDir,QWidget *parent = 0);

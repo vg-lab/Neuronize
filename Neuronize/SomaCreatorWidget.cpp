@@ -127,6 +127,11 @@ SomaCreatorWidget::SomaCreatorWidget (const QString &tempDir, QWidget *parent )
     futureWatcher = new QFutureWatcher<void>();
     connect(futureWatcher, &QFutureWatcher<void>::finished, this, &SomaCreatorWidget::onProcessFinish);
 
+    connect(ui.oneNeuronRadio,&QRadioButton::toggled,this,&SomaCreatorWidget::onRadioChanged2);
+    connect(ui.adavencedOptionsButton,&QPushButton::released,this,[&](){ui.horizontalWidget->setVisible(!ui.horizontalWidget->isVisible());});
+    connect(ui.inputDirectoryButton,&QPushButton::released,this,[&](){openDir(ui.inputDirectoryPath,"Select input folder");});
+    connect(ui.outputDirectoryButton,&QPushButton::released,this,[&](){openDir(ui.outputDirectoryPath,"Select output directory");});
+    connect(ui.pushButton_GenerateNeurons,&QPushButton::released,this,&SomaCreatorWidget::onGenerateNeurons);
 
   ui.tabWidget_Main->setVisible ( false );
 
@@ -563,6 +568,7 @@ void SomaCreatorWidget::resetInterface ( )
     ui.saveCheckBox->setChecked(false);
     ui.ascPath->setDisabled(true);
     ui.ascPath->setText("");
+    ui.horizontalWidget->hide();
     //ui.pushButton_GoToSomaDeformer->setEnabled ( false );
 }
 
@@ -1060,6 +1066,93 @@ void SomaCreatorWidget::disableRepair() {
 
 void SomaCreatorWidget::deleteTreeViewer() {
 
+}
+
+void SomaCreatorWidget::onRadioChanged2(bool b) {
+
+    if (b) {
+        ui.traces->setEnabled(true);
+        ui.vrmls->setEnabled(true);
+        ui.pushButton_GoToSomaDeformer->setEnabled(true);
+
+        bool trace = ui.traces->isChecked();
+        ui.tracePathButton->setEnabled(trace);
+        ui.tracePath->setEnabled(trace);
+
+        ui.basalPath->setEnabled(!trace);
+        ui.basalPathButton->setEnabled(!trace);
+        ui.apiPath->setEnabled(!trace);
+        ui.apiPathButton->setEnabled(!trace);
+        ui.saveCheckBox->setEnabled(!trace);
+        if (ui.saveCheckBox->isChecked()) {
+            ui.ascPath->setEnabled(!trace);
+            ui.ascButton->setEnabled(!trace);
+        }
+
+        ui.inputDirectoryButton->setEnabled(false);
+        ui.inputDirectoryPath->setEnabled(false);
+        ui.outputDirectoryButton->setEnabled(false);
+        ui.outputDirectoryPath->setEnabled(false);
+        ui.adavencedOptionsButton->setEnabled(false);
+        ui.subdivisionsLabel->setEnabled(false);
+        ui.subdivisionsSpinBox->setEnabled(false);
+        ui.baseNameLabel->setEnabled(false);
+        ui.baseNameLineEdit->setEnabled(false);
+        
+    } else {
+        ui.traces->setEnabled(false);
+        ui.vrmls->setEnabled(false);
+
+        ui.tracePathButton->setEnabled(false);
+        ui.basalPathButton->setEnabled(false);
+        ui.apiPathButton->setEnabled(false);
+        ui.saveCheckBox->setEnabled(false);
+        ui.ascButton->setEnabled(false);
+
+        ui.tracePath->setEnabled(false);
+        ui.basalPath->setEnabled(false);
+        ui.apiPath->setEnabled(false);
+        ui.saveCheckBox->setEnabled(false);
+        ui.ascPath->setEnabled(false);
+
+        ui.pushButton_GoToSomaDeformer->setEnabled(false);
+
+        ui.inputDirectoryButton->setEnabled(true);
+        ui.inputDirectoryPath->setEnabled(true);
+        ui.outputDirectoryButton->setEnabled(true);
+        ui.outputDirectoryPath->setEnabled(true);
+        ui.adavencedOptionsButton->setEnabled(true);
+        ui.subdivisionsLabel->setEnabled(true);
+        ui.subdivisionsSpinBox->setEnabled(true);
+        ui.baseNameLabel->setEnabled(true);
+        ui.baseNameLineEdit->setEnabled(true);
+
+    }
+
+
+}
+
+void SomaCreatorWidget::openDir(QLineEdit* dest,QString message) {
+    auto folder = QFileDialog::getExistingDirectory(this, message, QString());
+    dest->setText(folder);
+}
+
+void SomaCreatorWidget::onGenerateNeurons() {
+    auto inputDir = ui.inputDirectoryPath->text();
+    auto outputDir = ui.outputDirectoryPath->text();
+    if (inputDir.isEmpty()) {
+        QToolTip::showText(ui.inputDirectoryPath->mapToGlobal(QPoint(0, 0)), "Need a Input Directory");
+        return;
+    }
+
+    if (outputDir.isEmpty()) {
+        QToolTip::showText(ui.outputDirectoryPath->mapToGlobal(QPoint(0, 0)), "Need a Output Directory");
+        return;
+    }
+
+    int subdivisions = ui.subdivisionsSpinBox->value();
+    auto baseName = ui.baseNameLineEdit->text();
+    emit generateNeurons(inputDir,outputDir,subdivisions,baseName);
 }
 
 
