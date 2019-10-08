@@ -249,7 +249,16 @@
    <item>
     <widget class="QWidget" name="horizontalWidget" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <property name="margin">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
        <number>0</number>
       </property>
       <item>
@@ -332,6 +341,9 @@
    </item>
    <item>
     <widget class="QPushButton" name="pushButton_GenerateNeurons">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="text">
       <string>Generate Neurons</string>
      </property>
@@ -420,8 +432,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>745</width>
-               <height>545</height>
+               <width>746</width>
+               <height>498</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout">
@@ -713,7 +725,7 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup_2"/>
   <buttongroup name="buttonGroup"/>
+  <buttongroup name="buttonGroup_2"/>
  </buttongroups>
 </ui>

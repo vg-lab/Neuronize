@@ -1061,7 +1061,7 @@ void SomaCreatorWidget::showWarningDialogReaminingSegments(int sobrantes, int &n
 }
 
 void SomaCreatorWidget::disableRepair() {
-    //TODO Disable repair tab if no python
+   ui.tabWidget_Main->setTabEnabled(1,false);
 }
 
 void SomaCreatorWidget::deleteTreeViewer() {
@@ -1098,7 +1098,9 @@ void SomaCreatorWidget::onRadioChanged2(bool b) {
         ui.subdivisionsSpinBox->setEnabled(false);
         ui.baseNameLabel->setEnabled(false);
         ui.baseNameLineEdit->setEnabled(false);
-        
+        ui.pushButton_GenerateNeurons->setEnabled(false);
+
+
     } else {
         ui.traces->setEnabled(false);
         ui.vrmls->setEnabled(false);
@@ -1126,6 +1128,7 @@ void SomaCreatorWidget::onRadioChanged2(bool b) {
         ui.subdivisionsSpinBox->setEnabled(true);
         ui.baseNameLabel->setEnabled(true);
         ui.baseNameLineEdit->setEnabled(true);
+        ui.pushButton_GenerateNeurons->setEnabled(true);
 
     }
 
