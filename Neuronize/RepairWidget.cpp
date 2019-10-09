@@ -99,8 +99,8 @@ void RepairWidget::setupUi() {
 
     saveCombo = new QComboBox(advancedWidget);
     saveCombo->addItem("None");
-    saveCombo->addItem("STL");
-    saveCombo->addItem("VRML");
+    saveCombo->addItem("Obj");
+    saveCombo->addItem("Stl");
 
     advancedButton = new QPushButton("Advanced Options" );
     advancedButton->setStyleSheet(tr("border:1px"));
@@ -179,44 +179,82 @@ void RepairWidget::setupUi() {
 }
 
 void RepairWidget::onOk() {
+    QStringList arguments;
     QString input;
-    if (inputPath->text().isEmpty()) {
-        QToolTip::showText(inputPath->mapToGlobal(QPoint()), tr("Need a input file"));
-        return;
+    QString output;
+    if (fileRadio->isChecked()) {
+        if (inputPath->text().isEmpty()) {
+            QToolTip::showText(inputPath->mapToGlobal(QPoint()), tr("Need a input file"));
+            return;
+        } else {
+            input = inputPath->text();
+        }
+
+        if (csvPath->text().isEmpty()) {
+            QString filename = input.section(".", 0, 0);
+            output = input + ".csv";
+        } else {
+            output = csvPath->text();
+        }
+
+        arguments << "-a" << "\"" + output + "\"" << "-v" << "\"" + input + "\"";
+
     } else {
-        input = inputPath->text();
+        if (folderInputEdit->text().isEmpty()) {
+            QToolTip::showText(folderInputEdit->mapToGlobal(QPoint()), tr("Need a input Directory"));
+            return;
+        } else {
+            input = folderInputEdit->text();
+        }
+
+        if (folderOutputEdit->text().isEmpty()) {
+            QToolTip::showText(folderOutputEdit->mapToGlobal(QPoint()), tr("Need a output Directory"));
+            return;
+        } else {
+            output = folderOutputEdit->text();
+        }
+
+        arguments << "-o" << "\"" + output + "\"" << "-w" << "\"" + input + "\"";
     }
 
-    QString output;
-    if (csvPath->text().isEmpty()) {
-        QString filename = input.section(".",0,0);
-        output = input+".csv";
-    } else {
-        output = csvPath->text();
-    }
-    auto future = QtConcurrent::run([=](){
+
+    auto future = QtConcurrent::run([&](){
 
         QString envPath = Neuronize::configPath + "/" + "env";
+        QFileInfo fi (input);
+        QString saveFormat;
+        QString outputMeshPath;
 
-        QStringList arguments;
-        arguments << "-a" << "\"" + output + "\"" << "-v" << "\"" + input + "\"" << "-s" << saveCombo->currentText() << "-p" << precisionBox->text()
+        if (saveCombo->currentIndex() == 0) {
+            saveFormat = "Obj";
+            outputMeshPath = Neuronize::tmpPath + "/Meshes";
+            arguments << "-e" << outputMeshPath;
+        } else {
+            saveFormat = saveCombo->currentText();
+            outputMeshPath = output +"/Meshes";
+        }
+
+
+        arguments << "-a" << "\"" + output + "\"" << "-s" << saveFormat << "-p" << precisionBox->text()
                   << "-r" << QString::number(percentageBox->value()) << "-f" << QString::number(segmentsCheckBox->isChecked()) << "-k" << kernelSizeBox->text()
                   << "-c" << QString::number(cleanCheckBox->isChecked());
-        auto test = arguments.join(" ").toStdString();
-        std::cout << test << std::endl;
+
+
+
         std::string command = QCoreApplication::applicationDirPath().toStdString() + "/" + RUN + " " + envPath.toStdString() + " " + arguments.join(" ").toStdString();
+        std::cout << command << std::endl;
         std::system(command.c_str());
 
-
+        addToBBDD(outputMeshPath, saveFormat);
     });
+
     futureWatcher->setFuture(future);
 
-    progressDialog = new QProgressDialog("Operation in progress", "Cancel", 0, 0, this);
+    progressDialog = new QProgressDialog("Repairing Meshes", "Cancel", 0, 0, this);
     progressDialog->setValue(0);
     progressDialog->setCancelButton(0);
     progressDialog->setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
     progressDialog->exec();
-
 }
 
 void RepairWidget::openSelectFileDialog(QLineEdit *dest, const QString &message, const QString &formats) {
@@ -257,4 +295,17 @@ void RepairWidget::onRadioChanged(bool b) {
 void RepairWidget::openFolder(QLineEdit *dest, const QString &message) {
     auto folder = QFileDialog::getExistingDirectory(this, message, QString());
     dest->setText(folder);
+}
+
+void RepairWidget::addToBBDD(const QString& path,const QString& extension) {
+    QDirIterator it(path,QStringList() << "*_O." + extension, QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+    Neuronize::bbdd.openTransaction();
+    while (it.hasNext()) {
+        auto originalFile = it.next();
+        int pos = originalFile.lastIndexOf('.');
+        auto repairedFile = originalFile;
+        repairedFile.replace(pos-1,1,"R");
+        Neuronize::bbdd.addSpineImaris(originalFile.toStdString(),repairedFile.toStdString(),extension.toStdString());
+    }
+    Neuronize::bbdd.closeTransaction();
 }

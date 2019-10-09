@@ -1131,6 +1131,7 @@ void SomaCreatorWidget::onRadioChanged2(bool b) {
         ui.pushButton_GenerateNeurons->setEnabled(true);
 
     }
+}
 
 const vector<vector<OpenMesh::Vec3d>> &SomaCreatorWidget::getContours() const {
     return contours;
