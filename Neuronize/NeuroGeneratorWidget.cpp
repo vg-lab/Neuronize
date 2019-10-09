@@ -19,6 +19,7 @@
  */
 
 #include "NeuroGeneratorWidget.h"
+#include "neuronize.h"
 
 #include <libs/libQtNeuroUtils/QtThreadsManager.hpp>
 
@@ -247,7 +248,6 @@ void NeuroGeneratorWidget::generateDendrites ( )
   mMsgTimer = new QTimer ( this );
   connect ( mMsgTimer, SIGNAL( timeout ( )), this, SLOT( loadNeuronDefinitionAndGenerateMesh ( )) );
   mMsgTimer->start ( mMiSecsSimulation );
-
 }
 
 void NeuroGeneratorWidget::loadNeuronDefinitionAndGenerateMesh ( )
@@ -263,6 +263,22 @@ void NeuroGeneratorWidget::loadNeuronDefinitionAndGenerateMesh ( )
   ui.pushButton_GoToGenerateSpines->setEnabled ( true );
   ui.pushButton_NextStep->setEnabled ( true );
   ui.pushButton_SmoothDendrites->setEnabled ( true );
+
+
+  QFileInfo fi (mSWCFleName);
+  bool neuronAdded = Neuronize::bbdd.addNeuron(fi.baseName().toStdString(),mSWCFleName.toStdString());
+
+  if (!neuronAdded) {
+      MeshVCG somaMesh(mTempDir.toStdString() + "/RealSize.obj");
+      Neuronize::bbdd.addSoma(fi.baseName().toStdString(), somaMesh, BBDD::Spring_Mass, this->contours);
+
+      SWCImporter *importer = this->viewer->getNeuroSWC()->getImporter();
+      for (const auto &dendritic : importer->getDendritics()) {
+          Neuronize::bbdd.addDendrite(fi.baseName().toStdString(), dendritic.initialNode, dendritic.finalNode,
+                                      dendritic.type);
+      }
+  }
+
 
   viewer->updateGL ( );
 
@@ -535,8 +551,7 @@ void NeuroGeneratorWidget::generateSpines ( )
                                               lMaxRadio );
       break;
       case 5:
-          this->neuron->spines_to_obj_without_base(mTempDir.toStdString() + "/tmpSpines");
-          viewer->generateSpinesVrml(mTempDir + "/tmpSpines");
+          viewer->generateSpinesVrml(this->neuron, mTempDir.toStdString());
           break;
       case 6:
       viewer->generateSpinesASC(this->spines,lHorResol,
@@ -564,8 +579,7 @@ void NeuroGeneratorWidget::batchSpinesGeneration(skelgenerator::Neuron *pNeuron,
 
   if (pNeuron != nullptr) {
     std::cout<<"---------------------------------------------->> Opcion elegida: 5"<<"----------------------------------" <<std::endl << std::flush;
-    pNeuron->spines_to_obj_without_base(mTempDir.toStdString() + "/tmpSpines");
-    viewer->generateSpinesVrml(mTempDir + "/tmpSpines");
+      viewer->generateSpinesVrml(pNeuron,mTempDir.toStdString());
   } else if (!spines.empty()) {
     std::cout<<"---------------------------------------------->> Opcion elegida: 6"<<"----------------------------------" <<std::endl << std::flush;
     viewer->generateSpinesASC(spines, lHorResol,
@@ -1189,5 +1203,9 @@ void NeuroGeneratorWidget::setNeuron(skelgenerator::Neuron *neuron) {
 
 void NeuroGeneratorWidget::setSpines(const vector<Spine> &spines) {
   NeuroGeneratorWidget::spines = spines;
+}
+
+void NeuroGeneratorWidget::setContours(const vector<vector<OpenMesh::Vec3d>> &contours) {
+    NeuroGeneratorWidget::contours = contours;
 }
 

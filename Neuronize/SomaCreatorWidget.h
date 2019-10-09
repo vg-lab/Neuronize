@@ -144,8 +144,11 @@ private:
     skelgenerator::Neuron* neuron;
     bool somaContours;
     std::vector<Spine> spines;
+    std::vector<std::vector<OpenMesh::Vec3d>> contours;
+
 public:
     const vector<Spine> &getSpines() const;
+    const vector<vector<OpenMesh::Vec3d>> &getContours() const;
 
 private:
 

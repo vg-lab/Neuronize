@@ -14,6 +14,7 @@
 #include <QInputDialog>
 #include <QProgressDialog>
 #include <QFutureWatcher>
+#include <cctype>
 
 
 LoadFileDialog::LoadFileDialog(const std::string &tmpDir,QWidget *parent): QDialog(parent) {
@@ -154,12 +155,31 @@ void LoadFileDialog::openSaveFileDialog(QLineEdit *target,const QString& title, 
 
 }
 
+QString LoadFileDialog::getNeuronName() {
+    QFileInfo fi = this->basalPath->text().split(';')[0];
+    auto basal = fi.baseName().toStdString();
+    std::string aux = "basal";
+    std::string::iterator it = std::search( basal.begin(),basal.end(),
+                           aux.begin(),aux.end(),
+                           [](char c1, char c2) { return std::toupper(c1) == std::toupper(c2);}
+                           );
+
+    if (it != basal.end()) {
+        return QString::fromStdString(basal.substr(0,it - basal.begin()));
+    } else {
+        std::cerr << "Not possible extract neuron name";
+        return fi.baseName();
+    }
+
+}
+
 void LoadFileDialog::onOkPressed() {
     if (traces->isChecked()) {
         this->file = tracePath->text().toStdString();
         accept();
     } else {
-        QFuture<void> future = QtConcurrent::run([=]() { processSkel(tmpDir + "/temp.asc"); });
+        auto name = getNeuronName();
+        QFuture<void> future = QtConcurrent::run([=]() { processSkel(tmpDir + "/" + name.toStdString() + ".asc"); });
         futureWatcher->setFuture(future);
         progresDialog = new QProgressDialog("Operation in progress", "Cancel", 0, 0, this);
         progresDialog->setValue(0);

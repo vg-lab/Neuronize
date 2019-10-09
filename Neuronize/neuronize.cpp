@@ -21,6 +21,7 @@
 
 #include <QMessageBox>
 #include <QtCore/QDirIterator>
+#include <QSettings>
 
 #include "neuronize.h"
 
@@ -33,6 +34,8 @@
 #endif
 
 QString Neuronize::configPath;
+BBDD::BBDD Neuronize::bbdd = BBDD::BBDD();
+QString Neuronize::tmpPath;
 
 Neuronize::Neuronize ( QWidget *parent )
   : QMainWindow ( parent )
@@ -47,7 +50,7 @@ Neuronize::Neuronize ( QWidget *parent )
       throw "Cant create temporary dir";
   }
   std::cout << "TmpDir: " << tempDir.path().toStdString() << std::endl ;
-
+  Neuronize::tmpPath = tempDir.path();
   //QObject::connect(ui.actionGenerateNewNeuron	,SIGNAL(triggered())	,this,SLOT(generateNewNeuron()));
   QObject::connect ( ui.actionGenerateNewNeuron, SIGNAL( triggered ( )), this, SLOT( actionNewNeuron ( )) );
   QObject::connect ( ui.actionTake_a_snapshot, SIGNAL( triggered ( )), this, SLOT( takeASnapshot ( )) );
@@ -85,6 +88,9 @@ Neuronize::Neuronize ( QWidget *parent )
         std::system(command.c_str());
     }
 
+  QString path = QFileInfo(settings.fileName()).absoluteDir().absolutePath() + "/neuronize.sqlite";
+  std::cout << path.toStdString() << std::endl;
+  Neuronize::bbdd = BBDD::BBDD(path.toStdString());
   this->showMaximized ( );
 
   initrand ( );
@@ -206,6 +212,7 @@ void Neuronize::showDendriteGenerator ( )
   ui.tabWidget_MainContainer->insertTab ( 0, ui.tab_DendritesGenerator, "Dendrites/Spines builder" );
 
   mNeuroGeneratorWidget->setSpines(mSomaCreatorWidget->getSpines());
+  mNeuroGeneratorWidget->setContours(mSomaCreatorWidget->getContours());
 
   //Noise options
   mNeuroGeneratorWidget->getUI ( ).checkBox_NoiseSoma->setVisible ( true );

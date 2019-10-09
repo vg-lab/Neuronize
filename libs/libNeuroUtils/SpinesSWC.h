@@ -27,6 +27,7 @@
 #include "BaseMeshContainer.h"
 #include "SWCSpinesDistributor.h"
 #include "AS2SWCV2.h"
+#include <libs/libNeuroUtils/BBDD.h>
 
 using namespace std;
 using namespace NSNeuroSWC;
@@ -172,7 +173,10 @@ namespace NSSpinesSWC
                                         float pBasalMinDistance,
                                         float pBasalCteDistance,
                                         float pApicalMinDistance,
-                                        float pApicalCteDistance
+                                        float pApicalCteDistance,
+                                        BBDD::BBDD bbdd,
+                                        const std::string& neuronName,
+                                        const std::string& tmpPath
       );
 
       //void distributeSpineAlongAllDendriticsInGroups(unsigned int pNumberOfGropus);
@@ -223,7 +227,7 @@ namespace NSSpinesSWC
 
       const std::vector < unsigned int > &getSpineDesp ( ) const { return mSpineDesp; };
 
-      void distributeSpines(const vector<Spine> &spines);
+      void distributeSpines(const vector<Spine> &spines,const std::string& neuronName,const OpenMesh::Vec3f& diplacement, BBDD::BBDD bbdd, const std::string& tmpPath);
   };
 }
 

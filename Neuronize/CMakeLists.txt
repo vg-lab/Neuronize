@@ -56,6 +56,7 @@ set(NEURONIZE_LINK_LIBRARIES
 		Qt5::OpenGL
 		${Boost_LIBRARIES}
 		skelgeneratorutil
+		${SQLite3_LIBRARIES}
 		)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})

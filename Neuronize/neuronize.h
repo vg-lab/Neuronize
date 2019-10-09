@@ -33,6 +33,7 @@
 #include "SomaDeformerWidget.h"
 #include "NeuroGeneratorWidget.h"
 #include "batchbuilder.h"
+#include <libs/libNeuroUtils/BBDD.h>
 
 
 class Neuronize: public QMainWindow
@@ -53,6 +54,8 @@ class Neuronize: public QMainWindow
 
     ~Neuronize ( );
 
+    static BBDD::BBDD bbdd;
+    static QString tmpPath;
     static QString configPath;
 
   private:
