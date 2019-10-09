@@ -9,27 +9,51 @@
 #include <libs/libNeuroUtils/MeshVCG.h>
 #include <QCoreApplication>
 #include <QDirIterator>
-#include <QTemporaryDir>
-#include <libs/libNeuroUtils/AS2SWCV2.h>
+
 
 #define ERRCHECK {if (_err!=NULL) {std::cerr << "BBDD Error : " << _err << "\n" << std::endl; sqlite3_free(_err);}}
 
 static int getSpineCallback(void *spines, int columns, char **data, char **columnNames) {
-    std::vector<BBDD::Spine>* spinesCast = (std::vector<BBDD::Spine> *) spines;
+    auto spinesCast = (std::vector<BBDD::Spine> *) spines;
 
     BBDD::Spine spine;
-    spine.id = std::atoi(data[0]);
+    spine.id = std::stoi(data[0]);
     spine.file = std::string(data[4]);
-    spine.ext = (BBDD::FileType) std::atoi(data[6]);
+    spine.ext = (BBDD::FileType) std::stoi(data[6]);
     spinesCast->push_back(spine);
     return 0;
 }
 
 static int countCallback(void *count, int columns, char **data, char **columnNames) {
    int* countCast = (int *) count;
-   *countCast = std::atoi(data[0]);
+   *countCast = std::stoi(data[0]);
     return 0;
 }
+
+static int getSomaInfoCallback(void *soma, int columns, char **data, char **columnNames) {
+    auto somaCast = (BBDD::Soma*) soma;
+    somaCast->area = std::stof(data[0]);
+    somaCast->area2D = std::stof(data[1]);
+    somaCast->volume = std::stof(data[2]);
+    return 0;
+}
+
+static int getSpineInfoCallBack(void* spines, int columns,char **data,char **comlumnNames) {
+    auto spinesCast = (std::vector<BBDD::Spine> *) spines;
+    BBDD::Spine spine;
+    spine.area = std::stof(data[0]);
+    spine.volume = std::stof(data[1]);
+    spine.origin = (BBDD::SpineOrigin) std::stoi(data[2]);
+    spinesCast->push_back(spine);
+    return 0;
+}
+
+static int getNeuronNamesCallBack(void* names,int columns,char** data,char** columnNames) {
+    auto namesCast = (std::vector<std::string>*) names;
+    namesCast->push_back(data[0]);
+    return 0;
+}
+
 
 namespace BBDD {
 
@@ -447,6 +471,57 @@ namespace BBDD {
         return count == 0;
     }
 
+    void BBDD::exportNeuron(const std::string& id,const std::string& path) {
+        std::setlocale(LC_NUMERIC, "en_US.UTF-8");
+        std::string querySoma = "SELECT\n"
+                                "    SOMA.AREA,SOMA.AREA_2D,SOMA.VOLUME\n"
+                                "FROM\n"
+                                "     NEURON\n"
+                                "INNER JOIN SOMA on NEURON.ID = SOMA.NEURON\n"
+                                "where NEURON.ID = '%x'";
+
+        std::string formatedQuerySoma = str(boost::format(querySoma) % id);
+        Soma soma{};
+        sqlite3_exec(_db,formatedQuerySoma.c_str(),getSomaInfoCallback,&soma,&_err);
+        ERRCHECK
+
+        std::string querySpines = "SELECT\n"
+                                  "    SM.AREA,SM.VOLUME,SM.ORIGIN\n"
+                                  "FROM\n"
+                                  "     NEURON\n"
+                                  "INNER JOIN SPINES on NEURON.ID = SPINES.NEURON\n"
+                                  "INNER JOIN SPINE_MODEL SM on SPINES.SPINE_MODEL = SM.ID\n"
+                                  "where NEURON.ID = '%x'";
+
+        std::string formatedQuerySpines = str(boost::format(querySpines) % id);
+        std::vector<Spine> spines;
+        sqlite3_exec(_db,formatedQuerySpines.c_str(),getSpineInfoCallBack,&spines,&_err);
+
+        std::string outputDir = path + "/" + id;
+        boost::filesystem::create_directory(outputDir);
+
+        std::ofstream spinesStream;
+        spinesStream.open (outputDir + "/spines.csv",std::ofstream::out);
+        spinesStream << "Area;Volume;Origin" << std::endl;
+        for (const auto& spine:spines) {
+            spinesStream << spine.area << ";" << spine.volume << ";" << spineOriginDesc[spine.origin] << std::endl;
+        }
+        spinesStream.close();
+
+        std::ofstream somaStream;
+        somaStream.open (outputDir + "/soma.csv",std::ofstream::out);
+        somaStream << "Area;Area2D,Volume" << std::endl;
+        somaStream << soma.area << ";" << soma.area2D << ";" << soma.volume << std::endl;
+        somaStream.close();
+    }
+
+    std::vector<std::string> BBDD::getNeuronsNames(){
+        std::string query = "SELECT ID FROM NEURON;";
+        std::vector<std::string> names;
+        sqlite3_exec(_db,query.c_str(),getNeuronNamesCallBack,&names,&_err);
+        ERRCHECK
+        return names;
+    }
 
 }
 

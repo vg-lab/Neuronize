@@ -923,10 +923,16 @@ void SomaCreatorWidget::onOkPressed() {
         if (ui.basalPath->text().isEmpty()) {
             QToolTip::showText(ui.tracePath->mapToGlobal(QPoint(0, 0)), "Need a Input File");
         } else {
+            QFileInfo fi (ui.basalPath->text());
+            auto name = fi.dir().dirName();
+
+            this->mInputFile = this->mExitDirectory + "/" + name + ".asc";
+
             QFuture<void> future = QtConcurrent::run(
-                    [=]() { processSkel(this->mExitDirectory.toStdString() + "/temp.asc"); });
+                    [=]() { processSkel(this->mInputFile.toStdString());});
+
             futureWatcher->setFuture(future);
-            progresDialog = new QProgressDialog("Operation in progress", "Cancel", 0, 0, this);
+            progresDialog = new QProgressDialog("Generating tracing", "Cancel", 0, 0, this);
             progresDialog->setValue(0);
             progresDialog->setCancelButton(0);
             progresDialog->setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
@@ -967,12 +973,6 @@ void SomaCreatorWidget::processSkel(const std::string &fileName) {
         }
 
     }
-
-
-    std::ofstream file;
-    file.open(fileName, std::ios::out);
-    file << neuron->to_asc();
-    file.close();
     this->neuron = neuron;
 
 }
@@ -985,7 +985,7 @@ void SomaCreatorWidget::onProcessFinish() {
     if (ui.saveCheckBox->checkState() == Qt::Checked && ui.ascPath->text() != nullptr && ui.ascPath->text() != "") {
         outPath = ui.ascPath->text();
     } else {
-        outPath = this->mExitDirectory + "/" + "temp.asc";
+        outPath = this->mInputFile;
     }
 
     std::ofstream file;

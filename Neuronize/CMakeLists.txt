@@ -15,6 +15,7 @@ set (NEURONIZE_SOURCES
         RepairWidget.cpp
 		CompareMeshesWidget.cpp
 		CompareMeshWidgetViewer.cpp
+		ExportDialog.cpp
 		)
 
 set(NEURONIZE_HEADERS
@@ -34,6 +35,7 @@ set(NEURONIZE_HEADERS
 		xneuron.ui
         RepairWidget.h
 		CompareMeshesWidget.h
+		ExportDialog.h
 		CompareMeshWidgetViewer.h
 		)
 

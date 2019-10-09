@@ -116,6 +116,8 @@ class Neuronize: public QMainWindow
 
     void onSomaBuildFinish();
 
+    void showExportDialog();
+
 };
 
 #endif // XNEURON_H

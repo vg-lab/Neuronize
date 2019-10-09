@@ -113,6 +113,7 @@
     <addaction name="actionGenerateNewNeuron"/>
     <addaction name="actionRepair_Meshes"/>
     <addaction name="actionCompare_Meshes"/>
+    <addaction name="actionExport_Neuron_info"/>
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
@@ -226,6 +227,11 @@
   <action name="actionCompare_Meshes">
    <property name="text">
     <string>Compare Meshes</string>
+   </property>
+  </action>
+  <action name="actionExport_Neuron_info">
+   <property name="text">
+    <string>Export Neuron info</string>
    </property>
   </action>
  </widget>

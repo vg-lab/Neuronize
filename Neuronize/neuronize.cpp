@@ -24,6 +24,7 @@
 #include <QSettings>
 
 #include "neuronize.h"
+#include "ExportDialog.h"
 #include <boost/process.hpp>
 #include <QtConcurrent/QtConcurrent>
 #include <QFutureWatcher>
@@ -37,32 +38,39 @@
 #endif
 
 QString Neuronize::configPath;
-BBDD::BBDD Neuronize::bbdd = BBDD::BBDD();
+BBDD::BBDD Neuronize::bbdd;
 QString Neuronize::tmpPath;
 
 Neuronize::Neuronize ( QWidget *parent )
         : QMainWindow(parent) {
     ui.setupUi(this);
 
-  //Init glut
-  int argc = 0;
-  char **argv = NULL;
-  glutInit ( &argc, argv );
-  if (!tempDir.isValid()) {
-      throw "Cant create temporary dir";
-  }
-  std::cout << "TmpDir: " << tempDir.path().toStdString() << std::endl ;
-  Neuronize::tmpPath = tempDir.path(); ;
+    //Init glut
+    int argc = 0;
+    char **argv = NULL;
+    glutInit(&argc, argv);
+    if (!tempDir.isValid()) {
+        throw "Cant create temporary dir";
+    }
+    std::cout << "TmpDir: " << tempDir.path().toStdString() << std::endl;
+    Neuronize::tmpPath = tempDir.path();;
 
-  //QObject::connect(ui.actionGenerateNewNeuron	,SIGNAL(triggered())	,this,SLOT(generateNewNeuron()));
-  QObject::connect ( ui.actionGenerateNewNeuron, SIGNAL( triggered ( )), this, SLOT( actionNewNeuron ( )) );
-  connect(ui.actionRepair_Meshes,&QAction::triggered,[&](){resetNeuronnizeInterface(); ui.tabWidget_MainContainer->setCurrentIndex(1);});
-    connect(ui.actionCompare_Meshes,&QAction::triggered,[&](){resetNeuronnizeInterface(); ui.tabWidget_MainContainer->setCurrentIndex(2);});
-  QObject::connect ( ui.actionTake_a_snapshot, SIGNAL( triggered ( )), this, SLOT( takeASnapshot ( )) );
-  QObject::connect ( ui.actionHelp, SIGNAL( triggered ( )), this, SLOT( showHelp ( )) );
-  QObject::connect ( ui.actionQuit, SIGNAL( triggered ( )), this, SLOT( actionQuit ( )) );
-  QObject::connect ( ui.actionAbout_Neuronize, SIGNAL( triggered ( )), this, SLOT( actionAbout ( )) );
-  QObject::connect ( ui.actionUndo, SIGNAL( triggered ( )), this, SLOT( actionBack ( )) );
+    //QObject::connect(ui.actionGenerateNewNeuron	,SIGNAL(triggered())	,this,SLOT(generateNewNeuron()));
+    QObject::connect(ui.actionGenerateNewNeuron, SIGNAL(triggered()), this, SLOT(actionNewNeuron()));
+    connect(ui.actionRepair_Meshes, &QAction::triggered, [&]() {
+        resetNeuronnizeInterface();
+        ui.tabWidget_MainContainer->setCurrentIndex(1);
+    });
+    connect(ui.actionCompare_Meshes, &QAction::triggered, [&]() {
+        resetNeuronnizeInterface();
+        ui.tabWidget_MainContainer->setCurrentIndex(2);
+    });
+    connect(ui.actionExport_Neuron_info,&QAction::triggered,this,&Neuronize::showExportDialog);
+    QObject::connect(ui.actionTake_a_snapshot, SIGNAL(triggered()), this, SLOT(takeASnapshot()));
+    QObject::connect(ui.actionHelp, SIGNAL(triggered()), this, SLOT(showHelp()));
+    QObject::connect(ui.actionQuit, SIGNAL(triggered()), this, SLOT(actionQuit()));
+    QObject::connect(ui.actionAbout_Neuronize, SIGNAL(triggered()), this, SLOT(actionAbout()));
+    QObject::connect(ui.actionUndo, SIGNAL(triggered()), this, SLOT(actionBack()));
 
     QObject::connect(ui.actionBatchBuilder, SIGNAL(triggered()), this, SLOT(showBatchBuilder()));
 
@@ -94,6 +102,10 @@ Neuronize::Neuronize ( QWidget *parent )
     this->showNormal();
     resize(1200, 800);
 
+    QString path = QFileInfo(settings.fileName()).absoluteDir().absolutePath() + "/neuronize.sqlite";
+    std::cout << path.toStdString() << std::endl;
+    Neuronize::bbdd = BBDD::BBDD(path.toStdString());
+
     if (mPythonVersion == 3) {
         QString envPath = configPath + "/" + ENV;
 
@@ -115,10 +127,6 @@ Neuronize::Neuronize ( QWidget *parent )
     } else {
         QString message("Python 3 not found. Mesh repair is disabled");
         QString informativeText;
-
-  QString path = QFileInfo(settings.fileName()).absoluteDir().absolutePath() + "/neuronize.sqlite";
-  std::cout << path.toStdString() << std::endl;
-  Neuronize::bbdd = BBDD::BBDD(path.toStdString());
 
         QMessageBox msgBox(this);
         msgBox.setIcon(QMessageBox::Warning);
@@ -652,5 +660,9 @@ int Neuronize::checkPython() {
 void Neuronize::onSomaBuildFinish() {
     this->showMaximized();
     showSomaDeformer();
+}
 
+void Neuronize::showExportDialog(){
+    ExportDialog dialog;
+    dialog.exec();
 }

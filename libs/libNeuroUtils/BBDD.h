@@ -29,9 +29,16 @@ namespace  BBDD {
 
     struct Spine {
         int id;
+        float area, volume;
         std::string file;
         FileType ext;
+        SpineOrigin origin;
     };
+
+    struct Soma {
+        float area, area2D, volume;
+    };
+
 
     class NEUROUTILS_API BBDD {
         sqlite3 *_db;
@@ -61,6 +68,10 @@ namespace  BBDD {
         void closeTransaction();
 
         bool haveSpinesNeuron(const std::string& neuronName);
+
+        void exportNeuron(const std::string& id,const std::string& path);
+
+        std::vector<std::string> getNeuronsNames();
 
         static const std::vector<std::string> neuriteTypeDesc;
         static const std::vector<std::string> fileTypeDesc;
