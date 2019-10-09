@@ -35,6 +35,7 @@
 #include "NeuroGeneratorWidget.h"
 #include "RepairWidget.h"
 #include "CompareMeshesWidget.h"
+#include <libs/libNeuroUtils/BBDD.h>
 
 
 class Neuronize: public QMainWindow
@@ -55,6 +56,8 @@ class Neuronize: public QMainWindow
 
     ~Neuronize ( );
 
+    static BBDD::BBDD bbdd;
+    static QString tmpPath;
     static QString configPath;
 
   private:

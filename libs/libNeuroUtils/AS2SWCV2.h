@@ -58,7 +58,7 @@ using Dendrite = std::vector<SWCPoint>;
 
 class NEUROUTILS_API AS2SWCV2 {
 public:
-    static std::tuple<MeshVCG*,std::vector<Spine>> asc2swc(const std::string& inputFile, const std::string& outFile, bool useSoma);
+    static std::tuple<MeshVCG*,std::vector<Spine>,std::vector<std::vector<OpenMesh::Vec3d>>> asc2swc(const std::string& inputFile, const std::string& outFile, bool useSoma);
 
 private:
     static void procesSomaPart(std::ifstream &file,std::vector<std::vector<OpenMesh::Vec3d>> &countours);

@@ -56,6 +56,8 @@ private slots:
     void onAdvancedPress();
     void saveFileDialog(QLineEdit *dest, const QString &message, const QString &formats);
 
+    void addToBBDD(const QString& string,const QString& qString);
+
     void onRadioChanged(bool b);
 
     void setupUi();

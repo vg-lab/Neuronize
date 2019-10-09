@@ -1132,8 +1132,10 @@ void SomaCreatorWidget::onRadioChanged2(bool b) {
 
     }
 
-
+const vector<vector<OpenMesh::Vec3d>> &SomaCreatorWidget::getContours() const {
+    return contours;
 }
+
 
 void SomaCreatorWidget::openDir(QLineEdit* dest,QString message) {
     auto folder = QFileDialog::getExistingDirectory(this, message, QString());

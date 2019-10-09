@@ -23,6 +23,9 @@ set (NEUROUTILS_SOURCES
 		SWCSpinesDistributor.cpp
 		AS2SWCV2.cpp
 		MeshVCG.cpp
+		BBDD.cpp
+		../../VCG/wrap/ply/plylib.cpp
+		sqlite3.c
 		)
 
 set(NEUROUTILS_HEADERS
@@ -55,6 +58,8 @@ set(NEUROUTILS_HEADERS
 		SWCSpinesDistributor.h
 		ASC2SWC.h
 		MeshVCG.h
+		BBDD.h
+		sqlite3.h
 		)
 
 set(NEUROUTILS_LINK_LIBRARIES

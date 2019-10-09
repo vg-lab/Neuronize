@@ -44,6 +44,10 @@ class NeuroGeneratorWidget: public QWidget, public Ui::NeuroGeneratorWidget
     QString mTempDir;
     skelgenerator::Neuron* neuron;
     std::vector<Spine> spines;
+    std::vector<std::vector<OpenMesh::Vec3d>> contours;
+public:
+    void setContours(const vector<vector<OpenMesh::Vec3d>> &contours);
+
 public:
     void setSpines(const vector<Spine> &spines);
 

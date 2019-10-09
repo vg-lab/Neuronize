@@ -44,6 +44,7 @@ class MyFace
     class NEUROUTILS_API MeshVCG {
         MyMesh mesh;
         std::string name;
+        std::string path;
 
     public:
         explicit MeshVCG(const std::string &filename);
@@ -81,10 +82,14 @@ class MyFace
         double getArea();
 
         std::vector<MeshVCG*> slice(float zStep);
+        const std::string &getPath() const;
 
         float getMax2DArea(float zStep = 0.1f);
 
         static float getMax2DArea(const std::vector<std::vector<OpenMesh::Vec3d>>& contours);
+        void applyMatrix(const vcg::Matrix44d& matrix);
+
+        MyMesh::VertContainer getVertex();
 
         static QColor getColor(float value);
 
@@ -92,6 +97,8 @@ class MyFace
 
     private:
          MeshVCG*  sliceAux(float z);
+
+        int getNumVertex();
 
     };
 
