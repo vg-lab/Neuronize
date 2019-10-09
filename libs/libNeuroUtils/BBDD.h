@@ -33,10 +33,12 @@ namespace  BBDD {
         std::string file;
         FileType ext;
         SpineOrigin origin;
+        OpenMesh::Vec3f massCenter;
     };
 
     struct Soma {
         float area, area2D, volume;
+        OpenMesh::Vec3f massCenter;
     };
 
 

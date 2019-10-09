@@ -35,6 +35,9 @@ static int getSomaInfoCallback(void *soma, int columns, char **data, char **colu
     somaCast->area = std::stof(data[0]);
     somaCast->area2D = std::stof(data[1]);
     somaCast->volume = std::stof(data[2]);
+    somaCast->massCenter[0] = std::stof(data[3]);
+    somaCast->massCenter[1] = std::stof(data[4]);
+    somaCast->massCenter[2] = std::stof(data[5]);
     return 0;
 }
 
@@ -44,6 +47,9 @@ static int getSpineInfoCallBack(void* spines, int columns,char **data,char **com
     spine.area = std::stof(data[0]);
     spine.volume = std::stof(data[1]);
     spine.origin = (BBDD::SpineOrigin) std::stoi(data[2]);
+    spine.massCenter[0] = std::stof(data[3]);
+    spine.massCenter[1] = std::stof(data[4]);
+    spine.massCenter[2] = std::stof(data[5]);
     spinesCast->push_back(spine);
     return 0;
 }
@@ -106,6 +112,9 @@ namespace BBDD {
                                   "                   AREA REAL,\n"
                                   "                   AREA_2D REAL,\n"
                                   "                   VOLUME REAL,\n"
+                                  "                   MASS_CENTER_X REAL,\n"
+                                  "                   MASS_CENTER_Y REAL,\n"
+                                  "                   MASS_CENTER_Z REAL,\n"
                                   "                   NEURON TEXT NOT NULL,\n"
                                   "                   MODEL BLOB,\n"
                                   "                   RECONSTRUCTION_METHOD INTEGER,\n"
@@ -133,6 +142,9 @@ namespace BBDD {
         std::string create_SpineModel = "CREATE TABLE SPINE_MODEL(ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,\n"
                                         "            AREA REAL,\n"
                                         "            VOLUME REAL,\n"
+                                        "            MASS_CENTER_X REAL,\n"
+                                        "            MASS_CENTER_Y REAL,\n"
+                                        "            MASS_CENTER_Z REAL,\n"
                                         "            ORIGIN INT,\n"
                                         "            MODEL BLOB NOT NULL,\n"
                                         "            MODEL_NR BLOB,\n"
@@ -269,13 +281,15 @@ namespace BBDD {
     }
 
     void BBDD::addSoma(const std::string& neuronName, MeshVCG& model,ReconstructionMethod reconstructionMethod,std::vector<std::vector<OpenMesh::Vec3d>> contours) {
-        std::string query = "INSERT INTO SOMA (AREA, AREA_2D, VOLUME, NEURON, MODEL, RECONSTRUCTION_METHOD) VALUES (%f,%f,%f,'%s','%x',%i)";
+        std::string query = "INSERT INTO SOMA (AREA, AREA_2D, VOLUME, NEURON, MODEL, RECONSTRUCTION_METHOD, MASS_CENTER_X, MASS_CENTER_Y,MASS_CENTER_Z) "
+                            "VALUES (%f,%f,%f,'%s','%x',%i,%f,%f,%f)";
         float area = model.getArea();
         float volume = model.getVolume();
         float area2D = model.getMax2DArea(0.1f);
+        auto massCenter = model.getCenter();
         std::string file = readBytes(model.getPath()).data();
         std::string formatedQuery = str(
-                boost::format(query) % area % area2D % volume % neuronName % file % reconstructionMethod);
+                boost::format(query) % area % area2D % volume % neuronName % file % reconstructionMethod % massCenter[0] % massCenter[1] % massCenter[2]);
         sqlite3_exec(_db, formatedQuery.c_str(), nullptr, nullptr, &_err);
         ERRCHECK
 
@@ -340,10 +354,12 @@ namespace BBDD {
     }
 
     void BBDD::addSpineImaris(const std::string& originalSpine, const std::string& repairedSpine, const std::string& ext) {
-        std::string query = "INSERT INTO SPINE_MODEL (AREA, VOLUME, ORIGIN, MODEL, MODEL_NR, FILE_TYPE) VALUES (%f,%f,%i,'%x','%x',%i);";
+        std::string query = "INSERT INTO SPINE_MODEL (AREA, VOLUME, ORIGIN, MODEL, MODEL_NR, FILE_TYPE, MASS_CENTER_X, MASS_CENTER_Y, MASS_CENTER_Z) "
+                            "VALUES (%f,%f,%i,'%x','%x',%i,%f,%f,%f);";
         MeshVCG mesh (repairedSpine);
         float area = mesh.getArea();
         float volume = mesh.getVolume();
+        auto massCenter = mesh.getCenter();
 
         auto bytes = readBytes(repairedSpine);
         std::string repairedFile (bytes.begin(), bytes.end());
@@ -358,24 +374,26 @@ namespace BBDD {
             fileType = Stl;
         }
 
-        std::string formatedQuery = str(boost::format(query) % area % volume % Imaris % repairedFile % originalFile % fileType);
+        std::string formatedQuery = str(boost::format(query) % area % volume % Imaris % repairedFile % originalFile % fileType % massCenter[0] % massCenter[1] % massCenter[2]);
         sqlite3_exec(_db,formatedQuery.c_str(), nullptr, nullptr,&_err);
         ERRCHECK
     }
 
 
     void BBDD::addSpineVRML(const skelgenerator::Spine* const spine,const std::string& meshPath,const std::string& neuronName, const std::string& tmpDir, const OpenMesh::Vec3f& displacement) {
-        std::string query = "INSERT INTO SPINE_MODEL (AREA, VOLUME, ORIGIN, MODEL, File_TYPE) VALUES (%f,%f,%i,'%x',%i);";
+        std::string query = "INSERT INTO SPINE_MODEL (AREA, VOLUME, ORIGIN, MODEL, File_TYPE, MASS_CENTER_X, MASS_CENTER_Y, MASS_CENTER_Z)"
+                            " VALUES (%f,%f,%i,'%x',%i,%f,%f,%f);";
         MeshVCG mesh (meshPath);
         float area = mesh.getArea();
         float volume = mesh.getVolume();
+        auto massCenter = mesh.getCenter();
 
         auto transform = orientSpine(mesh,spine);
         mesh.toObj(tmpDir + "spine.obj");
         auto bytes = readBytes(tmpDir + "spine.obj");
         std::string file (bytes.begin(),bytes.end());
 
-        std::string formatedQuery = str(boost::format(query) % area % volume % FilamentTracer % file % Obj );
+        std::string formatedQuery = str(boost::format(query) % area % volume % FilamentTracer % file % Obj % massCenter[0] % massCenter[1] % massCenter[2] );
         sqlite3_exec(_db,formatedQuery.c_str(), nullptr, nullptr,&_err);
         ERRCHECK
 
@@ -474,7 +492,7 @@ namespace BBDD {
     void BBDD::exportNeuron(const std::string& id,const std::string& path) {
         std::setlocale(LC_NUMERIC, "en_US.UTF-8");
         std::string querySoma = "SELECT\n"
-                                "    SOMA.AREA,SOMA.AREA_2D,SOMA.VOLUME\n"
+                                "    SOMA.AREA,SOMA.AREA_2D,SOMA.VOLUME,SOMA.MASS_CENTER_X,SOMA.MASS_CENTER_Y,SOMA.MASS_CENTER_Z\n"
                                 "FROM\n"
                                 "     NEURON\n"
                                 "INNER JOIN SOMA on NEURON.ID = SOMA.NEURON\n"
@@ -486,7 +504,7 @@ namespace BBDD {
         ERRCHECK
 
         std::string querySpines = "SELECT\n"
-                                  "    SM.AREA,SM.VOLUME,SM.ORIGIN\n"
+                                  "    SM.AREA,SM.VOLUME,SM.ORIGIN,SM.MASS_CENTER_X,SM.MASS_CENTER_Y,SM.MASS_CENTER_Z\n"
                                   "FROM\n"
                                   "     NEURON\n"
                                   "INNER JOIN SPINES on NEURON.ID = SPINES.NEURON\n"
@@ -502,16 +520,19 @@ namespace BBDD {
 
         std::ofstream spinesStream;
         spinesStream.open (outputDir + "/spines.csv",std::ofstream::out);
-        spinesStream << "Area;Volume;Origin" << std::endl;
+        spinesStream << "Area;Volume;Mass Center-x;Mass Center-y;Mass Center-z;Origin" << std::endl;
         for (const auto& spine:spines) {
-            spinesStream << spine.area << ";" << spine.volume << ";" << spineOriginDesc[spine.origin] << std::endl;
+            spinesStream << spine.area << ";" << spine.volume << ";" << spine.massCenter[0] << ";" <<
+                            spine.massCenter[1] << ";" << spine.massCenter[2] << ";" << spineOriginDesc[spine.origin]
+                            << std::endl;
         }
         spinesStream.close();
 
         std::ofstream somaStream;
         somaStream.open (outputDir + "/soma.csv",std::ofstream::out);
-        somaStream << "Area;Area2D,Volume" << std::endl;
-        somaStream << soma.area << ";" << soma.area2D << ";" << soma.volume << std::endl;
+        somaStream << "Area;Area2D;Volume;Mass Center-x;Mass Center-y;Mass Center-z" << std::endl;
+        somaStream << soma.area << ";" << soma.area2D << ";" << soma.volume << ";" << soma.massCenter[0] << ";" <<
+                      soma.massCenter[1] << ";" << soma.massCenter[2] << std::endl;
         somaStream.close();
     }
 
