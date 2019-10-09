@@ -18,8 +18,8 @@ static int getSpineCallback(void *spines, int columns, char **data, char **colum
 
     BBDD::Spine spine;
     spine.id = std::stoi(data[0]);
-    spine.file = std::string(data[4]);
-    spine.ext = (BBDD::FileType) std::stoi(data[6]);
+    spine.ext = (BBDD::FileType) std::stoi(data[1]);
+    spine.file = std::string(data[2]);
     spinesCast->push_back(spine);
     return 0;
 }
@@ -461,7 +461,7 @@ namespace BBDD {
     }
 
     std::vector<std::tuple<int,std::string>> BBDD::getRandomSpines(int n,const std::string& tmpPath) {
-        std::string query = "SELECT * FROM SPINE_MODEL WHERE ORIGIN == 1 OR ORIGIN == 3 ORDER BY RANDOM() LIMIT " + std::to_string(n);
+        std::string query = "SELECT ID,FILE_TYPE,MODEL FROM SPINE_MODEL WHERE ORIGIN == 1 OR ORIGIN == 3 ORDER BY RANDOM() LIMIT " + std::to_string(n);
         std::vector<Spine> spines;
         spines.reserve(n);
         sqlite3_exec(_db,query.c_str() ,getSpineCallback,&spines,&_err);
