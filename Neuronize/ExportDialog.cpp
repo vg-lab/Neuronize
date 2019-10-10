@@ -19,8 +19,8 @@ ExportDialog::ExportDialog(QWidget *parent): QDialog(parent) {
         const auto& neuron = neurons[i];
         auto checkBox = new QCheckBox(this);
         checkBoxs.push_back(checkBox);
-        gridLayout->addWidget(checkBox,0,0);
-        gridLayout->addWidget(new QLabel(QString::fromStdString(neuron)),0,1);
+        gridLayout->addWidget(checkBox,i,0);
+        gridLayout->addWidget(new QLabel(QString::fromStdString(neuron)),i,1);
     }
     widget->setLayout(gridLayout);
     scrollArea->setWidget(widget);
