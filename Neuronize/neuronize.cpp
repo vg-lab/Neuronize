@@ -436,13 +436,13 @@ void Neuronize::genetareNeuronsInBatch (QString inputFilePath,QString outputFile
    QDir directory;
   if ( mInputFilePath.isNull ( ) == false ) {
     directory.setPath(mInputFilePath);
-    QDirIterator it(directory.absolutePath(), QDir::AllEntries | QDir::NoDotAndDotDot);
+    QDirIterator it(directory.absolutePath(), QDir::NoDotAndDotDot);
     while (it.hasNext()) {
       QFileInfo current = it.next();
       if (current.isFile()) {
         auto ext = current.suffix();
         if (ext == "asc" || ext == "ASC" || ext == "swc" || ext == "SWC") {
-          mFilesContainer.emplace_back(it.next(), nullptr);
+          mFilesContainer.emplace_back(current.absoluteFilePath(), nullptr);
         }
 
       } else if (current.isDir()) {
