@@ -305,7 +305,12 @@ void RepairWidget::addToBBDD(const QString& path,const QString& extension) {
         int pos = originalFile.lastIndexOf('.');
         auto repairedFile = originalFile;
         repairedFile.replace(pos-1,1,"R");
-        Neuronize::bbdd.addSpineImaris(originalFile.toStdString(),repairedFile.toStdString(),extension.toStdString());
+
+        QFileInfo fileInfo (originalFile);
+        auto spineName = fileInfo.baseName();
+        spineName = spineName.left(spineName.size() - 2);
+
+        Neuronize::bbdd.addSpineImaris(originalFile.toStdString(),repairedFile.toStdString(),extension.toStdString(),spineName.toStdString());
     }
     Neuronize::bbdd.closeTransaction();
 }

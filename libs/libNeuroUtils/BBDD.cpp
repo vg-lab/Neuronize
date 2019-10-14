@@ -142,6 +142,7 @@ namespace BBDD {
         std::string create_SpineModel = "CREATE TABLE SPINE_MODEL(ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,\n"
                                         "            AREA REAL,\n"
                                         "            VOLUME REAL,\n"
+                                        "            NAME TEXT,\n"
                                         "            MASS_CENTER_X REAL,\n"
                                         "            MASS_CENTER_Y REAL,\n"
                                         "            MASS_CENTER_Z REAL,\n"
@@ -353,9 +354,9 @@ namespace BBDD {
         return transform;
     }
 
-    void BBDD::addSpineImaris(const std::string& originalSpine, const std::string& repairedSpine, const std::string& ext) {
-        std::string query = "INSERT INTO SPINE_MODEL (AREA, VOLUME, ORIGIN, MODEL, MODEL_NR, FILE_TYPE, MASS_CENTER_X, MASS_CENTER_Y, MASS_CENTER_Z) "
-                            "VALUES (%f,%f,%i,'%x','%x',%i,%f,%f,%f);";
+    void BBDD::addSpineImaris(const std::string& originalSpine, const std::string& repairedSpine, const std::string& ext,const std::string& name) {
+        std::string query = "INSERT INTO SPINE_MODEL (AREA, VOLUME, ORIGIN, MODEL, MODEL_NR, FILE_TYPE, MASS_CENTER_X, MASS_CENTER_Y, MASS_CENTER_Z,NAME) "
+                            "VALUES (%f,%f,%i,'%x','%x',%i,%f,%f,%f,'%x');";
         MeshVCG mesh (repairedSpine);
         float area = mesh.getArea();
         float volume = mesh.getVolume();
@@ -374,7 +375,7 @@ namespace BBDD {
             fileType = Stl;
         }
 
-        std::string formatedQuery = str(boost::format(query) % area % volume % Imaris % repairedFile % originalFile % fileType % massCenter[0] % massCenter[1] % massCenter[2]);
+        std::string formatedQuery = str(boost::format(query) % area % volume % Imaris % repairedFile % originalFile % fileType % massCenter[0] % massCenter[1] % massCenter[2] % name);
         sqlite3_exec(_db,formatedQuery.c_str(), nullptr, nullptr,&_err);
         ERRCHECK
     }

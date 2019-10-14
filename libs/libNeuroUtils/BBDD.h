@@ -59,7 +59,7 @@ namespace  BBDD {
 
         void addSpineVRML(const skelgenerator::Spine* const spine,const std::string& meshPath,const std::string& neuronName, const std::string& tmpDir, const OpenMesh::Vec3f& displacement);
 
-        void addSpineImaris(const std::string& originalSpine, const std::string& repairedSpine, const std::string& ext);
+        void addSpineImaris(const std::string& originalSpine, const std::string& repairedSpine, const std::string& ext, const std::string& name);
 
         void addSpine(const std::string& neuronName, int spineModel, const OpenMesh::Vec3f& displacement,const boost::numeric::ublas::matrix<float>& transform);
 
