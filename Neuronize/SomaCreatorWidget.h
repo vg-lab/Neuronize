@@ -35,6 +35,7 @@
 #include <libs/libNeuroUtils/AS2SWCV2.h>
 #include <QtWidgets/QProgressDialog>
 #include <QFutureWatcher>
+#include <QLineEdit>
 
 #include "ui_SomaCreatorWidget.h"
 

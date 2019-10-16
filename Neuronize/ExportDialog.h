@@ -14,6 +14,7 @@ class ExportDialog: public QDialog {
     Q_OBJECT
 
     std::vector<QCheckBox*> checkBoxs;
+    QCheckBox* allCheckBox;
     std::vector<std::string> neurons;
     QDialogButtonBox* buttons;
 
@@ -22,6 +23,7 @@ public:
 
 private slots:
     void onOk();
+    void onAllCheckBox(int state);
 
 };
 

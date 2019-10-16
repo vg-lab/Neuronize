@@ -50,6 +50,14 @@ static int getSpineInfoCallBack(void* spines, int columns,char **data,char **com
     spine.massCenter[0] = std::stof(data[3]);
     spine.massCenter[1] = std::stof(data[4]);
     spine.massCenter[2] = std::stof(data[5]);
+    spine.name = data[6];
+    spine.displacement[0] = std::stof(data[7]);
+    spine.displacement[1] = std::stof(data[8]);
+    spine.displacement[2] = std::stof(data[9]);
+    spine.q[0] = std::stof(data[10]);
+    spine.q[1] = std::stof(data[11]);
+    spine.q[2] = std::stof(data[12]);
+    spine.q[3] = std::stof(data[13]);
     spinesCast->push_back(spine);
     return 0;
 }
@@ -411,8 +419,6 @@ namespace BBDD {
 
 
     void BBDD::addSpine(const std::string& neuronName, int spineModel, const OpenMesh::Vec3f& displacement,const boost::numeric::ublas::matrix<float>& transform) {
-        OpenMesh::Vec3f translation (transform(0,3),transform(1,3),transform(2,3));
-        translation -= displacement;
 
         vcg::Matrix44f rot = vcg::Matrix44f::Identity();
         for (int i =0; i < 3; i++) {
@@ -425,8 +431,9 @@ namespace BBDD {
         q.FromMatrix(rot);
 
         std::string query = "INSERT INTO SPINES (NEURON, SPINE_MODEL, TRANSLATION_X, TRANSLATION_Y, TRANSLATION_Z, QUATERNION_1, QUATERNION_2, QUATERNION_3, QUATERNION_4) VALUES('%s',%i,%f,%f,%f,%f,%f,%f,%f);";
-        std::string formatedQuery = str(boost::format(query) % neuronName % spineModel % translation[0] % translation[1] % translation[2] % q[0] % q[1] %q[2] %q[3]);
+        std::string formatedQuery = str(boost::format(query) % neuronName % spineModel % displacement[0] % displacement[1] % displacement[2] % q[0] % q[1] %q[2] %q[3]);
         sqlite3_exec(_db,formatedQuery.c_str(), nullptr, nullptr,&_err);
+        std::cout << "Spine Added" << std::endl;
         ERRCHECK
     }
 
@@ -435,19 +442,23 @@ namespace BBDD {
         QDir spinesDir (spinesPath);
         spinesDir.setNameFilters(QStringList() << "*.obj");
 
-        std::string query = "INSERT INTO SPINE_MODEL(ID, AREA, VOLUME, ORIGIN, MODEL, FILE_TYPE) VALUES (%i,%f,%f,%i,'%x',%i)";
+        std::string query = "INSERT INTO SPINE_MODEL(ID, AREA, VOLUME, ORIGIN, MODEL, FILE_TYPE,MASS_CENTER_X,MASS_CENTER_Y,MASS_CENTER_Z,NAME) VALUES (%i,%f,%f,%i,'%x',%i,%f,%f,%f,'%x')";
 
+        this->openTransaction();
         for (const auto& spine:spinesDir.entryInfoList()) {
             MeshVCG mesh (spine.filePath().toStdString());
             float area = mesh.getArea();
             float volume = mesh.getVolume();
+            auto center = mesh.getCenter();
             QString name = spine.baseName();
             int id = name.mid(1,name.size() - 2).toInt();
+            std::string spineName = std::string("Default-") + std::to_string(id);
             std::string file = readBytes(spine.filePath().toStdString()).data();
-            std::string formatedQuery = str(boost::format(query) % id % area % volume % Neuronize % file % Obj);
+            std::string formatedQuery = str(boost::format(query) % id % area % volume % Neuronize % file % Obj % center[0] % center[1] % center[2] % spineName);
             sqlite3_exec(_db,formatedQuery.c_str(), nullptr, nullptr,&_err);
             ERRCHECK
         }
+        this->closeTransaction();
     }
 
     void BBDD::openTransaction() {
@@ -487,7 +498,7 @@ namespace BBDD {
         std::string formatedQuery = str(boost::format(query) % neuronName);
         int count;
         sqlite3_exec(_db,formatedQuery.c_str(),countCallback,&count,&_err);
-        return count == 0;
+        return count != 0;
     }
 
     void BBDD::exportNeuron(const std::string& id,const std::string& path) {
@@ -505,11 +516,12 @@ namespace BBDD {
         ERRCHECK
 
         std::string querySpines = "SELECT\n"
-                                  "    SM.AREA,SM.VOLUME,SM.ORIGIN,SM.MASS_CENTER_X,SM.MASS_CENTER_Y,SM.MASS_CENTER_Z\n"
+                                  "    SM.AREA,SM.VOLUME,SM.ORIGIN,SM.MASS_CENTER_X,SM.MASS_CENTER_Y,SM.MASS_CENTER_Z,SM.NAME,\n"
+                                  "    SPINES.TRANSLATION_X,TRANSLATION_Y,TRANSLATION_Z,QUATERNION_1,QUATERNION_2,QUATERNION_3,QUATERNION_4\n"
                                   "FROM\n"
                                   "     NEURON\n"
-                                  "INNER JOIN SPINES on NEURON.ID = SPINES.NEURON\n"
-                                  "INNER JOIN SPINE_MODEL SM on SPINES.SPINE_MODEL = SM.ID\n"
+                                  "     INNER JOIN SPINES on NEURON.ID = SPINES.NEURON\n"
+                                  "     INNER JOIN SPINE_MODEL SM on SPINES.SPINE_MODEL = SM.ID\n"
                                   "where NEURON.ID = '%x'";
 
         std::string formatedQuerySpines = str(boost::format(querySpines) % id);
@@ -521,10 +533,17 @@ namespace BBDD {
 
         std::ofstream spinesStream;
         spinesStream.open (outputDir + "/spines.csv",std::ofstream::out);
-        spinesStream << "Area;Volume;Mass Center-x;Mass Center-y;Mass Center-z;Origin" << std::endl;
+        spinesStream << "Name;Area;Volume;Mass Center-x;Mass Center-y;Mass Center-z;Origin" << std::endl;
         for (const auto& spine:spines) {
-            spinesStream << spine.area << ";" << spine.volume << ";" << spine.massCenter[0] << ";" <<
-                            spine.massCenter[1] << ";" << spine.massCenter[2] << ";" << spineOriginDesc[spine.origin]
+            vcg::Point3f massCenter(spine.massCenter[0], spine.massCenter[1], spine.massCenter[2]);
+            massCenter = spine.q.Rotate(massCenter);
+            massCenter[0] += spine.displacement[0];
+            massCenter[1] += spine.displacement[1];
+            massCenter[2] += spine.displacement[2];
+
+
+            spinesStream << spine.name << ";" << spine.area << ";" << spine.volume << ";" << massCenter[0] << ";" <<
+                            massCenter[1] << ";" << massCenter[2] << ";" << spineOriginDesc[spine.origin]
                             << std::endl;
         }
         spinesStream.close();

@@ -433,10 +433,8 @@ void Neuronize::genetareNeuronsInBatch (QString inputFilePath,QString outputFile
     }
   }*/
 
-   QDir directory;
   if ( mInputFilePath.isNull ( ) == false ) {
-    directory.setPath(mInputFilePath);
-    QDirIterator it(directory.absolutePath(), QDir::NoDotAndDotDot);
+    QDirIterator it(mInputFilePath, QDir::AllEntries | QDir::NoDotAndDotDot);
     while (it.hasNext()) {
       QFileInfo current = it.next();
       if (current.isFile()) {

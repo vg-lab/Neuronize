@@ -1900,7 +1900,7 @@ namespace NSSpinesSWC
     int numSpines = spines.size();
     int counter = 0;
     bool haveSpinesNeuron = bbdd.haveSpinesNeuron(neuronName);
-
+    bbdd.openTransaction();
     //Auxiliar vectors
     for ( int k = 0; k < lNumSegmentsWithSpines; ++k )
     {
@@ -1929,6 +1929,7 @@ namespace NSSpinesSWC
         OpenMesh::Vec3f lVecAB;
         float lSegPercetn;
         unsigned int lNumVertexToChoose = 0;
+
 
         //Colocaci�n de las espinas en los centros de las facetas
         //From vertex candidate, we choose his incident face
@@ -2050,7 +2051,7 @@ namespace NSSpinesSWC
                                        YVector
         );
         if (!haveSpinesNeuron) {
-            bbdd.addSpine(neuronName, lSpineModelSelected, {0, 0, 0}, glb_mat);
+            bbdd.addSpine(neuronName, lSpineModelSelected, auxPoint, glb_mat);
         }
 
         //Unimos la malla y calculamos los vertices antes y despues
@@ -2096,6 +2097,7 @@ namespace NSSpinesSWC
 
       }
     }
+    bbdd.closeTransaction();
     updateBaseMesh ( );
 
     ///####

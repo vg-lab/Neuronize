@@ -12,28 +12,29 @@ ExportDialog::ExportDialog(QWidget *parent): QDialog(parent) {
     neurons = Neuronize::bbdd.getNeuronsNames();
 
     auto widget = new QWidget();
-    auto gridLayout = new QGridLayout();
+    auto verticalLayout = new QVBoxLayout();
     checkBoxs.reserve(neurons.size());
 
-    for(size_t i =0 ; i < neurons.size(); i++) {
-        const auto& neuron = neurons[i];
-        auto checkBox = new QCheckBox(this);
+    for(const auto & neuron : neurons) {
+        auto checkBox = new QCheckBox(QString::fromStdString(neuron),this);
         checkBoxs.push_back(checkBox);
-        gridLayout->addWidget(checkBox,i,0);
-        gridLayout->addWidget(new QLabel(QString::fromStdString(neuron)),i,1);
+        verticalLayout->addWidget(checkBox);
     }
-    widget->setLayout(gridLayout);
+    widget->setLayout(verticalLayout);
     scrollArea->setWidget(widget);
 
 
     buttons = new QDialogButtonBox(QDialogButtonBox::Ok
                                      | QDialogButtonBox::Cancel);
 
+    allCheckBox = new QCheckBox(tr("Select All"), this);
+
     auto title = new QLabel("Select neurons for export");
     title->setAlignment(Qt::AlignHCenter);
 
     auto mainLayout = new QVBoxLayout();
     mainLayout->addWidget(title);
+    mainLayout->addWidget(allCheckBox);
     mainLayout->addWidget(scrollArea);
     mainLayout->addWidget(buttons);
 
@@ -41,6 +42,7 @@ ExportDialog::ExportDialog(QWidget *parent): QDialog(parent) {
 
     connect(buttons,&QDialogButtonBox::accepted,this,&ExportDialog::onOk);
     connect(buttons,&QDialogButtonBox::rejected,[&](){this->reject();});
+    connect(allCheckBox,&QCheckBox::stateChanged,this,&ExportDialog::onAllCheckBox);
 }
 
 void ExportDialog::onOk() {
@@ -54,5 +56,12 @@ void ExportDialog::onOk() {
     }
 
     accept();
+
+}
+
+void ExportDialog::onAllCheckBox( int state) {
+    for (const auto& checkBox: checkBoxs) {
+        checkBox->setCheckState((Qt::CheckState) state);
+    }
 
 }

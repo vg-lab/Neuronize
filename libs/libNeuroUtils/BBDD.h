@@ -30,10 +30,11 @@ namespace  BBDD {
     struct Spine {
         int id;
         float area, volume;
-        std::string file;
+        std::string file, name;
         FileType ext;
         SpineOrigin origin;
-        OpenMesh::Vec3f massCenter;
+        OpenMesh::Vec3f massCenter, displacement;
+        vcg::Quaternionf q;
     };
 
     struct Soma {
