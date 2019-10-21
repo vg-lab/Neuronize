@@ -9,6 +9,7 @@
 #include <libs/libNeuroUtils/MeshVCG.h>
 #include <QCoreApplication>
 #include <QDirIterator>
+#include <clocale>
 
 
 #define ERRCHECK {if (_err!=NULL) {std::cerr << "BBDD Error : " << _err << "\n" << std::endl; sqlite3_free(_err);}}
