@@ -44,7 +44,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>3</number>
+      <number>2</number>
      </property>
      <property name="tabsClosable">
       <bool>false</bool>
@@ -258,13 +258,6 @@
          </layout>
         </widget>
        </item>
-       <item row="8" column="0">
-        <widget class="QPushButton" name="pushButton_GoToGenerateSpines">
-         <property name="text">
-          <string>Next step</string>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="0">
         <widget class="QPushButton" name="pushButton_GenerateDendrites">
          <property name="text">
@@ -298,6 +291,13 @@
           </size>
          </property>
         </spacer>
+       </item>
+       <item row="2" column="0">
+        <widget class="QPushButton" name="pushButton_GoToGenerateSpines">
+         <property name="text">
+          <string>Go to Spine Generation</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -400,7 +400,7 @@
        <item>
         <widget class="QPushButton" name="pushButton_FinishNeuron">
          <property name="text">
-          <string>Finish</string>
+          <string>Export without spines</string>
          </property>
         </widget>
        </item>
@@ -857,7 +857,7 @@
                <x>0</x>
                <y>0</y>
                <width>335</width>
-               <height>303</height>
+               <height>310</height>
               </rect>
              </property>
              <layout class="QFormLayout" name="formLayout_8">
@@ -1043,8 +1043,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>246</width>
-            <height>631</height>
+            <width>255</width>
+            <height>604</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_12">
@@ -1637,7 +1637,6 @@
   <tabstop>tabWidget_RenderControl</tabstop>
   <tabstop>pushButton_GenerateDendrites</tabstop>
   <tabstop>pushButton_SmoothDendrites</tabstop>
-  <tabstop>pushButton_GoToGenerateSpines</tabstop>
   <tabstop>pushButton_RebuildWithAdvancedOptions</tabstop>
   <tabstop>spinBox_TubesVerResolution</tabstop>
   <tabstop>spinBox_TubesHorResolution</tabstop>

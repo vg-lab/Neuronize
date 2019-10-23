@@ -118,7 +118,7 @@ void CompareMeshesWidget::initRender() {
 
     if (hausdorffResult.max1 > 1.0f) {
         auto messageBox = new QMessageBox(this);
-        messageBox->setText("A distance too large has been found");
+        messageBox->setText("A too-large distance has been found");
         messageBox->setInformativeText(
                 "This may be because the meshes are not in the same place, do you want to center them?");
         messageBox->setStandardButtons(QMessageBox::Yes | QMessageBox::No);

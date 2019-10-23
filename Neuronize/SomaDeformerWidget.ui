@@ -59,30 +59,30 @@
        <item>
         <widget class="QPushButton" name="pushButton_FinalizeSoma">
          <property name="text">
-          <string>Next step</string>
+          <string>Go to Dendrite Generation</string>
          </property>
         </widget>
        </item>
        <item>
-           <widget class="QPushButton" name="pushButton_ExportModel">
-               <property name="text">
-                   <string>Export Soma</string>
-               </property>
-           </widget>
+        <widget class="QPushButton" name="pushButton_ExportModel">
+         <property name="text">
+          <string>Export Soma</string>
+         </property>
+        </widget>
        </item>
-          <item>
-              <spacer name="verticalSpacer">
-                  <property name="orientation">
-                      <enum>Qt::Vertical</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                      <size>
-                          <width>20</width>
-                          <height>40</height>
-                      </size>
-                  </property>
-              </spacer>
-          </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
        <item>
         <widget class="QPushButton" name="pushButton_RebuildSoma">
          <property name="text">
@@ -277,8 +277,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>256</width>
-               <height>1010</height>
+            <width>259</width>
+            <height>1010</height>
            </rect>
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_3">

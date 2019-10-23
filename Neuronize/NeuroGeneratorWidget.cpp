@@ -1217,6 +1217,8 @@ void NeuroGeneratorWidget::hideAdvancedOptions() {
     ui.pushButton_exportSpinesInfo->hide();
     ui.pushButton_importSpinesInfo->hide();
     ui.groupBox_SpinesCtrlHide->hide();
+    ui.radioButton_AdvanceSpinesCtrl_Shape_LoadDatabase->hide();
+    ui.radioButton_AdvanceSpinesCtrl_LoadPositionsFromFile->hide();
 
     // Dendrite section
     ui.groupBox_ModifiersCtrlHide->hide();

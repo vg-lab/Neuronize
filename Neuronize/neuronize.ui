@@ -231,7 +231,7 @@
   </action>
   <action name="actionExport_Neuron_info">
    <property name="text">
-    <string>Export Neuron info</string>
+    <string>Export Neuron Info</string>
    </property>
   </action>
  </widget>
