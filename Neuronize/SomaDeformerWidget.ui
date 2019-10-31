@@ -59,7 +59,7 @@
        <item>
         <widget class="QPushButton" name="pushButton_FinalizeSoma">
          <property name="text">
-          <string>Go to Dendrite Generation</string>
+          <string>Go to Neurite Generation</string>
          </property>
         </widget>
        </item>
@@ -277,7 +277,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>259</width>
+            <width>256</width>
             <height>1010</height>
            </rect>
           </property>

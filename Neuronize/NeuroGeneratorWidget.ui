@@ -44,7 +44,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <property name="tabsClosable">
       <bool>false</bool>
@@ -261,7 +261,7 @@
        <item row="0" column="0">
         <widget class="QPushButton" name="pushButton_GenerateDendrites">
          <property name="text">
-          <string>Build dendrites</string>
+          <string>Build Neurites</string>
          </property>
         </widget>
        </item>
@@ -856,7 +856,7 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>335</width>
+               <width>327</width>
                <height>310</height>
               </rect>
              </property>
@@ -1043,7 +1043,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>255</width>
+            <width>252</width>
             <height>604</height>
            </rect>
           </property>

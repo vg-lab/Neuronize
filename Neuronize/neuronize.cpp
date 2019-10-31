@@ -262,7 +262,7 @@ void Neuronize::showDendriteGenerator ( )
   mSomaDeformerWidget->stopDeformation();
 
   ui.tabWidget_MainContainer->removeTab ( 0 );
-  ui.tabWidget_MainContainer->insertTab ( 0, ui.tab_DendritesGenerator, "Dendrites/Spines builder" );
+  ui.tabWidget_MainContainer->insertTab ( 0, ui.tab_DendritesGenerator, "Neurites/Spines builder" );
 
   mNeuroGeneratorWidget->setSpines(mSomaCreatorWidget->getSpines());
   mNeuroGeneratorWidget->setContours(mSomaCreatorWidget->getContours());
