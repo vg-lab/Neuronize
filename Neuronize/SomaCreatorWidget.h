@@ -94,8 +94,6 @@ class SomaCreatorWidget: public QWidget, public Ui::SomaCreatorWidget
 
     void resetInterface ( );
 
-    void disableRepair();
-
     void openSaveFileDialog(QLineEdit *target, const QString &title, const QString &types);
 
     void processSkel(const std::string &fileName);

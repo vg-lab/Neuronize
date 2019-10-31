@@ -1060,9 +1060,7 @@ void SomaCreatorWidget::showWarningDialogReaminingSegments(int sobrantes, int &n
     }
 }
 
-void SomaCreatorWidget::disableRepair() {
-   ui.tabWidget_Main->setTabEnabled(1,false);
-}
+
 
 void SomaCreatorWidget::deleteTreeViewer() {
 

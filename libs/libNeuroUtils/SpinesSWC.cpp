@@ -1892,7 +1892,7 @@ namespace NSSpinesSWC
 
     lNumSegmentsWithSpines = lAuxSpinesDistrib.size ( );
     int total_spines = 0;
-    for (int i = 0; i < lNumSegmentsWithSpines; i++) {
+    for (int k = 0; k < lNumSegmentsWithSpines; k++) {
         total_spines += lAuxSpinesDistrib.at ( k ).mSpinesSegmentContainer.size ( );
     }
 
@@ -2887,6 +2887,7 @@ namespace NSSpinesSWC
 
           //Explicit translate
           //Muchmore faster than apply the translate matrix
+          //Muchmore faster than appaly the translate matrix
           glb_AuxVec[0] += auxPoint[0];
           glb_AuxVec[1] += auxPoint[1];
           glb_AuxVec[2] += auxPoint[2];
@@ -3039,7 +3040,6 @@ namespace NSSpinesSWC
       //Auxiliar vectors
         for ( i = 0; i < spines.size(); ++i ) {
 
-            std::cout << i << std::endl;
             auto spine = spinesModels[i % numModels];
 
           //Select the spine modelled

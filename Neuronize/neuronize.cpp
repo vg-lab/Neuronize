@@ -28,6 +28,7 @@
 #include <boost/process.hpp>
 #include <QtConcurrent/QtConcurrent>
 #include <QFutureWatcher>
+#include <clocale>
 
 #include <QSettings>
 #define ENV "env"
@@ -44,6 +45,9 @@ QString Neuronize::tmpPath;
 Neuronize::Neuronize ( QWidget *parent )
         : QMainWindow(parent) {
     ui.setupUi(this);
+    // Para evitar problemas con las tildes en español.
+    std::setlocale(LC_ALL, "es_ES.UTF-8");
+
 
     //Init glut
     int argc = 0;
@@ -72,7 +76,7 @@ Neuronize::Neuronize ( QWidget *parent )
     QObject::connect(ui.actionAbout_Neuronize, SIGNAL(triggered()), this, SLOT(actionAbout()));
     QObject::connect(ui.actionUndo, SIGNAL(triggered()), this, SLOT(actionBack()));
 
-    QObject::connect(ui.actionBatchBuilder, SIGNAL(triggered()), this, SLOT(showBatchBuilder()));
+    //QObject::connect(ui.actionBatchBuilder, SIGNAL(triggered()), this, SLOT(showBatchBuilder()));
 
     mSomaCreatorWidget = nullptr;
     mSomaDeformerWidget = nullptr;
@@ -89,7 +93,6 @@ Neuronize::Neuronize ( QWidget *parent )
 #else
     QSettings settings("Neuronize", "preferences");
 #endif
-
 
     configPath = QFileInfo(settings.fileName()).absoluteDir().absolutePath();
     QDir dir(configPath);
@@ -158,9 +161,7 @@ void Neuronize::resetNeuronnizeInterface ( )
     delete mCompareMeshesWidget;
 
   mSomaCreatorWidget = new SomaCreatorWidget (tempDir.path(), this );
-    if (mPythonVersion != 3) {
-        mSomaCreatorWidget->disableRepair();
-    }
+
   ui.verticalLayout_SomaCreator->addWidget ( mSomaCreatorWidget );
 
     mRepairWidget = new RepairWidget(this);
@@ -168,6 +169,7 @@ void Neuronize::resetNeuronnizeInterface ( )
 
     mCompareMeshesWidget = new CompareMeshesWidget(tempDir.path().toStdString(), this);
     ui.verticalLayout_CompareMeshes->addWidget(mCompareMeshesWidget);
+
 
     QObject::connect(mSomaCreatorWidget, SIGNAL(somaCreated()), this, SLOT(onSomaBuildFinish()));
     connect(mSomaCreatorWidget,&SomaCreatorWidget::generateNeurons,this,&Neuronize::genetareNeuronsInBatch);
@@ -229,6 +231,10 @@ void Neuronize::showSomaCreator ( )
     ui.tabWidget_MainContainer->insertTab(1, ui.tab_SomaCreator, "Generate Neuron");
     ui.tabWidget_MainContainer->insertTab(2, ui.tab_RepairMeshes, "Repair Meshes");
     ui.tabWidget_MainContainer->insertTab(3, ui.tab_CompareMeshes, "Compare Meshes");
+
+    if (mPythonVersion != 3) {
+       ui.tabWidget_MainContainer->setTabEnabled(1,false);
+    }
 
   mSomaCreatorWidget->deleteTreeViewer ( );
   mSomaCreatorWidget->resetInterface ( );
@@ -639,20 +645,27 @@ int Neuronize::checkPython() {
     std::string version;
     std::string token;
     boost::process::ipstream inputStream;
-    int result = boost::process::system(pythonName + " --version", boost::process::std_out > inputStream);
-    if (result != 0) {
-        return 0;
-    }
-    while (inputStream >> token) {
-        version += token;
-    }
-	if (version.empty())
-	{
+	try {
+		int result = boost::process::system(pythonName + " --version", boost::process::std_out > inputStream);
+		if (result != 0) {
+			return 0;
+		}
+		while (inputStream >> token) {
+			version += token;
+		}
+		if (version.empty())
+		{
+			return 0;
+		}
+		version = version.substr(6);
+		int versionMajor = version[0] - '0';
+		return versionMajor;
+	} catch (boost::process::process_error er) {
 		return 0;
 	}
-    version = version.substr(6);
-    int versionMajor = version[0] - '0';
-    return versionMajor;
+
+
+
 }
 
 void Neuronize::onSomaBuildFinish() {
