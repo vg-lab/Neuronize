@@ -1583,7 +1583,7 @@ QString NeuroGeneratorWidgetViewer::helpString ( ) const
          "deformation process. Finally, if the user wants to export the deformed soma model, he/she will click on the "
          "“Export Soma” button.</li>";
 
-  text +="<li>The next step is done from the “Neurites/Spines Builder” tab, clicking on the “Build Neurites” button to "
+  text +="<li>The next step is done from the “Neurites Builder” tab, clicking on the “Build Neurites” button to "
          "generate the neurites. Once built, the geometry can be smoothed using the “Smooth” button. Finally, click on "
          "the  “Go to Spine Generation” button to go to the next step.</li>";
 
