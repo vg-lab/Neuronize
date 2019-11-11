@@ -462,7 +462,7 @@ void SomaDeformerWidget::showContinueMsg ( )
   mMsgTimer->stop ( );
 
   QMessageBox Msgbox;
-  QString lMsge = "The soma is ready, if you like its shape, go to \"Next step\".\n";
+  QString lMsge = "The soma is ready, if you like its shape, go to \"Dendrite Generation\".\n";
   lMsge += "Otherwise, press \"Rebuild (advanced options)\".";
 
   Msgbox.setWindowTitle ( "Neuronize" );
