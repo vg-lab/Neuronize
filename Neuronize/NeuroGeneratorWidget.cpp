@@ -493,6 +493,8 @@ void NeuroGeneratorWidget::generateSpines ( )
     lGenerateOption = 5;
   else if (ui.radioButton_RealAscPos->isChecked ( )){
     lGenerateOption = 6;
+  } else if (ui.radioButton_ImarisSpines->isChecked ( )) {
+      lGenerateOption = 7;
   }
 
 
@@ -563,6 +565,9 @@ void NeuroGeneratorWidget::generateSpines ( )
                                 lMaxLongSpine,
                                 lMinRadio,
                                 lMaxRadio );
+      break;
+      case 7:
+          viewer->generateSpinesImaris(this->neuron, mTempDir.toStdString());
   }
 }
 
@@ -1153,6 +1158,11 @@ void NeuroGeneratorWidget::goAdvencedSpinesOptions ( )
   if (this->neuron != nullptr) {
     ui.radioButton_VrmlSpines->setEnabled(true);
     ui.radioButton_VrmlSpines->setChecked(true);
+  }
+
+  if (this->neuron->hasImarisSpines()) {
+      ui.radioButton_ImarisSpines->setEnabled(true);
+      ui.radioButton_ImarisSpines->setChecked(true);
   }
 
   ui.tabWidget_RenderControl->setCurrentIndex(1);

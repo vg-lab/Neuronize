@@ -265,6 +265,8 @@ class NeuroGeneratorWidgetViewer: public QGLViewer
 
     void generateSpinesVrml(skelgenerator::Neuron *neuron,const std::string& tempPath);
 
+    void generateSpinesImaris(skelgenerator::Neuron *neuron,const std::string& tempPath);
+
 
     void generateSpinesASC(std::vector<Spine>& spines,unsigned int pHorResol, unsigned int pVerResol, float pMinLongSpine,
                            float pMaxLongDistance, float pMinRadio, float pMaxRadio);

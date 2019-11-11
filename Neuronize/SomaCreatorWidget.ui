@@ -29,7 +29,7 @@
        </attribute>
       </widget>
      </item>
-     <item row="5" column="2">
+     <item row="6" column="2">
       <widget class="QPushButton" name="ascButton">
        <property name="enabled">
         <bool>false</bool>
@@ -94,7 +94,7 @@
        </property>
       </widget>
      </item>
-     <item row="5" column="3">
+     <item row="6" column="3">
       <widget class="QLineEdit" name="ascPath">
        <property name="enabled">
         <bool>false</bool>
@@ -114,7 +114,7 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="2">
+     <item row="5" column="2">
       <widget class="QCheckBox" name="saveCheckBox">
        <property name="enabled">
         <bool>false</bool>
@@ -157,14 +157,14 @@
        </attribute>
       </widget>
      </item>
-     <item row="6" column="0" colspan="4">
+     <item row="7" column="0" colspan="4">
       <widget class="QPushButton" name="pushButton_GoToSomaDeformer">
        <property name="text">
         <string>Go to soma generation</string>
        </property>
       </widget>
      </item>
-     <item row="8" column="0">
+     <item row="9" column="0">
       <widget class="QRadioButton" name="setNeuronsRadio">
        <property name="text">
         <string>Set of Neurons</string>
@@ -174,7 +174,7 @@
        </attribute>
       </widget>
      </item>
-     <item row="8" column="2">
+     <item row="9" column="2">
       <widget class="QPushButton" name="inputDirectoryButton">
        <property name="enabled">
         <bool>false</bool>
@@ -184,7 +184,7 @@
        </property>
       </widget>
      </item>
-     <item row="8" column="3">
+     <item row="9" column="3">
       <widget class="QLineEdit" name="inputDirectoryPath">
        <property name="enabled">
         <bool>false</bool>
@@ -194,7 +194,7 @@
        </property>
       </widget>
      </item>
-     <item row="9" column="2">
+     <item row="10" column="2">
       <widget class="QPushButton" name="outputDirectoryButton">
        <property name="enabled">
         <bool>false</bool>
@@ -204,7 +204,7 @@
        </property>
       </widget>
      </item>
-     <item row="9" column="3">
+     <item row="10" column="3">
       <widget class="QLineEdit" name="outputDirectoryPath">
        <property name="enabled">
         <bool>false</bool>
@@ -214,7 +214,7 @@
        </property>
       </widget>
      </item>
-     <item row="7" column="0">
+     <item row="8" column="0">
       <layout class="QHBoxLayout" name="horizontalLayout_3">
        <property name="leftMargin">
         <number>0</number>
@@ -223,6 +223,20 @@
         <number>10</number>
        </property>
       </layout>
+     </item>
+     <item row="4" column="2">
+      <widget class="QPushButton" name="imarisPathButton">
+       <property name="text">
+        <string>Select File...</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="3">
+      <widget class="QLineEdit" name="imarisPath">
+       <property name="placeholderText">
+        <string>Imaris spines VRML</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

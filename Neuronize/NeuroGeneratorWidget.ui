@@ -44,7 +44,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <property name="tabsClosable">
       <bool>false</bool>
@@ -456,7 +456,17 @@
              <bool>false</bool>
             </property>
             <property name="text">
-             <string>Real Spines in VRML</string>
+             <string>Real Spines Filament</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="radioButton_ImarisSpines">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Real Spines Imaris</string>
             </property>
            </widget>
           </item>

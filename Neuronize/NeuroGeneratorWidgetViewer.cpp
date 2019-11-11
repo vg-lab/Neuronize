@@ -1994,6 +1994,11 @@ NeuroGeneratorWidgetViewer::generateSpinesASC(std::vector<Spine>& spines,unsigne
     updateGL ( );
 }
 
+void NeuroGeneratorWidgetViewer::generateSpinesImaris(skelgenerator::Neuron *neuron, const std::string &tempPath) {
+
+
+}
+
 
 
 

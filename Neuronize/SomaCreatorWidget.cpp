@@ -116,6 +116,9 @@ SomaCreatorWidget::SomaCreatorWidget (const QString &tempDir, QWidget *parent )
     connect(ui.basalPathButton, &QPushButton::released, [=]() {
         openSelectFileDialog(ui.basalPath, "Select basal file", "Imaris VRML (*.vrml *.wrl)", true);
     });
+    connect(ui.imarisPathButton, &QPushButton::released, [=]() {
+        openSelectFileDialog(ui.imarisPath, "Select imaris spines file", "Imaris VRML (*.vrml *.wrl)", true);
+    });
 
     connect(ui.pushButton_GoToSomaDeformer, &QPushButton::released, this, &SomaCreatorWidget::onOkPressed);
 
@@ -945,13 +948,14 @@ void SomaCreatorWidget::onOkPressed() {
 void SomaCreatorWidget::processSkel(const std::string &fileName) {
     auto basalFiles = ui.basalPath->text().split(";");
     auto apiFile = ui.apiPath->text().toStdString();
+    auto imarisFile = ui.imarisPath->text().toStdString();
     std::vector<std::string> basalFilesStd;
     for (const auto &string: basalFiles) {
         basalFilesStd.push_back(string.toStdString());
     }
 
     int newThreshold = 3;
-    auto neuron = new skelgenerator::Neuron(apiFile, basalFilesStd, newThreshold);
+    auto neuron = new skelgenerator::Neuron(apiFile, basalFilesStd, imarisFile, newThreshold);
     bool ignore = false;
     while (neuron->isIncorrectConecctions() || neuron->getReamingSegments() > 0 && !ignore) {
         if (neuron->isIncorrectConecctions()) {
@@ -969,7 +973,7 @@ void SomaCreatorWidget::processSkel(const std::string &fileName) {
         ignore = newThreshold < 0;
         if (!ignore) {
             delete (neuron);
-            neuron = new skelgenerator::Neuron(apiFile, basalFilesStd, newThreshold);
+            neuron = new skelgenerator::Neuron(apiFile, basalFilesStd, imarisFile, newThreshold);
         }
 
     }
