@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>826</width>
-    <height>763</height>
+    <height>796</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -226,6 +226,9 @@
      </item>
      <item row="4" column="2">
       <widget class="QPushButton" name="imarisPathButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>Select File...</string>
        </property>
@@ -233,6 +236,9 @@
      </item>
      <item row="4" column="3">
       <widget class="QLineEdit" name="imarisPath">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="placeholderText">
         <string>Imaris spines VRML</string>
        </property>

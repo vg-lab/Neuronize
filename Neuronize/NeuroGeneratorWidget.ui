@@ -471,6 +471,16 @@
            </widget>
           </item>
           <item>
+           <widget class="QRadioButton" name="radioButton_RepairedImarisSpines">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Repaired Spines Imaris</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QRadioButton" name="radioButton_AdvanceSpinesCtrl_LoadPositionsFromFile">
             <property name="enabled">
              <bool>false</bool>

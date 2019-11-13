@@ -491,11 +491,13 @@ void NeuroGeneratorWidget::generateSpines ( )
     lGenerateOption = 4;
   else if (ui.radioButton_VrmlSpines->isChecked ( ))
     lGenerateOption = 5;
-  else if (ui.radioButton_RealAscPos->isChecked ( )){
+  else if (ui.radioButton_RealAscPos->isChecked ( ))
     lGenerateOption = 6;
-  } else if (ui.radioButton_ImarisSpines->isChecked ( )) {
+  else if (ui.radioButton_ImarisSpines->isChecked ( ))
       lGenerateOption = 7;
-  }
+  else if (ui.radioButton_RepairedImarisSpines->isChecked())
+      lGenerateOption = 8;
+
 
 
 //  lGenerateOption = 0;
@@ -568,6 +570,9 @@ void NeuroGeneratorWidget::generateSpines ( )
       break;
       case 7:
           viewer->generateSpinesImaris(this->neuron, mTempDir.toStdString());
+          break;
+      case 8:
+          viewer->generateRepairedImarisSpines(this->neuron, mTempDir.toStdString());
   }
 }
 
@@ -1163,6 +1168,9 @@ void NeuroGeneratorWidget::goAdvencedSpinesOptions ( )
   if (this->neuron->hasImarisSpines()) {
       ui.radioButton_ImarisSpines->setEnabled(true);
       ui.radioButton_ImarisSpines->setChecked(true);
+      if (Neuronize::hasPython){
+          ui.radioButton_RepairedImarisSpines->setEnabled(true);
+      }
   }
 
   ui.tabWidget_RenderControl->setCurrentIndex(1);

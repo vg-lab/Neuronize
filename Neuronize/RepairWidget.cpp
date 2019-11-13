@@ -20,7 +20,6 @@
 #define RUN std::string("src/run.sh")
 #endif
 
-
 RepairWidget::RepairWidget(QWidget *parent) : QWidget(parent) {
     setupUi();
     setupConnections();
@@ -182,6 +181,7 @@ void RepairWidget::onOk() {
     QStringList arguments;
     QString input;
     QString output;
+    QFuture<void> future;
     if (fileRadio->isChecked()) {
         if (inputPath->text().isEmpty()) {
             QToolTip::showText(inputPath->mapToGlobal(QPoint()), tr("Need a input file"));
@@ -197,7 +197,26 @@ void RepairWidget::onOk() {
             output = csvPath->text();
         }
 
-        arguments << "-a" << "\"" + output + "\"" << "-v" << "\"" + input + "\"";
+        future = QtConcurrent::run([&](){
+            QFileInfo fi (input);
+            QString saveFormat;
+            QString outputMeshPath;
+            QString tmpPath;
+
+            if (saveCombo->currentIndex() == 0) {
+                saveFormat = "Obj";
+                outputMeshPath = Neuronize::tmpPath + "/Meshes";
+                tmpPath = outputMeshPath;
+            } else {
+                saveFormat = saveCombo->currentText();
+                outputMeshPath = output +"/Meshes";
+            }
+
+            repairFile(output,input,saveFormat,precisionBox->text().toInt(),percentageBox->value(),
+                    segmentsCheckBox->isChecked(),kernelSizeBox->text().toInt(),cleanCheckBox, tmpPath);
+
+            addToBBDD(outputMeshPath, saveFormat);
+        });
 
     } else {
         if (folderInputEdit->text().isEmpty()) {
@@ -214,39 +233,27 @@ void RepairWidget::onOk() {
             output = folderOutputEdit->text();
         }
 
-        arguments << "-o" << "\"" + output + "\"" << "-w" << "\"" + input + "\"";
+        future = QtConcurrent::run([&]() {
+            QFileInfo fi(input);
+            QString saveFormat;
+            QString outputMeshPath;
+            QString tmpPath;
+
+            if (saveCombo->currentIndex() == 0) {
+                saveFormat = "Obj";
+                outputMeshPath = Neuronize::tmpPath + "/Meshes";
+                tmpPath = outputMeshPath;
+            } else {
+                saveFormat = saveCombo->currentText();
+                outputMeshPath = output + "/Meshes";
+            }
+
+            repairDir(output, input, saveFormat, precisionBox->text().toInt(), percentageBox->value(),
+                       segmentsCheckBox->isChecked(), kernelSizeBox->text().toInt(), cleanCheckBox, tmpPath);
+
+            addToBBDD(outputMeshPath, saveFormat);
+        });
     }
-
-
-    auto future = QtConcurrent::run([&](){
-
-        QString envPath = Neuronize::configPath + "/" + "env";
-        QFileInfo fi (input);
-        QString saveFormat;
-        QString outputMeshPath;
-
-        if (saveCombo->currentIndex() == 0) {
-            saveFormat = "Obj";
-            outputMeshPath = Neuronize::tmpPath + "/Meshes";
-            arguments << "-e" << outputMeshPath;
-        } else {
-            saveFormat = saveCombo->currentText();
-            outputMeshPath = output +"/Meshes";
-        }
-
-
-        arguments << "-a" << "\"" + output + "\"" << "-s" << saveFormat << "-p" << precisionBox->text()
-                  << "-r" << QString::number(percentageBox->value()) << "-f" << QString::number(segmentsCheckBox->isChecked()) << "-k" << kernelSizeBox->text()
-                  << "-c" << QString::number(cleanCheckBox->isChecked());
-
-
-
-        std::string command = QCoreApplication::applicationDirPath().toStdString() + "/" + RUN + " " + envPath.toStdString() + " " + arguments.join(" ").toStdString();
-        std::cout << command << std::endl;
-        std::system(command.c_str());
-
-        addToBBDD(outputMeshPath, saveFormat);
-    });
 
     futureWatcher->setFuture(future);
 
@@ -256,6 +263,7 @@ void RepairWidget::onOk() {
     progressDialog->setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
     progressDialog->exec();
 }
+
 
 void RepairWidget::openSelectFileDialog(QLineEdit *dest, const QString &message, const QString &formats) {
     auto file = QFileDialog::getOpenFileName(this,message,QString(),formats);
@@ -313,4 +321,44 @@ void RepairWidget::addToBBDD(const QString& path,const QString& extension) {
         Neuronize::bbdd.addSpineImaris(originalFile.toStdString(),repairedFile.toStdString(),extension.toStdString(),spineName.toStdString());
     }
     Neuronize::bbdd.closeTransaction();
+}
+
+int
+RepairWidget::repairFile(const QString &outputFile, const QString &inputFile, const QString &saveFormat,
+                         int precision, float reduction, bool includeSegments, int kernelSize,
+                         bool clean, const QString& exportPath) {
+    QStringList arguments;
+
+    arguments << "-a" << "\"" + outputFile + "\"" << "-v" << "\"" + inputFile + "\"" <<  "-s" << saveFormat << "-p" << QString::number(precision)
+              << "-r" << QString::number(reduction) << "-f" << QString::number(includeSegments) << "-k" << QString::number(kernelSize)
+              << "-c" << QString::number(clean);
+
+    if (!exportPath.isEmpty()) {
+        arguments << "-e" << "\"" + exportPath + "\"";
+    }
+
+    std::string command = QCoreApplication::applicationDirPath().toStdString() + "/" + RUN + " " + Neuronize::envPath.toStdString() + " " + arguments.join(" ").toStdString();
+    std::cout << command << std::endl;
+    return std::system(command.c_str());
+
+}
+
+int RepairWidget::repairDir(const QString &outputDir, const QString &inputDir, const QString &saveFormat,
+                             int precision, float reduction, bool includeSegments, int kernelSize,
+                             bool clean, const QString& exportPath) {
+
+    QStringList arguments;
+
+    arguments << "-o" << "\"" + outputDir + "\"" << "-w" << "\"" + inputDir + "\"" <<"-s" << saveFormat << "-p" << QString::number(precision)
+              << "-r" << QString::number(reduction) << "-f" << QString::number(includeSegments) << "-k" << QString::number(kernelSize)
+              << "-c" << QString::number(clean);
+
+    if (!exportPath.isEmpty()) {
+       arguments << "-e" << "\"" + exportPath + "\"";
+    }
+
+    std::string command = QCoreApplication::applicationDirPath().toStdString() + "/" + RUN + " " + Neuronize::envPath.toStdString() + " " + arguments.join(" ").toStdString();
+    std::cout << command << std::endl;
+    return std::system(command.c_str());
+
 }

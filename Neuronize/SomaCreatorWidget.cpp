@@ -873,6 +873,8 @@ void SomaCreatorWidget::onRadioChanged(bool b) {
     ui.apiPathButton->setDisabled(b);
     ui.basalPath->setDisabled(b);
     ui.basalPathButton->setDisabled(b);
+    ui.imarisPath->setDisabled(b);
+    ui.imarisPathButton->setDisabled(b);
     ui.saveCheckBox->setDisabled(b);
     if (b) {
         ui.ascButton->setDisabled(b);

@@ -250,24 +250,36 @@ SimplePoint* AS2SWCV2::calcSoma(std::vector<Dendrite> &dentrites) {
 
     return new SimplePoint(center[0], center[1], center[2], radius);
 }
-
+// TODO leer un unico contorno y no invetarnos el soma completamente
 SimplePoint* AS2SWCV2::calcSoma2(std::vector<Dendrite> &dendrites) {
-    OpenMesh::Vec3d maxPoint {-std::numeric_limits<double >::max(),-std::numeric_limits<double >::max(),-std::numeric_limits<double >::max()};
-    OpenMesh::Vec3d minPoint = -maxPoint;
-    for (const auto &dendrite:dendrites){
-        maxPoint[0] = std::max(maxPoint[0],dendrite[0].point[0]);
-        maxPoint[1] = std::max(maxPoint[1],dendrite[0].point[1]);
-        maxPoint[2] = std::max(maxPoint[2],dendrite[0].point[2]);
+    if (dendrites.size() == 1) { //Special case
+        auto dendrite = dendrites[0];
+        OpenMesh::Vec3d firstPoint = dendrite[0].point;
+        OpenMesh::Vec3d secondPoint = dendrite[1].point;
+        OpenMesh::Vec3d dir = firstPoint - secondPoint;
+        dir.normalize();
 
-        minPoint[0] = std::min(minPoint[0],dendrite[0].point[0]);
-        minPoint[1] = std::min(minPoint[1],dendrite[0].point[1]);
-        minPoint[2] = std::min(minPoint[2],dendrite[0].point[2]);
+        OpenMesh::Vec3d somaCener = firstPoint + dir;
+        return new SimplePoint(somaCener[0],somaCener[1],somaCener[2],0.95f);
+    } else {
+        OpenMesh::Vec3d maxPoint{-std::numeric_limits<double>::max(), -std::numeric_limits<double>::max(),
+                                 -std::numeric_limits<double>::max()};
+        OpenMesh::Vec3d minPoint = -maxPoint;
+        for (const auto &dendrite:dendrites) {
+            maxPoint[0] = std::max(maxPoint[0], dendrite[0].point[0]);
+            maxPoint[1] = std::max(maxPoint[1], dendrite[0].point[1]);
+            maxPoint[2] = std::max(maxPoint[2], dendrite[0].point[2]);
+
+            minPoint[0] = std::min(minPoint[0], dendrite[0].point[0]);
+            minPoint[1] = std::min(minPoint[1], dendrite[0].point[1]);
+            minPoint[2] = std::min(minPoint[2], dendrite[0].point[2]);
+        }
+
+        OpenMesh::Vec3d center = minPoint + (maxPoint - minPoint) / 2;
+
+        double radius = calcSommaRadius(center, dendrites);
+        return new SimplePoint(center[0], center[1], center[2], radius);
     }
-
-    OpenMesh::Vec3d center = minPoint + (maxPoint-minPoint)/2;
-
-    double radius = calcSommaRadius(center,dendrites);
-    return new SimplePoint(center[0],center[1],center[2], radius);
 
 
 }

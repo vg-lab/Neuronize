@@ -825,15 +825,17 @@ void NeuroGeneratorWidgetViewer::generateSpinesInSegment ( unsigned int pNumSpin
 
   spineMeshRend = new MeshRenderer ( );
 
-  if ( lNumMeshes != 0 )
-  {
-    for ( int i = 0; i < lNumMeshes; ++i )
-    {
-      delete mSpinesSynthContainers.getElementAt ( i );
-    }
+//  if ( lNumMeshes != 0 )
+//  {
+//    for ( int i = 0; i < lNumMeshes; ++i )
+//    {
+//      delete mSpinesSynthContainers.getElementAt ( i );
+//    }
+//
+//    mSpinesSynthContainers.getContainer ( ).clear ( );
+//  }
 
-    mSpinesSynthContainers.getContainer ( ).clear ( );
-  }
+    mSpinesSynthContainers.destroyAllElementsInContainer();
 
   meshSpines =
     new SpinesSWC ( mesh, pNumSpinesByGroup, pHorResol, pVerResol, pMinLongSpine, pMaxLongSpine, pMinRadio, pMaxRadio );
@@ -1815,11 +1817,11 @@ void NeuroGeneratorWidgetViewer::generateSpinesVrml(skelgenerator::Neuron *neuro
         delete meshSpines;
         meshSpines = NULL;
     }
+
     std::string dirPath = tempPath + "/tmpSpines";
     QDir().mkdir(QString::fromStdString(dirPath));
 
     boost::numeric::ublas::matrix<float> translationMatrix (4,4);
-    boost::numeric::ublas::matrix<float> scaleMatrix (4,4);
 
     auto displacement = mSWCImporter->getDisplacement();
 
@@ -1853,7 +1855,7 @@ void NeuroGeneratorWidgetViewer::generateSpinesVrml(skelgenerator::Neuron *neuro
         }
     }
 
-
+    mSpinesSynthContainers.destroyAllElementsInContainer();
     mSpinesSynthContainers.addElement(new BaseMesh());
     mSpinesSynthContainers.getElementAt(0)->JoinBaseMesh(meshSpines);
 
@@ -1995,6 +1997,127 @@ NeuroGeneratorWidgetViewer::generateSpinesASC(std::vector<Spine>& spines,unsigne
 }
 
 void NeuroGeneratorWidgetViewer::generateSpinesImaris(skelgenerator::Neuron *neuron, const std::string &tempPath) {
+
+    std::string dirPath = tempPath + "/tmpSpines";
+    neuron->imarisSpinesToObj(dirPath);
+
+    boost::numeric::ublas::matrix<float> translationMatrix (4,4);
+
+    auto displacement = mSWCImporter->getDisplacement();
+
+    generateSquareTraslationMatrix(translationMatrix,-displacement[0],-displacement[1],-displacement[2]);
+    int total_files = neuron->getImarisSpines().size();
+    std::vector<SpinesSWC*> spinesMeshes;
+    spinesMeshes.reserve(total_files);
+    QFileInfo fi(mSWCFile);
+    bool haveSpinesNeuron = Neuronize::bbdd.haveSpinesNeuron(fi.baseName().toStdString());
+
+    QDirIterator it (QString::fromStdString(dirPath),QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+    //TODO add to BBDD
+    while (it.hasNext()) {
+        auto file = it.next();
+        SpinesSWC* auxMesh = new SpinesSWC();
+        auxMesh->loadModel(file.toStdString());
+        auxMesh->applyMatrixTransform(translationMatrix,4);
+        auxMesh->updateBaseMesh();
+        spinesMeshes.push_back(auxMesh);
+    }
+
+    meshSpines = fusionAllSpines(spinesMeshes);
+    for(int i = 0; i < spinesMeshes.size();i++) {
+        if (spinesMeshes[i] != meshSpines) {
+            delete spinesMeshes[i];
+        } else {
+            std::cout << i << ":"<< spinesMeshes.size() <<std::endl;
+        }
+    }
+
+    mSpinesSynthContainers.destroyAllElementsInContainer();
+    mSpinesSynthContainers.addElement(new BaseMesh());
+    mSpinesSynthContainers.getElementAt(0)->JoinBaseMesh(meshSpines);
+
+    MeshDef::ConstVertexIter iniLimit = mSpinesSynthContainers.getElementAt(0)->getMesh()->vertices_begin();
+    MeshDef::ConstVertexIter finLimit = mSpinesSynthContainers.getElementAt(0)->getMesh()->vertices_end();
+
+    mSpinesSynthContainers.getElementAt(0)->setVertexColor(iniLimit, finLimit, MeshDef::Color(0.6, 0.0, 0.0, 1.0)
+    );
+
+
+    if ( spineMeshRend != NULL )
+    {
+        delete spineMeshRend;
+    }
+
+    spineMeshRend = new MeshRenderer ( );
+
+    spineMeshRend->setMeshToRender(mSpinesSynthContainers.getElementAt(0));
+
+    spineMeshRend->setRenderOptions ( renderMask );
+
+    updateGL();
+}
+
+void NeuroGeneratorWidgetViewer::generateRepairedImarisSpines(skelgenerator::Neuron *neuron, string tmpDir) {
+    QString inputFile = QString::fromStdString(neuron->getImarisFile());
+    QString outPath = QString::fromStdString(tmpDir) + "/repairedMeshes";
+    RepairWidget::repairFile(QString::fromStdString(tmpDir) +"/csv.csv",inputFile,"Obj",50,
+            30, false,3,true,outPath);
+
+    boost::numeric::ublas::matrix<float> translationMatrix (4,4);
+
+    auto displacement = mSWCImporter->getDisplacement();
+
+    generateSquareTraslationMatrix(translationMatrix,-displacement[0],-displacement[1],-displacement[2]);
+    int total_files = neuron->getImarisSpines().size();
+    std::vector<SpinesSWC*> spinesMeshes;
+    spinesMeshes.reserve(total_files);
+    QFileInfo fi(mSWCFile);
+    bool haveSpinesNeuron = Neuronize::bbdd.haveSpinesNeuron(fi.baseName().toStdString());
+
+    QDirIterator it(outPath,QStringList() << "*_R.obj", QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+
+    while (it.hasNext()) {
+        auto file = it.next();
+        SpinesSWC* auxMesh = new SpinesSWC();
+        auxMesh->loadModel(file.toStdString());
+        auxMesh->applyMatrixTransform(translationMatrix,4);
+        auxMesh->updateBaseMesh();
+        spinesMeshes.push_back(auxMesh);
+    }
+
+    meshSpines = fusionAllSpines(spinesMeshes);
+    for(int i = 0; i < spinesMeshes.size();i++) {
+        if (spinesMeshes[i] != meshSpines) {
+            delete spinesMeshes[i];
+        } else {
+            std::cout << i << ":"<< spinesMeshes.size() <<std::endl;
+        }
+    }
+
+    mSpinesSynthContainers.destroyAllElementsInContainer();
+    mSpinesSynthContainers.addElement(new BaseMesh());
+    mSpinesSynthContainers.getElementAt(0)->JoinBaseMesh(meshSpines);
+
+    MeshDef::ConstVertexIter iniLimit = mSpinesSynthContainers.getElementAt(0)->getMesh()->vertices_begin();
+    MeshDef::ConstVertexIter finLimit = mSpinesSynthContainers.getElementAt(0)->getMesh()->vertices_end();
+
+    mSpinesSynthContainers.getElementAt(0)->setVertexColor(iniLimit, finLimit, MeshDef::Color(0.6, 0.0, 0.0, 1.0)
+    );
+
+
+    if ( spineMeshRend != NULL )
+    {
+        delete spineMeshRend;
+    }
+
+    spineMeshRend = new MeshRenderer ( );
+
+    spineMeshRend->setMeshToRender(mSpinesSynthContainers.getElementAt(0));
+
+    spineMeshRend->setRenderOptions ( renderMask );
+
+    updateGL();
+
 
 
 }

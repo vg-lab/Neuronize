@@ -39,8 +39,10 @@
 #endif
 
 QString Neuronize::configPath;
+QString Neuronize::envPath;
 BBDD::BBDD Neuronize::bbdd;
 QString Neuronize::tmpPath;
+bool Neuronize::hasPython;
 
 Neuronize::Neuronize ( QWidget *parent )
         : QMainWindow(parent) {
@@ -110,7 +112,8 @@ Neuronize::Neuronize ( QWidget *parent )
     Neuronize::bbdd = BBDD::BBDD(path.toStdString());
 
     if (mPythonVersion == 3) {
-        QString envPath = configPath + "/" + ENV;
+        Neuronize::hasPython = true;
+        Neuronize::envPath = configPath + "/" + ENV;
 
         if (!QFileInfo(envPath).exists()) {
             std::string command = INSTALL + " " + envPath.toStdString();
@@ -128,8 +131,10 @@ Neuronize::Neuronize ( QWidget *parent )
             progress.exec();
         }
     } else {
+        Neuronize::hasPython = false;
         QString message("Python 3 not found. Mesh repair is disabled");
         QString informativeText;
+
 
         QMessageBox msgBox(this);
         msgBox.setIcon(QMessageBox::Warning);
