@@ -568,6 +568,7 @@ void SomaCreatorWidget::resetInterface ( )
     ui.tracePath->setText("");
     ui.apiPath->setText("");
     ui.basalPath->setText("");
+    ui.imarisPath->setText("");
     ui.saveCheckBox->setChecked(false);
     ui.ascPath->setDisabled(true);
     ui.ascPath->setText("");

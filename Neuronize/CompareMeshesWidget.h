@@ -25,8 +25,12 @@ public:
 private:
     QPushButton* selectMesh1Button;
     QPushButton* selectMesh2Button;
+    QPushButton* selectNoDistMesh1Button;
+    QPushButton* selectNoDistMesh2Button;
     QLineEdit* mesh1Path;
     QLineEdit* mesh2Path;
+    QLineEdit* noDistMesh1Path;
+    QLineEdit* noDistMesh2Path;
     QHBoxLayout* render1;
     QHBoxLayout* render2;
     QHBoxLayout* transferGrid1;
@@ -51,6 +55,7 @@ private:
 
 private slots:
     void loadFileDialog(QLineEdit* target,const QString& title,const QString& types);
+    void loadExtraMesh(QLineEdit* target,const QString& title,const QString& types,CompareMeshWidgetViewer* viewer);
     void initRender();
 };
 

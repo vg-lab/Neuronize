@@ -1835,7 +1835,7 @@ void NeuroGeneratorWidgetViewer::generateSpinesVrml(skelgenerator::Neuron *neuro
     for (const auto& spine:neuron->getSpines()) {
         std::string filename = spine->to_obj_without_base(dirPath,i);
         if (!haveSpinesNeuron) {
-            Neuronize::bbdd.addSpineVRML(spine, filename, fi.baseName().toStdString(), tempPath, displacement);
+            Neuronize::bbdd.addSpineFilament(spine, filename, fi.baseName().toStdString(), tempPath, displacement);
         }
         SpinesSWC* auxMesh = new SpinesSWC();
         auxMesh->loadModel(filename);
@@ -2010,18 +2010,28 @@ void NeuroGeneratorWidgetViewer::generateSpinesImaris(skelgenerator::Neuron *neu
     std::vector<SpinesSWC*> spinesMeshes;
     spinesMeshes.reserve(total_files);
     QFileInfo fi(mSWCFile);
+    std::string neuronName = fi.baseName().toStdString();
     bool haveSpinesNeuron = Neuronize::bbdd.haveSpinesNeuron(fi.baseName().toStdString());
 
     QDirIterator it (QString::fromStdString(dirPath),QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
-    //TODO add to BBDD
+
+    Neuronize::bbdd.openTransaction();
     while (it.hasNext()) {
         auto file = it.next();
+
+        if (!haveSpinesNeuron) {
+            QString name = file;
+            name.chop(6);
+            Neuronize::bbdd.addSpineImarisNeuron(file.toStdString(),name.toStdString(),neuronName);
+        }
+
         SpinesSWC* auxMesh = new SpinesSWC();
         auxMesh->loadModel(file.toStdString());
         auxMesh->applyMatrixTransform(translationMatrix,4);
         auxMesh->updateBaseMesh();
         spinesMeshes.push_back(auxMesh);
     }
+    Neuronize::bbdd.closeTransaction();
 
     meshSpines = fusionAllSpines(spinesMeshes);
     for(int i = 0; i < spinesMeshes.size();i++) {
@@ -2072,18 +2082,32 @@ void NeuroGeneratorWidgetViewer::generateRepairedImarisSpines(skelgenerator::Neu
     std::vector<SpinesSWC*> spinesMeshes;
     spinesMeshes.reserve(total_files);
     QFileInfo fi(mSWCFile);
+    std::string neuronName = fi.baseName().toStdString();
     bool haveSpinesNeuron = Neuronize::bbdd.haveSpinesNeuron(fi.baseName().toStdString());
 
     QDirIterator it(outPath,QStringList() << "*_R.obj", QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
 
+    Neuronize::bbdd.openTransaction();
     while (it.hasNext()) {
         auto file = it.next();
+
+        if (!haveSpinesNeuron) {
+            QString originalFile = file;
+            int pos = originalFile.size() - 5;
+            QFileInfo fileInfo(file);
+            QString name = fileInfo.fileName();
+            name.chop(6);
+            originalFile.replace(pos,1,"O");
+            Neuronize::bbdd.addSpineImarisNeuron(originalFile.toStdString(),file.toStdString(),name.toStdString(),neuronName);
+        }
+
         SpinesSWC* auxMesh = new SpinesSWC();
         auxMesh->loadModel(file.toStdString());
         auxMesh->applyMatrixTransform(translationMatrix,4);
         auxMesh->updateBaseMesh();
         spinesMeshes.push_back(auxMesh);
     }
+    Neuronize::bbdd.closeTransaction();
 
     meshSpines = fusionAllSpines(spinesMeshes);
     for(int i = 0; i < spinesMeshes.size();i++) {

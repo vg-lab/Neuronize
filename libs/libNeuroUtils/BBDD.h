@@ -33,7 +33,8 @@ namespace  BBDD {
         std::string file, name;
         FileType ext;
         SpineOrigin origin;
-        OpenMesh::Vec3f massCenter, displacement;
+        OpenMesh::Vec3f massCenter;
+        OpenMesh::Vec3f  displacement;
         vcg::Quaternionf q;
     };
 
@@ -58,9 +59,13 @@ namespace  BBDD {
 
         void addDendrite(const std::string& neuronName,int initCounter,int lastCounter,NSSWCImporter::DendriticType type);
 
-        void addSpineVRML(const skelgenerator::Spine* const spine,const std::string& meshPath,const std::string& neuronName, const std::string& tmpDir, const OpenMesh::Vec3f& displacement);
+        void addSpineFilament(const skelgenerator::Spine* const spine, const std::string& meshPath, const std::string& neuronName, const std::string& tmpDir, const OpenMesh::Vec3f& displacement);
 
         void addSpineImaris(const std::string& originalSpine, const std::string& repairedSpine, const std::string& ext, const std::string& name);
+
+        void addSpineImarisNeuron(const std::string& originalSpine, const std::string& repairedSpine,const std::string& name, const std::string& neuronName);
+
+        void addSpineImarisNeuron(const std::string& originalSpine,const std::string& name, const std::string& neuronName);
 
         void addSpine(const std::string& neuronName, int spineModel, const OpenMesh::Vec3f& displacement,const boost::numeric::ublas::matrix<float>& transform);
 

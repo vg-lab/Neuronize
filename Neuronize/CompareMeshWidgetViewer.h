@@ -11,15 +11,19 @@
 #include <QMouseEvent>
 #include <libs/libGLNeuroUtils/LightManager.h>
 #include <libs/libGLNeuroUtils/MeshRenderer.h>
+#include <Eigen/Dense>
 
 class CompareMeshWidgetViewer: public QGLViewer {
     Q_OBJECT
     NSLightManager::LightManager* lights;
     NSMeshRenderer::MeshRenderer* meshRend;
+    NSMeshRenderer::MeshRenderer* extraMeshRend;
     unsigned int renderMask;
     BaseMesh* mesh;
+    BaseMesh* extraMesh;
     int number;
     double maxDist;
+    Eigen::Vector3d displacement;
 public:
     double getMaxDist() const;
 
@@ -29,6 +33,8 @@ public:
     explicit CompareMeshWidgetViewer ( int number,QWidget* parent = 0);
     void setupViewer();
     void setMesh(const std::string& filename );
+    void setExtraMesh(const std::string& filename);
+    void setDisplacement(Eigen::Vector3d displacement);
 
 signals:
     void viewChanged( QMouseEvent *mouseMoveEvent, QWheelEvent* whellEvent, QMouseEvent* mousePressEvent, QMouseEvent* mouseReleaseEvent);

@@ -52,13 +52,22 @@ static int getSpineInfoCallBack(void* spines, int columns,char **data,char **com
     spine.massCenter[1] = std::stof(data[4]);
     spine.massCenter[2] = std::stof(data[5]);
     spine.name = data[6];
-    spine.displacement[0] = std::stof(data[7]);
-    spine.displacement[1] = std::stof(data[8]);
-    spine.displacement[2] = std::stof(data[9]);
-    spine.q[0] = std::stof(data[10]);
-    spine.q[1] = std::stof(data[11]);
-    spine.q[2] = std::stof(data[12]);
-    spine.q[3] = std::stof(data[13]);
+    if (data[7] != nullptr) {
+        spine.displacement[0] = std::stof(data[7]);
+        spine.displacement[1] = std::stof(data[8]);
+        spine.displacement[2] = std::stof(data[9]);
+    } else {
+        spine.displacement = {0,0,0};
+    }
+
+    if (data[10] != nullptr) {
+        spine.q[0] = std::stof(data[10]);
+        spine.q[1] = std::stof(data[11]);
+        spine.q[2] = std::stof(data[12]);
+        spine.q[3] = std::stof(data[13]);
+    } else {
+        spine.q.SetIdentity();
+    }
     spinesCast->push_back(spine);
     return 0;
 }
@@ -389,8 +398,33 @@ namespace BBDD {
         ERRCHECK
     }
 
+    void BBDD::addSpineImarisNeuron(const std::string& originalSpine, const std::string& repairedSpine,const std::string& name, const std::string& neuronName) {
+        addSpineImaris(originalSpine,repairedSpine,"Obj",name);
+        std::string query = "INSERT INTO SPINES (NEURON,SPINE_MODEL) VALUES ('%x',%i)";
+        std::string formatedQuery = str(boost::format(query) % neuronName % sqlite3_last_insert_rowid(_db));
+        sqlite3_exec(_db,formatedQuery.c_str(), nullptr, nullptr,&_err);
+        ERRCHECK
 
-    void BBDD::addSpineVRML(const skelgenerator::Spine* const spine,const std::string& meshPath,const std::string& neuronName, const std::string& tmpDir, const OpenMesh::Vec3f& displacement) {
+    }
+
+    void BBDD::addSpineImarisNeuron(const std::string& originalSpine,const std::string& name, const std::string& neuronName){
+        std::string query = "INSERT INTO SPINE_MODEL (AREA, VOLUME, ORIGIN, MODEL_NR, FILE_TYPE, MASS_CENTER_X, MASS_CENTER_Y, MASS_CENTER_Z,NAME) "
+                            "VALUES (%f,%f,%i,'%x',%i,%f,%f,%f,'%x');";
+        MeshVCG mesh (originalSpine);
+        float area = mesh.getArea();
+        float volume = mesh.getVolume();
+        auto massCenter = mesh.getCenter();
+
+        auto bytes = readBytes(originalSpine);
+        std::string originalFile (bytes.begin(), bytes.end());
+
+        std::string formatedQuery = str(boost::format(query) % area % volume % Imaris  % originalFile % "Obj" % massCenter[0] % massCenter[1] % massCenter[2] % name);
+        sqlite3_exec(_db,formatedQuery.c_str(), nullptr, nullptr,&_err);
+        ERRCHECK
+    }
+
+
+    void BBDD::addSpineFilament(const skelgenerator::Spine* const spine, const std::string& meshPath, const std::string& neuronName, const std::string& tmpDir, const OpenMesh::Vec3f& displacement) {
         std::string query = "INSERT INTO SPINE_MODEL (AREA, VOLUME, ORIGIN, MODEL, File_TYPE, MASS_CENTER_X, MASS_CENTER_Y, MASS_CENTER_Z)"
                             " VALUES (%f,%f,%i,'%x',%i,%f,%f,%f);";
         MeshVCG mesh (meshPath);

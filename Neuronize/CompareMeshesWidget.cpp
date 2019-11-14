@@ -19,10 +19,19 @@ void CompareMeshesWidget::initUi() {
     this->selectMesh1Button = new QPushButton("Select File...",this);
     this->selectMesh2Button = new QPushButton("Select File...",this);
 
+    this->selectNoDistMesh1Button = new QPushButton("Select File...",this);
+    this->selectNoDistMesh2Button = new QPushButton("Select File...",this);
+
+
     this->mesh1Path = new QLineEdit(this);
     mesh1Path->setPlaceholderText("Mesh 1");
     this->mesh2Path = new QLineEdit(this);
     mesh2Path->setPlaceholderText("Mesh 2");
+
+    this->noDistMesh1Path = new QLineEdit(this);
+    noDistMesh1Path->setPlaceholderText("Mesh only for visualization not affect to distance calculation");
+    this->noDistMesh2Path = new QLineEdit(this);
+    noDistMesh2Path->setPlaceholderText("Mesh only for visualization not affect to distance calculation");
 
     auto mainLayout = new QVBoxLayout(this);
 
@@ -47,15 +56,19 @@ void CompareMeshesWidget::initUi() {
     viewer2->setupViewer();
 
 
-    auto header1layout = new QHBoxLayout(this);
+    auto header1layout = new QGridLayout(this);
     header1layout->setSpacing(6);
-    header1layout->addWidget(selectMesh1Button);
-    header1layout->addWidget(mesh1Path);
+    header1layout->addWidget(selectMesh1Button,0,0);
+    header1layout->addWidget(mesh1Path,0,1);
+    header1layout->addWidget(selectNoDistMesh1Button,1,0);
+    header1layout->addWidget(noDistMesh1Path,1,1);
 
-    auto header2layout = new QHBoxLayout(this);
+    auto header2layout = new QGridLayout(this);
     header2layout->setSpacing(6);
-    header2layout->addWidget(selectMesh2Button);
-    header2layout->addWidget(mesh2Path);
+    header2layout->addWidget(selectMesh2Button,0,0);
+    header2layout->addWidget(mesh2Path,0,1);
+    header2layout->addWidget(selectNoDistMesh2Button,1,0);
+    header2layout->addWidget(noDistMesh2Path,1,1);
 
     auto stats1layout = new QHBoxLayout(this);
     auto stats2layout = new QHBoxLayout(this);
@@ -94,6 +107,11 @@ void CompareMeshesWidget::initConnections() {
     connect(selectMesh2Button, &QPushButton::released, this,
             [=]() { loadFileDialog(mesh2Path, "Select Mesh File", "Mesh(*.obj *.off *.ply *.stl)"); });
 
+    connect(selectNoDistMesh1Button, &QPushButton::released, this,
+            [=]() { loadExtraMesh(noDistMesh1Path, "Select Mesh File", "Mesh(*.obj *.off *.ply *.stl)",viewer1); });
+    connect(selectNoDistMesh2Button, &QPushButton::released, this,
+            [=]() { loadExtraMesh(noDistMesh2Path, "Select Mesh File", "Mesh(*.obj *.off *.ply *.stl)",viewer2); });
+
     connect(viewer1,&CompareMeshWidgetViewer::viewChanged,viewer2,&CompareMeshWidgetViewer::onViewChanged);
     connect(viewer2,&CompareMeshWidgetViewer::viewChanged,viewer1,&CompareMeshWidgetViewer::onViewChanged);
 }
@@ -107,6 +125,15 @@ void CompareMeshesWidget::loadFileDialog(QLineEdit *target, const QString &title
 
 }
 
+
+void CompareMeshesWidget::loadExtraMesh(QLineEdit* target,const QString& title,const QString& types,CompareMeshWidgetViewer* viewer) {
+    auto file = QFileDialog::getOpenFileName(this,title,QString(),types);
+    target->setText(file);
+    if (!target->text().isEmpty()) {
+        viewer->setExtraMesh(target->text().toStdString());
+    }
+
+}
 
 void CompareMeshesWidget::initRender() {
     auto mesh1text = mesh1Path->text();
@@ -139,6 +166,9 @@ void CompareMeshesWidget::initRender() {
 
     viewer1->setMesh(tmpPath + "/" + mesh1Filename );
     viewer2->setMesh(tmpPath + "/" + mesh2Filemane );
+
+    viewer1->setDisplacement(hausdorffResult.displacement);
+    viewer2->setDisplacement(hausdorffResult.displacement);
 
     updateLabels(hausdorffResult);
 }

@@ -8,6 +8,9 @@ CompareMeshWidgetViewer::CompareMeshWidgetViewer(int number,QWidget *parent): QG
     this->number = number;
     meshRend = nullptr;
     mesh = nullptr;
+    extraMesh = nullptr;
+    extraMeshRend = nullptr;
+    this->displacement = {0,0,0};
     renderMask = 0;
     renderMask = NSMeshRenderer::MeshRenderer::RENDER_SURFACE;
 }
@@ -29,6 +32,10 @@ void CompareMeshWidgetViewer::draw() {
 
     if ( meshRend != nullptr ) {
         meshRend->Render ( );
+    }
+
+    if (extraMeshRend != nullptr) {
+        extraMeshRend->Render();
     }
 }
 
@@ -60,6 +67,31 @@ void CompareMeshWidgetViewer::setMesh(const std::string& filename) {
 
     meshRend->setMeshToRender(mesh);
     meshRend->setRenderOptions(renderMask);
+    updateGL();
+}
+
+void CompareMeshWidgetViewer::setExtraMesh(const std::string& filename) {
+    if (extraMesh != nullptr) {
+        delete extraMesh;
+    }
+
+    if (extraMeshRend != nullptr) {
+        delete extraMeshRend;
+    }
+
+    extraMesh = new BaseMesh(filename);
+    extraMeshRend = new NSMeshRenderer::MeshRenderer;
+
+    extraMesh->setVertexColor ( extraMesh->getMesh ( )->vertices_begin ( ),
+                          extraMesh->getMesh ( )->vertices_end ( ),
+                          MeshDef::Color ( 0.5, 0.5, 1.0, 1.0 ));
+
+    boost::numeric::ublas::matrix<float> translationMatrix (4,4);
+    generateSquareTraslationMatrix(translationMatrix,-displacement[0],-displacement[1],-displacement[2]);
+    extraMesh->applyMatrixTransform(translationMatrix,4);
+
+    extraMeshRend->setMeshToRender(extraMesh);
+    extraMeshRend->setRenderOptions(renderMask);
     updateGL();
 }
 
@@ -110,4 +142,22 @@ double CompareMeshWidgetViewer::getMaxDist() const {
 void CompareMeshWidgetViewer::setMaxDist(double maxDist) {
     CompareMeshWidgetViewer::maxDist = maxDist;
 }
+
+void CompareMeshWidgetViewer::setDisplacement(Eigen::Vector3d displacement_){
+    if (extraMesh != nullptr) {
+        boost::numeric::ublas::matrix<float> inverseTranslationMatrix (4,4);
+        generateSquareTraslationMatrix(inverseTranslationMatrix,displacement[0],displacement[1],displacement[2]);
+
+        boost::numeric::ublas::matrix<float> translationMatrix (4,4);
+        generateSquareTraslationMatrix(translationMatrix,-displacement_[0],-displacement_[1],-displacement_[2]);
+
+        extraMesh->applyMatrixTransform(inverseTranslationMatrix,4);
+        extraMesh->applyMatrixTransform(translationMatrix,4);
+    }
+
+    this->displacement = displacement_;
+    updateGL();
+}
+
+
 

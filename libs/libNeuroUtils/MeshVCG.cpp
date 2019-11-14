@@ -366,9 +366,9 @@ HausdorffRet MeshVCG::hausdorffDistance(MeshVCG &otherMesh, const std::string &c
 
     vcg::tri::UpdateColor<MyMesh>::PerVertexQualityRamp(mesh, minmaxS1.second, minmaxS1.first);
     vcg::tri::UpdateColor<MyMesh>::PerVertexQualityRamp(otherMesh.mesh, minmaxS2.second, minmaxS2.first);
+    vcg::tri::Inertia<MyMesh> Ib(mesh);
+    auto cc = Ib.CenterOfMass();
     if (!colorMeshPath.empty()) {
-        vcg::tri::Inertia<MyMesh> Ib(mesh);
-        auto cc = Ib.CenterOfMass();
         vcg::Matrix44d trans;
         trans.SetTranslate(-cc[0], -cc[1], -cc[2]);
         vcg::tri::UpdatePosition<MyMesh>::Matrix(mesh, trans);
@@ -382,7 +382,7 @@ HausdorffRet MeshVCG::hausdorffDistance(MeshVCG &otherMesh, const std::string &c
         vcg::tri::io::ExporterOBJ<MyMesh>::Save(otherMesh.mesh, s2Name.c_str(), saveMask);
     }
 
-    HausdorffRet hausdorffRet{minmaxS1.second, minmaxS2.second, meanDist1, meanDist2, minmaxS1.first, minmaxS2.first};
+    HausdorffRet hausdorffRet{minmaxS1.second, minmaxS2.second, meanDist1, meanDist2, minmaxS1.first, minmaxS2.first,{cc[0],cc[1],cc[2]}};
 
     return hausdorffRet;
 }
