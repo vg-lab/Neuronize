@@ -135,9 +135,18 @@
     <addaction name="actionHelp"/>
     <addaction name="actionAbout_Neuronize"/>
    </widget>
+   <widget class="QMenu" name="menuOptions">
+    <property name="title">
+     <string>Options</string>
+    </property>
+    <addaction name="actionReset_Python_Enviorement"/>
+    <addaction name="actionExport_Database_File"/>
+    <addaction name="actionDelete_Local_Database"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuView"/>
+   <addaction name="menuOptions"/>
    <addaction name="menuAbout"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
@@ -232,6 +241,21 @@
   <action name="actionExport_Neuron_info">
    <property name="text">
     <string>Export Neuron Info</string>
+   </property>
+  </action>
+  <action name="actionReset_Python_Enviorement">
+   <property name="text">
+    <string>Reset Python Enviorement</string>
+   </property>
+  </action>
+  <action name="actionDelete_Local_Database">
+   <property name="text">
+    <string>Delete Local Database</string>
+   </property>
+  </action>
+  <action name="actionExport_Database_File">
+   <property name="text">
+    <string>Export Database File</string>
    </property>
   </action>
  </widget>

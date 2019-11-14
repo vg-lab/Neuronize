@@ -31,6 +31,8 @@
 #include <clocale>
 
 #include <QSettings>
+#include <QtWidgets/QDialog>
+
 #define ENV "env"
 #ifdef _WIN32
 #define INSTALL std::string("src\\install.bat")
@@ -72,11 +74,15 @@ Neuronize::Neuronize ( QWidget *parent )
         ui.tabWidget_MainContainer->setCurrentIndex(2);
     });
     connect(ui.actionExport_Neuron_info,&QAction::triggered,this,&Neuronize::showExportDialog);
+    connect(ui.actionReset_Python_Enviorement,&QAction::triggered,this,&Neuronize::resetPythonEnv);
+    connect(ui.actionDelete_Local_Database,&QAction::triggered,this,&Neuronize::deleteDatabase);
+    connect(ui.actionExport_Database_File,&QAction::triggered,this,&Neuronize::exportDatabase);
     QObject::connect(ui.actionTake_a_snapshot, SIGNAL(triggered()), this, SLOT(takeASnapshot()));
     QObject::connect(ui.actionHelp, SIGNAL(triggered()), this, SLOT(showHelp()));
     QObject::connect(ui.actionQuit, SIGNAL(triggered()), this, SLOT(actionQuit()));
     QObject::connect(ui.actionAbout_Neuronize, SIGNAL(triggered()), this, SLOT(actionAbout()));
     QObject::connect(ui.actionUndo, SIGNAL(triggered()), this, SLOT(actionBack()));
+
 
     //QObject::connect(ui.actionBatchBuilder, SIGNAL(triggered()), this, SLOT(showBatchBuilder()));
 
@@ -103,49 +109,10 @@ Neuronize::Neuronize ( QWidget *parent )
     }
     std::cout << configPath.toStdString() << std::endl;
 
-
+    createDatabase();
     this->showNormal();
     resize(1200, 800);
-
-    QString path = QFileInfo(settings.fileName()).absoluteDir().absolutePath() + "/neuronize.sqlite";
-    std::cout << path.toStdString() << std::endl;
-    Neuronize::bbdd = BBDD::BBDD(path.toStdString());
-
-    if (mPythonVersion == 3) {
-        Neuronize::hasPython = true;
-        Neuronize::envPath = configPath + "/" + ENV;
-
-        if (!QFileInfo(envPath).exists()) {
-            std::string command = INSTALL + " " + envPath.toStdString();
-
-            QFuture<void> future = QtConcurrent::run([=]() { std::system(command.c_str()); });
-            QFutureWatcher<void> watcher;
-            watcher.setFuture(future);
-
-            QProgressDialog progress(this);
-            connect(&watcher, SIGNAL(finished()), &progress, SLOT(close()));
-            progress.setLabelText("Installing python dependencies");
-            progress.setCancelButton(0);
-            progress.setMaximum(0);
-            progress.setMinimum(0);
-            progress.exec();
-        }
-    } else {
-        Neuronize::hasPython = false;
-        QString message("Python 3 not found. Mesh repair is disabled");
-        QString informativeText;
-
-
-        QMessageBox msgBox(this);
-        msgBox.setIcon(QMessageBox::Warning);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setDefaultButton(QMessageBox::Ok);
-        msgBox.setText(message);
-        if (mPythonVersion == 2) {
-            msgBox.setInformativeText("Python 2 found, but not compatible. Mesh repair is disabled");
-        }
-        msgBox.exec();
-    }
+    initPythonEnv();
 
     initrand();
 }
@@ -557,7 +524,6 @@ void Neuronize::genetareNeuronsInBatch (QString inputFilePath,QString outputFile
   QMessageBox::information(this,"Neuronize","Task Finished",QMessageBox::Ok);
 }
 
-
 void Neuronize::actionNewNeuron ( )
 {
   QString text = QObject::tr ( "Are you sure you build a new neuron?" );
@@ -572,6 +538,7 @@ void Neuronize::actionNewNeuron ( )
     resetNeuronnizeInterface ( );
   }
 }
+
 
 void Neuronize::actionQuit ( )
 {
@@ -681,4 +648,78 @@ void Neuronize::onSomaBuildFinish() {
 void Neuronize::showExportDialog(){
     ExportDialog dialog;
     dialog.exec();
+}
+
+void Neuronize::deleteDatabase() {
+    int ret = QMessageBox::question(this,tr("Neuronize"),tr("Are you sure you want to delete the database?"));
+
+    if (ret == QMessageBox::Yes) {
+        QFile::remove(QString::fromStdString(Neuronize::bbdd.getFile()));
+        createDatabase();
+    }
+}
+
+void Neuronize::createDatabase() {
+    QString path = Neuronize::configPath + "/neuronize.sqlite";
+    Neuronize::bbdd = BBDD::BBDD(path.toStdString());
+}
+
+void Neuronize::resetPythonEnv() {
+    QDir dir (Neuronize::envPath);
+    dir.removeRecursively();
+
+    initPythonEnv();
+
+    resetNeuronnizeInterface();
+}
+
+
+void Neuronize::initPythonEnv() {
+    mPythonVersion = checkPython();
+
+    if (mPythonVersion == 3) {
+        hasPython = true;
+        envPath = configPath + "/" + ENV;
+
+        if (!QFileInfo(envPath).exists()) {
+            string command = INSTALL + " " + envPath.toStdString();
+
+            QFuture<void> future = QtConcurrent::run([=]() { system(command.c_str()); });
+            QFutureWatcher<void> watcher;
+            watcher.setFuture(future);
+
+            QProgressDialog progress(this);
+            connect(&watcher, SIGNAL(finished()), &progress, SLOT(close()));
+            progress.setLabelText("Installing python dependencies");
+            progress.setCancelButton(0);
+            progress.setMaximum(0);
+            progress.setMinimum(0);
+            progress.exec();
+        }
+    } else {
+        hasPython = false;
+        QString message("Python 3 not found. Mesh repair is disabled");
+        QString informativeText;
+
+
+        QMessageBox msgBox(this);
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setDefaultButton(QMessageBox::Ok);
+        msgBox.setText(message);
+        if (mPythonVersion == 2) {
+            msgBox.setInformativeText("Python 2 found, but not compatible. Mesh repair is disabled");
+        }
+        msgBox.exec();
+    }
+
+}
+
+void Neuronize::exportDatabase() {
+    QString fileName = QFileDialog::getSaveFileName ( this, tr ( "Save Database" ), "./");
+    if (!fileName.isEmpty()) {
+        QFile::copy(QString::fromStdString(Neuronize::bbdd.getFile()),fileName);
+    }
+
+
 }

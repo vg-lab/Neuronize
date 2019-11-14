@@ -93,6 +93,7 @@ namespace BBDD {
 
 
     BBDD::BBDD(const std::string &filename) {
+        this->file = filename;
         if (!boost::filesystem::exists(filename)) {
             sqlite3_open(filename.c_str(), &_db);
             createSchema();
@@ -597,6 +598,10 @@ namespace BBDD {
         sqlite3_exec(_db,query.c_str(),getNeuronNamesCallBack,&names,&_err);
         ERRCHECK
         return names;
+    }
+
+    const string &BBDD::getFile() const {
+        return file;
     }
 
 }

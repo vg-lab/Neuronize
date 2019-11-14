@@ -590,19 +590,6 @@ void NeuroGeneratorWidget::batchSpinesGeneration(skelgenerator::Neuron *pNeuron,
   unsigned int lNumOfGroups = ui.spinBox_NumOfGroupsModeledSpines->value();
   unsigned int lGenerateOption = 0;
 
-  if (pNeuron != nullptr) {
-    std::cout<<"---------------------------------------------->> Opcion elegida: 5"<<"----------------------------------" <<std::endl << std::flush;
-      viewer->generateSpinesVrml(pNeuron,mTempDir.toStdString());
-  } else if (!spines.empty()) {
-    std::cout<<"---------------------------------------------->> Opcion elegida: 6"<<"----------------------------------" <<std::endl << std::flush;
-    viewer->generateSpinesASC(spines, lHorResol,
-                              lVerResol,
-                              lMinLongSpine,
-                              lMaxLongSpine,
-                              lMinRadio,
-                              lMaxRadio);
-  } else {
-
       if (ui.radioButton_ProceduralSpines->isChecked())
           lGenerateOption = 0;
       else if (ui.radioButton_ModelSpines->isChecked())
@@ -613,10 +600,15 @@ void NeuroGeneratorWidget::batchSpinesGeneration(skelgenerator::Neuron *pNeuron,
           lGenerateOption = 3;
       else if (ui.radioButton_SegmentSpines->isChecked())
           lGenerateOption = 4;
+      else if (ui.radioButton_VrmlSpines->isChecked ( ))
+          lGenerateOption = 5;
+      else if (ui.radioButton_RealAscPos->isChecked ( ))
+          lGenerateOption = 6;
+      else if (ui.radioButton_ImarisSpines->isChecked ( ))
+          lGenerateOption = 7;
+      else if (ui.radioButton_RepairedImarisSpines->isChecked())
+          lGenerateOption = 8;
 
-
-      std::cout << "---------------------------------------------->> Opcion elegida:" << lGenerateOption
-                << "<<----------------------------------" << std::endl << std::flush;
 
       switch (lGenerateOption) {
           //Rand Procedurales
@@ -677,6 +669,22 @@ void NeuroGeneratorWidget::batchSpinesGeneration(skelgenerator::Neuron *pNeuron,
                                               lMinRadio,
                                               lMaxRadio);
               break;
+          case 5:
+              viewer->generateSpinesVrml(this->neuron, mTempDir.toStdString());
+              break;
+          case 6:
+              viewer->generateSpinesASC(this->spines,lHorResol,
+                                        lVerResol,
+                                        lMinLongSpine,
+                                        lMaxLongSpine,
+                                        lMinRadio,
+                                        lMaxRadio );
+              break;
+          case 7:
+              viewer->generateSpinesImaris(this->neuron, mTempDir.toStdString());
+              break;
+          case 8:
+              viewer->generateRepairedImarisSpines(this->neuron, mTempDir.toStdString());
 
 
       }

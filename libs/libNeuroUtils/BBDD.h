@@ -47,9 +47,12 @@ namespace  BBDD {
     class NEUROUTILS_API BBDD {
         sqlite3 *_db;
         char *_err = NULL;
+        std::string file;
     public:
         BBDD () = default;
         explicit BBDD(const std::string &filename);
+
+        const string &getFile() const;
 
         void addSpine(const std::string &name, float area, float volume, const std::string &neuronName, int origin,
                       const std::string &file);

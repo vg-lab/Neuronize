@@ -120,6 +120,15 @@ class Neuronize: public QMainWindow
 
     void showExportDialog();
 
+    void deleteDatabase();
+
+    void createDatabase();
+
+    void exportDatabase();
+
+    void resetPythonEnv();
+
+    void initPythonEnv();
 };
 
 #endif // XNEURON_H
