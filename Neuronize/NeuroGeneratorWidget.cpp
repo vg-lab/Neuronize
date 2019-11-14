@@ -689,7 +689,7 @@ void NeuroGeneratorWidget::batchSpinesGeneration(skelgenerator::Neuron *pNeuron,
 
       }
   }
-}
+
 
 void NeuroGeneratorWidget::attachNewSpinesGroup ( )
 {
