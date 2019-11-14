@@ -685,11 +685,8 @@ void NeuroGeneratorWidget::batchSpinesGeneration(skelgenerator::Neuron *pNeuron,
               break;
           case 8:
               viewer->generateRepairedImarisSpines(this->neuron, mTempDir.toStdString());
-
-
       }
   }
-
 
 void NeuroGeneratorWidget::attachNewSpinesGroup ( )
 {

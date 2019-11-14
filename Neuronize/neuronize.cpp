@@ -682,7 +682,7 @@ void Neuronize::initPythonEnv() {
         envPath = configPath + "/" + ENV;
 
         if (!QFileInfo(envPath).exists()) {
-            string command = INSTALL + " " + envPath.toStdString();
+            string command = "\"" + QCoreApplication::applicationDirPath().toStdString() + "/" + INSTALL + " " + envPath.toStdString();
 
             QFuture<void> future = QtConcurrent::run([=]() { system(command.c_str()); });
             QFutureWatcher<void> watcher;

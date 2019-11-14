@@ -337,7 +337,7 @@ RepairWidget::repairFile(const QString &outputFile, const QString &inputFile, co
         arguments << "-e" << "\"" + exportPath + "\"";
     }
 
-    std::string command = QCoreApplication::applicationDirPath().toStdString() + "/" + RUN + " " + Neuronize::envPath.toStdString() + " " + arguments.join(" ").toStdString();
+    std::string command = "\"" + QCoreApplication::applicationDirPath().toStdString() + "/" + RUN + "\" " + Neuronize::envPath.toStdString() + " " + arguments.join(" ").toStdString();
     std::cout << command << std::endl;
     return std::system(command.c_str());
 
