@@ -15,9 +15,9 @@
 #include "neuronize.h"
 
 #ifdef _WIN32
-#define RUN std::string("src\\run.bat")
+#define RUN "src/run.bat"
 #else
-#define RUN std::string("src/run.sh")
+#define RUN "src/run.sh"
 #endif
 
 RepairWidget::RepairWidget(QWidget *parent) : QWidget(parent) {
@@ -337,9 +337,9 @@ RepairWidget::repairFile(const QString &outputFile, const QString &inputFile, co
         arguments << "-e" << "\"" + exportPath + "\"";
     }
 
-    std::string command = "\"" + QCoreApplication::applicationDirPath().toStdString() + "/" + RUN + "\" " + Neuronize::envPath.toStdString() + " " + arguments.join(" ").toStdString();
-    std::cout << command << std::endl;
-    return std::system(command.c_str());
+    QString command = "\"\"" + QCoreApplication::applicationDirPath() + "/" + RUN + "\" " + Neuronize::envPath + " " + arguments.join(" ") + "\"";
+    std::cout << command.toStdString() << std::endl;
+    return std::system(command.toStdString().c_str());
 
 }
 
@@ -357,8 +357,9 @@ int RepairWidget::repairDir(const QString &outputDir, const QString &inputDir, c
        arguments << "-e" << "\"" + exportPath + "\"";
     }
 
-    std::string command = QCoreApplication::applicationDirPath().toStdString() + "/" + RUN + " " + Neuronize::envPath.toStdString() + " " + arguments.join(" ").toStdString();
-    std::cout << command << std::endl;
-    return std::system(command.c_str());
+    QString command = "\"\"" + QCoreApplication::applicationDirPath() + "/" + RUN + "\" " + Neuronize::envPath + " " + arguments.join(" ") + "\"";
+    std::cout << command.toStdString() << std::endl;
+    return std::system(command.toStdString().c_str());
+    return 0;
 
 }
