@@ -35,7 +35,7 @@
 
 #define ENV "env"
 #ifdef _WIN32
-#define INSTALL std::string("src\\install.bat")
+#define INSTALL std::string("src/install.bat")
 #else
 #define INSTALL std::string("src/install.sh")
 #endif
@@ -682,7 +682,7 @@ void Neuronize::initPythonEnv() {
         envPath = configPath + "/" + ENV;
 
         if (!QFileInfo(envPath).exists()) {
-            string command = "\"" + QCoreApplication::applicationDirPath().toStdString() + "/" + INSTALL + " " + envPath.toStdString();
+            string command = "\"\"" + QCoreApplication::applicationDirPath().toStdString() + "/" + INSTALL + " " + envPath.toStdString()+"\"";
 
             QFuture<void> future = QtConcurrent::run([=]() { system(command.c_str()); });
             QFutureWatcher<void> watcher;
