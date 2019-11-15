@@ -25,6 +25,7 @@
 
 #include <QDir>
 #include <QGLViewer/qglviewer.h>
+#include <QRandomGenerator>
 
 #include <libs/libNeuroUtils/BaseMesh.h>
 #include <libs/libNeuroUtils/BaseMeshContainer.h>
@@ -295,6 +296,9 @@ protected:
     XMLProgressiveNeuroVizManager *mXMLProgressiveNeuroVizManager;
 
     std::vector < SpineInfo > mLastSpinesInfo;
+
+    //Spine info
+    std::vector<int> spinesIndex;
 
     unsigned int renderMask;
 

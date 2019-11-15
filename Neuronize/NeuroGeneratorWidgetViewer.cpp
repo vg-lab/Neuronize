@@ -27,6 +27,7 @@
 #include <QtConcurrent/QtConcurrent>
 #include <queue>
 #include <libs/libGLNeuroUtils/MeshRenderer.h>
+#include <random>
 //#include <QtGui>
 
 // Constructor must call the base class constructor.
@@ -862,13 +863,6 @@ void NeuroGeneratorWidgetViewer::generateSpinesInSegment ( unsigned int pNumSpin
 
   mSpinesSynthContainers.addElement ( new BaseMesh ( ));
   mSpinesSynthContainers.getElementAt ( i )->JoinBaseMesh ( meshSpines );
-
-
-  MeshDef::ConstVertexIter iniLimit = mSpinesSynthContainers.getElementAt ( i )->getMesh ( )->vertices_begin ( );
-  MeshDef::ConstVertexIter finLimit = mSpinesSynthContainers.getElementAt ( i )->getMesh ( )->vertices_end ( );
-
-  mSpinesSynthContainers.getElementAt ( i )->setVertexColor ( iniLimit, finLimit, MeshDef::Color ( 0.6, 0.0, 0.0, 1.0 )
-  );
 
   mLastSpinesInfo.clear ( );
   mLastSpinesInfo = meshSpines->getSpinesInfo ( );
@@ -1840,6 +1834,8 @@ void NeuroGeneratorWidgetViewer::generateSpinesVrml(skelgenerator::Neuron *neuro
         SpinesSWC* auxMesh = new SpinesSWC();
         auxMesh->loadModel(filename);
         auxMesh->applyMatrixTransform(translationMatrix,4);
+        MeshDef::Color color = SpinesSWC::spineColors[SpinesSWC::random.bounded(0,SpinesSWC::spineColors.size())];
+        auxMesh->setVertexColor(auxMesh->getMesh()->vertices_begin(),auxMesh->getMesh()->vertices_end(),color);
         auxMesh->updateBaseMesh();
         spinesMeshes[i] = auxMesh;
         i++;
@@ -1858,14 +1854,6 @@ void NeuroGeneratorWidgetViewer::generateSpinesVrml(skelgenerator::Neuron *neuro
     mSpinesSynthContainers.destroyAllElementsInContainer();
     mSpinesSynthContainers.addElement(new BaseMesh());
     mSpinesSynthContainers.getElementAt(0)->JoinBaseMesh(meshSpines);
-
-
-    MeshDef::ConstVertexIter iniLimit = mSpinesSynthContainers.getElementAt(0)->getMesh()->vertices_begin();
-    MeshDef::ConstVertexIter finLimit = mSpinesSynthContainers.getElementAt(0)->getMesh()->vertices_end();
-
-    mSpinesSynthContainers.getElementAt(0)->setVertexColor(iniLimit, finLimit, MeshDef::Color(0.6, 0.0, 0.0, 1.0)
-    );
-
 
     if ( spineMeshRend != NULL )
     {
@@ -1965,11 +1953,6 @@ NeuroGeneratorWidgetViewer::generateSpinesASC(std::vector<Spine>& spines,unsigne
     mSpinesSynthContainers.getElementAt ( i )->JoinBaseMesh ( meshSpines );
 
 
-    MeshDef::ConstVertexIter iniLimit = mSpinesSynthContainers.getElementAt ( i )->getMesh ( )->vertices_begin ( );
-    MeshDef::ConstVertexIter finLimit = mSpinesSynthContainers.getElementAt ( i )->getMesh ( )->vertices_end ( );
-
-    mSpinesSynthContainers.getElementAt ( i )->setVertexColor ( iniLimit, finLimit, MeshDef::Color ( 0.6, 0.0, 0.0, 1.0 )
-    );
 
     mLastSpinesInfo.clear ( );
     mLastSpinesInfo = meshSpines->getSpinesInfo ( );
@@ -2028,6 +2011,8 @@ void NeuroGeneratorWidgetViewer::generateSpinesImaris(skelgenerator::Neuron *neu
         SpinesSWC* auxMesh = new SpinesSWC();
         auxMesh->loadModel(file.toStdString());
         auxMesh->applyMatrixTransform(translationMatrix,4);
+        MeshDef::Color color = SpinesSWC::spineColors[SpinesSWC::random.bounded(0,SpinesSWC::spineColors.size())];
+        auxMesh->setVertexColor(auxMesh->getMesh()->vertices_begin(),auxMesh->getMesh()->vertices_end(),color);
         auxMesh->updateBaseMesh();
         spinesMeshes.push_back(auxMesh);
     }
@@ -2046,11 +2031,6 @@ void NeuroGeneratorWidgetViewer::generateSpinesImaris(skelgenerator::Neuron *neu
     mSpinesSynthContainers.addElement(new BaseMesh());
     mSpinesSynthContainers.getElementAt(0)->JoinBaseMesh(meshSpines);
 
-    MeshDef::ConstVertexIter iniLimit = mSpinesSynthContainers.getElementAt(0)->getMesh()->vertices_begin();
-    MeshDef::ConstVertexIter finLimit = mSpinesSynthContainers.getElementAt(0)->getMesh()->vertices_end();
-
-    mSpinesSynthContainers.getElementAt(0)->setVertexColor(iniLimit, finLimit, MeshDef::Color(0.6, 0.0, 0.0, 1.0)
-    );
 
 
     if ( spineMeshRend != NULL )
@@ -2104,6 +2084,8 @@ void NeuroGeneratorWidgetViewer::generateRepairedImarisSpines(skelgenerator::Neu
         SpinesSWC* auxMesh = new SpinesSWC();
         auxMesh->loadModel(file.toStdString());
         auxMesh->applyMatrixTransform(translationMatrix,4);
+        MeshDef::Color color = SpinesSWC::spineColors[SpinesSWC::random.bounded(0,SpinesSWC::spineColors.size())];
+        auxMesh->setVertexColor(auxMesh->getMesh()->vertices_begin(),auxMesh->getMesh()->vertices_end(),color);
         auxMesh->updateBaseMesh();
         spinesMeshes.push_back(auxMesh);
     }
@@ -2121,13 +2103,6 @@ void NeuroGeneratorWidgetViewer::generateRepairedImarisSpines(skelgenerator::Neu
     mSpinesSynthContainers.destroyAllElementsInContainer();
     mSpinesSynthContainers.addElement(new BaseMesh());
     mSpinesSynthContainers.getElementAt(0)->JoinBaseMesh(meshSpines);
-
-    MeshDef::ConstVertexIter iniLimit = mSpinesSynthContainers.getElementAt(0)->getMesh()->vertices_begin();
-    MeshDef::ConstVertexIter finLimit = mSpinesSynthContainers.getElementAt(0)->getMesh()->vertices_end();
-
-    mSpinesSynthContainers.getElementAt(0)->setVertexColor(iniLimit, finLimit, MeshDef::Color(0.6, 0.0, 0.0, 1.0)
-    );
-
 
     if ( spineMeshRend != NULL )
     {

@@ -385,6 +385,7 @@ namespace NSBaseMesh
   void BaseMesh::JoinBaseMesh ( const BaseMesh *pBaseMesh )
   {
     MeshDef::Point lAuxVec ( 0, 0, 0 );
+    MeshDef::Color lAuxColor (0,0,0,0);
 
     //Capturar los vhandler a medida que se crean para ir controlandolos luego
 
@@ -395,9 +396,11 @@ namespace NSBaseMesh
           ++v_it )
     {
       lAuxVec = pBaseMesh->getMesh ( )->point ( *v_it );
-      Mesh->add_vertex ( MeshDef::Point ( lAuxVec[0], lAuxVec[1], lAuxVec[2]
+      lAuxColor =pBaseMesh->getMesh()->color(v_it);
+      auto newVertex =Mesh->add_vertex ( MeshDef::Point ( lAuxVec[0], lAuxVec[1], lAuxVec[2]
                          )
       );
+      Mesh->set_color(newVertex,{lAuxColor[0],lAuxColor[1],lAuxColor[2],lAuxColor[3]});
     }
 
     //Anyadir las facetas al final contemplando el desplazamiento del numero de vertices inicial

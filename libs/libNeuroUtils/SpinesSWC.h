@@ -22,6 +22,7 @@
 #define _SPINESSWC_H_
 
 #include <neuroutils/api.h>
+#include <QRandomGenerator>
 
 #include "NeuroSWC.h"
 #include "BaseMeshContainer.h"
@@ -228,6 +229,9 @@ namespace NSSpinesSWC
       const std::vector < unsigned int > &getSpineDesp ( ) const { return mSpineDesp; };
 
       void distributeSpines(const vector<Spine> &spines,const std::string& neuronName,const OpenMesh::Vec3f& diplacement, BBDD::BBDD bbdd, const std::string& tmpPath);
+
+      static const std::vector<MeshDef::Color> spineColors;
+      static QRandomGenerator random;
   };
 }
 

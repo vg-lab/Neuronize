@@ -34,7 +34,11 @@
 
 namespace NSSpinesSWC
 {
-  SpinesSWC::SpinesSWC ( ): BaseMesh ( )
+
+    const std::vector<MeshDef::Color> SpinesSWC::spineColors={{1,0,0,1},{0,1,0,1},{0,0,1,1},{1,1,0,1},{1,0,1,1}};
+    QRandomGenerator SpinesSWC::random;
+
+    SpinesSWC::SpinesSWC ( ): BaseMesh ( )
   //SpinesSWC::SpinesSWC()
   {
     HorResol = VerResol = totalNumSpines = 0;
@@ -1918,6 +1922,8 @@ namespace NSSpinesSWC
         //////!!!!!!
         tmpMesh = new BaseMesh ( );
         tmpMesh->loadModel(std::get<1>(spine));
+        MeshDef::Color color = SpinesSWC::spineColors[SpinesSWC::random.bounded(0,SpinesSWC::spineColors.size())];
+        tmpMesh->setVertexColor(tmpMesh->getMesh()->vertices_begin(),tmpMesh->getMesh()->vertices_end(),color);
         //tmpMesh->JoinBaseMesh ( mSpinesModeledContainer->getElementAt ( lSpineModelSelected ));
         //tmpMesh->scaleBaseMesh(lSpineScale);
 
@@ -2936,7 +2942,8 @@ namespace NSSpinesSWC
     }
   }
 
-    void SpinesSWC::distributeSpines(const vector<Spine> &spines,const std::string& neuronName,const OpenMesh::Vec3f& diplacement, BBDD::BBDD bbdd, const std::string& tmpPath) {
+    void SpinesSWC::distributeSpines(const vector<Spine> &spines,const std::string& neuronName,
+            const OpenMesh::Vec3f& diplacement, BBDD::BBDD bbdd, const std::string& tmpPath) {
       mNumVerticesEnSpina = mSpinesModeledContainer->getContainer ( ).at ( 0 )->getNumVertex ( );
 
       SpineInfo lSpineInfo;
@@ -3049,6 +3056,8 @@ namespace NSSpinesSWC
           //////!!!!!!
           tmpMesh = new BaseMesh();
           tmpMesh->loadModel(std::get<1>(spine));
+          MeshDef::Color color = SpinesSWC::spineColors[random.bounded(0,spineColors.size())];
+          tmpMesh->setVertexColor(tmpMesh->getMesh()->vertices_begin(),tmpMesh->getMesh()->vertices_end(),color);
           //tmpMesh->scaleBaseMesh(lSpineScale);
 
           MeshDef::ConstVertexFaceIter CVFIter;
