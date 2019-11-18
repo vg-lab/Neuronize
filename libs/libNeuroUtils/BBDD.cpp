@@ -12,7 +12,7 @@
 #include <clocale>
 
 
-#define ERRCHECK {if (_err!=NULL) {std::cerr << "BBDD Error : " << _err << "\n" << std::endl; sqlite3_free(_err);}}
+#define ERRCHECK {if (_err!=NULL) {std::cerr << "------------------------------BBDD Error : " << _err << "\n" << std::endl; sqlite3_free(_err);}}
 
 static int getSpineCallback(void *spines, int columns, char **data, char **columnNames) {
     auto spinesCast = (std::vector<BBDD::Spine> *) spines;
@@ -166,7 +166,7 @@ namespace BBDD {
                                         "            MASS_CENTER_Y REAL,\n"
                                         "            MASS_CENTER_Z REAL,\n"
                                         "            ORIGIN INT,\n"
-                                        "            MODEL BLOB NOT NULL,\n"
+                                        "            MODEL BLOB,\n"
                                         "            MODEL_NR BLOB,\n"
                                         "            FILE_TYPE INTEGER NOT NULL,\n"
                                         "            FOREIGN KEY (ORIGIN) REFERENCES SPINES_ORIGIN(ID),\n"
@@ -419,7 +419,7 @@ namespace BBDD {
         auto bytes = readBytes(originalSpine);
         std::string originalFile (bytes.begin(), bytes.end());
 
-        std::string formatedQuery = str(boost::format(query) % area % volume % Imaris  % originalFile % "Obj" % massCenter[0] % massCenter[1] % massCenter[2] % name);
+        std::string formatedQuery = str(boost::format(query) % area % volume % Imaris  % originalFile % Obj % massCenter[0] % massCenter[1] % massCenter[2] % name);
         sqlite3_exec(_db,formatedQuery.c_str(), nullptr, nullptr,&_err);
         ERRCHECK
     }

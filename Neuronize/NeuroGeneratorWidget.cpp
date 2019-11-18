@@ -1167,12 +1167,12 @@ void NeuroGeneratorWidget::goAdvencedSpinesOptions ( )
     ui.radioButton_RealAscPos->setChecked(true);
   }
 
-  if (this->neuron != nullptr) {
+  if (this->neuron != nullptr && this->neuron->hasFilamentSpines()) {
     ui.radioButton_VrmlSpines->setEnabled(true);
     ui.radioButton_VrmlSpines->setChecked(true);
   }
 
-  if (this->neuron->hasImarisSpines()) {
+  if (this->neuron != nullptr && this->neuron->hasImarisSpines()) {
       ui.radioButton_ImarisSpines->setEnabled(true);
       ui.radioButton_ImarisSpines->setChecked(true);
       if (Neuronize::hasPython){

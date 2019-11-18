@@ -117,7 +117,10 @@ SomaCreatorWidget::SomaCreatorWidget (const QString &tempDir, QWidget *parent )
         openSelectFileDialog(ui.basalPath, "Select basal file", "Imaris VRML (*.vrml *.wrl)", true);
     });
     connect(ui.imarisPathButton, &QPushButton::released, [=]() {
-        openSelectFileDialog(ui.imarisPath, "Select imaris spines file", "Imaris VRML (*.vrml *.wrl)", true);
+        openSelectFileDialog(ui.imarisPath, "Select imaris spines volumes file", "Imaris VRML (*.vrml *.wrl)", false);
+    });
+    connect(ui.longsButton, &QPushButton::released, [=]() {
+        openSelectFileDialog(ui.longsPath, "Select imaris spines longs file", "Imaris VRML (*.vrml *.wrl)", false);
     });
 
     connect(ui.pushButton_GoToSomaDeformer, &QPushButton::released, this, &SomaCreatorWidget::onOkPressed);
@@ -874,6 +877,8 @@ void SomaCreatorWidget::onRadioChanged(bool b) {
     ui.apiPathButton->setDisabled(b);
     ui.basalPath->setDisabled(b);
     ui.basalPathButton->setDisabled(b);
+    ui.longsButton->setDisabled(b);
+    ui.longsPath->setDisabled(b);
     ui.imarisPath->setDisabled(b);
     ui.imarisPathButton->setDisabled(b);
     ui.saveCheckBox->setDisabled(b);
@@ -954,13 +959,14 @@ void SomaCreatorWidget::processSkel(const std::string &fileName) {
     auto basalFiles = ui.basalPath->text().split(";");
     auto apiFile = ui.apiPath->text().toStdString();
     auto imarisFile = ui.imarisPath->text().toStdString();
+    auto longsFile = ui.longsPath->text().toStdString();
     std::vector<std::string> basalFilesStd;
     for (const auto &string: basalFiles) {
         basalFilesStd.push_back(string.toStdString());
     }
 
     int newThreshold = 3;
-    auto neuron = new skelgenerator::Neuron(apiFile, basalFilesStd, imarisFile, newThreshold);
+    auto neuron = new skelgenerator::Neuron(apiFile, basalFilesStd, imarisFile, longsFile, newThreshold);
     bool ignore = false;
     while (neuron->isIncorrectConecctions() || neuron->getReamingSegments() > 0 && !ignore) {
         if (neuron->isIncorrectConecctions()) {
@@ -978,7 +984,7 @@ void SomaCreatorWidget::processSkel(const std::string &fileName) {
         ignore = newThreshold < 0;
         if (!ignore) {
             delete (neuron);
-            neuron = new skelgenerator::Neuron(apiFile, basalFilesStd, imarisFile, newThreshold);
+            neuron = new skelgenerator::Neuron(apiFile, basalFilesStd, imarisFile,longsFile, newThreshold);
         }
 
     }
