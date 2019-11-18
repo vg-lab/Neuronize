@@ -845,11 +845,13 @@ void NeuroGeneratorWidget::exportSpinesInmediatly ( QString fileName )
 
 void NeuroGeneratorWidget::exportNeuronAndSpines ( )
 {
+    QMessageBox::information(this,tr("Neuronize"),tr("Please select a file to save the neuron mesh"));
   exportNeuron ( );
 
   if ( viewer->hasSpines ( ))
   {
-    exportSpines ( );
+      QMessageBox::information(this,tr("Neuronize"),tr("Please select a file to save the spines mesh"));
+      exportSpines ( );
   }
 }
 

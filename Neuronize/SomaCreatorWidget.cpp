@@ -928,6 +928,8 @@ void SomaCreatorWidget::onOkPressed() {
     } else {
         if (ui.basalPath->text().isEmpty()) {
             QToolTip::showText(ui.tracePath->mapToGlobal(QPoint(0, 0)), "Need a Input File");
+        } else if (ui.saveCheckBox->checkState() == Qt::Checked && ui.ascPath->text().isEmpty()) {
+            QToolTip::showText(ui.ascPath->mapToGlobal(QPoint(0, 0)), "Need a Output File");
         } else {
             QFileInfo fi (ui.basalPath->text());
             auto name = fi.dir().dirName();
