@@ -8,5 +8,7 @@
     <file>icons/Camera.app.png</file>
     <file>icons/document-open-6.png</file>
     <file>icons/help-2.png</file>
+    <file>icons/repair.png</file>
+    <file>icons/compare.png</file>
   </qresource>
 </RCC>

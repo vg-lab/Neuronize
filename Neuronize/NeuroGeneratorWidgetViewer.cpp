@@ -1834,7 +1834,7 @@ void NeuroGeneratorWidgetViewer::generateSpinesVrml(skelgenerator::Neuron *neuro
         SpinesSWC* auxMesh = new SpinesSWC();
         auxMesh->loadModel(filename);
         auxMesh->applyMatrixTransform(translationMatrix,4);
-        MeshDef::Color color = SpinesSWC::spineColors[SpinesSWC::random.bounded(0,SpinesSWC::spineColors.size())];
+        MeshDef::Color color = SpinesSWC::getRandomColor();
         auxMesh->setVertexColor(auxMesh->getMesh()->vertices_begin(),auxMesh->getMesh()->vertices_end(),color);
         auxMesh->updateBaseMesh();
         spinesMeshes[i] = auxMesh;
@@ -2011,7 +2011,7 @@ void NeuroGeneratorWidgetViewer::generateSpinesImaris(skelgenerator::Neuron *neu
         SpinesSWC* auxMesh = new SpinesSWC();
         auxMesh->loadModel(file.toStdString());
         auxMesh->applyMatrixTransform(translationMatrix,4);
-        MeshDef::Color color = SpinesSWC::spineColors[SpinesSWC::random.bounded(0,SpinesSWC::spineColors.size())];
+        MeshDef::Color color = SpinesSWC::getRandomColor();
         auxMesh->setVertexColor(auxMesh->getMesh()->vertices_begin(),auxMesh->getMesh()->vertices_end(),color);
         auxMesh->updateBaseMesh();
         spinesMeshes.push_back(auxMesh);
@@ -2084,7 +2084,7 @@ void NeuroGeneratorWidgetViewer::generateRepairedImarisSpines(skelgenerator::Neu
         SpinesSWC* auxMesh = new SpinesSWC();
         auxMesh->loadModel(file.toStdString());
         auxMesh->applyMatrixTransform(translationMatrix,4);
-        MeshDef::Color color = SpinesSWC::spineColors[SpinesSWC::random.bounded(0,SpinesSWC::spineColors.size())];
+        MeshDef::Color color = SpinesSWC::getRandomColor();
         auxMesh->setVertexColor(auxMesh->getMesh()->vertices_begin(),auxMesh->getMesh()->vertices_end(),color);
         auxMesh->updateBaseMesh();
         spinesMeshes.push_back(auxMesh);

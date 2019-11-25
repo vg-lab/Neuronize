@@ -13,6 +13,8 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <libs/libNeuroUtils/MeshVCG.h>
+#include <QListWidget>
+#include <QCheckBox>
 #include "CompareMeshWidgetViewer.h"
 
 class CompareMeshesWidget : public QWidget {
@@ -25,12 +27,15 @@ public:
 private:
     QPushButton* selectMesh1Button;
     QPushButton* selectMesh2Button;
-    QPushButton* selectNoDistMesh1Button;
-    QPushButton* selectNoDistMesh2Button;
+    QPushButton* addMeshVisualize1;
+    QPushButton* removeMeshVisualize1;
+    QPushButton* addMeshVisualize2;
+    QPushButton* removeMeshVisualize2;
+    QListWidget* listMeshes1;
+    QListWidget* listMeshes2;
     QLineEdit* mesh1Path;
     QLineEdit* mesh2Path;
-    QLineEdit* noDistMesh1Path;
-    QLineEdit* noDistMesh2Path;
+    QCheckBox* comparaMeshesCheckbox;
     QHBoxLayout* render1;
     QHBoxLayout* render2;
     QHBoxLayout* transferGrid1;
@@ -55,8 +60,10 @@ private:
 
 private slots:
     void loadFileDialog(QLineEdit* target,const QString& title,const QString& types);
-    void loadExtraMesh(QLineEdit* target,const QString& title,const QString& types,CompareMeshWidgetViewer* viewer);
     void initRender();
+    void addMesh(QListWidget *list,CompareMeshWidgetViewer* viewer);
+    void removeMesh(QListWidget *list,CompareMeshWidgetViewer* viewer);
+    void onColorsChange(int state);
 };
 
 

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
+    <width>599</width>
     <height>400</height>
    </rect>
   </property>
@@ -102,7 +102,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>600</width>
+     <width>599</width>
      <height>25</height>
     </rect>
    </property>
@@ -149,18 +149,6 @@
    <addaction name="menuOptions"/>
    <addaction name="menuAbout"/>
   </widget>
-  <widget class="QToolBar" name="mainToolBar">
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-   <addaction name="actionGenerateNewNeuron"/>
-   <addaction name="actionUndo"/>
-   <addaction name="actionTake_a_snapshot"/>
-   <addaction name="separator"/>
-  </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QToolBar" name="toolBar">
    <property name="windowTitle">
@@ -172,6 +160,20 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionGenerateNewNeuron"/>
+   <addaction name="actionRepair_Meshes"/>
+   <addaction name="actionCompare_Meshes"/>
+   <addaction name="actionUndo"/>
+   <addaction name="actionTake_a_snapshot"/>
+   <addaction name="separator"/>
   </widget>
   <action name="actionGenerateNewNeuron">
    <property name="icon">
@@ -229,11 +231,19 @@
    </property>
   </action>
   <action name="actionRepair_Meshes">
+   <property name="icon">
+    <iconset resource="neuronize.qrc">
+     <normaloff>:/Neuronize/icons/repair.png</normaloff>:/Neuronize/icons/repair.png</iconset>
+   </property>
    <property name="text">
     <string>Repair Meshes</string>
    </property>
   </action>
   <action name="actionCompare_Meshes">
+   <property name="icon">
+    <iconset resource="neuronize.qrc">
+     <normaloff>:/Neuronize/icons/compare.png</normaloff>:/Neuronize/icons/compare.png</iconset>
+   </property>
    <property name="text">
     <string>Compare Meshes</string>
    </property>

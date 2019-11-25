@@ -7,10 +7,12 @@
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QMessageBox>
+#include <QtConcurrent/QtConcurrent>
+#include <QFuture>
+#include <QProgressDialog>
 
 CompareMeshesWidget::CompareMeshesWidget(const std::string &tmpPath_, QWidget *parent) : QWidget(parent) {
     this->tmpPath = tmpPath_;
-
     initUi();
     initConnections();
 }
@@ -19,19 +21,31 @@ void CompareMeshesWidget::initUi() {
     this->selectMesh1Button = new QPushButton("Select File...",this);
     this->selectMesh2Button = new QPushButton("Select File...",this);
 
-    this->selectNoDistMesh1Button = new QPushButton("Select File...",this);
-    this->selectNoDistMesh2Button = new QPushButton("Select File...",this);
-
-
     this->mesh1Path = new QLineEdit(this);
     mesh1Path->setPlaceholderText("Mesh 1");
     this->mesh2Path = new QLineEdit(this);
     mesh2Path->setPlaceholderText("Mesh 2");
 
-    this->noDistMesh1Path = new QLineEdit(this);
-    noDistMesh1Path->setPlaceholderText("Mesh only for visualization not affect to distance calculation");
-    this->noDistMesh2Path = new QLineEdit(this);
-    noDistMesh2Path->setPlaceholderText("Mesh only for visualization not affect to distance calculation");
+    this->addMeshVisualize1 = new QPushButton("Add mesh to view",this);
+    this->addMeshVisualize2 = new QPushButton("Add mesh to view",this);
+    addMeshVisualize1->setSizePolicy(QSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed));
+    addMeshVisualize2->setSizePolicy(QSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed));
+
+
+    this->removeMeshVisualize1 = new QPushButton("Remove mesh from view",this);
+    this->removeMeshVisualize2 = new QPushButton("Remove mesh from view",this);
+    removeMeshVisualize1->setSizePolicy(QSizePolicy(QSizePolicy::Minimum,QSizePolicy::Fixed));
+    removeMeshVisualize2->setSizePolicy(QSizePolicy(QSizePolicy::Minimum,QSizePolicy::Fixed));
+
+    this->listMeshes1 = new QListWidget(this);
+    this->listMeshes2 = new QListWidget(this);
+    listMeshes1->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
+    listMeshes2->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
+    listMeshes1->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+    listMeshes2->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+
+
+    this->comparaMeshesCheckbox = new QCheckBox(this);
 
     auto mainLayout = new QVBoxLayout(this);
 
@@ -42,12 +56,14 @@ void CompareMeshesWidget::initUi() {
 
     viewer1 = new CompareMeshWidgetViewer(1,this);
     viewer1->setSizePolicy(QSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding));
+    viewer1->setMaximumSize(1000,1000);
     render1->setSpacing(6);
     render1->addItem(transferGrid1);
     render1->addWidget(viewer1);
 
     viewer2 = new CompareMeshWidgetViewer(2,this);
     viewer2->setSizePolicy(QSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding));
+    viewer2->setMaximumSize(1000,1000);
     render2->setSpacing(6);
     render2->addWidget(viewer2);
     render2->addItem(transferGrid2);
@@ -55,20 +71,34 @@ void CompareMeshesWidget::initUi() {
     viewer1->setupViewer();
     viewer2->setupViewer();
 
+    auto buttonLayout1 = new QVBoxLayout(this);
+    buttonLayout1->addWidget(addMeshVisualize1);
+    buttonLayout1->addWidget(removeMeshVisualize1);
+   // buttonLayout1->addStretch();
 
-    auto header1layout = new QGridLayout(this);
-    header1layout->setSpacing(6);
-    header1layout->addWidget(selectMesh1Button,0,0);
-    header1layout->addWidget(mesh1Path,0,1);
-    header1layout->addWidget(selectNoDistMesh1Button,1,0);
-    header1layout->addWidget(noDistMesh1Path,1,1);
 
-    auto header2layout = new QGridLayout(this);
-    header2layout->setSpacing(6);
-    header2layout->addWidget(selectMesh2Button,0,0);
-    header2layout->addWidget(mesh2Path,0,1);
-    header2layout->addWidget(selectNoDistMesh2Button,1,0);
-    header2layout->addWidget(noDistMesh2Path,1,1);
+    auto buttonLayout2 = new QVBoxLayout(this);
+    buttonLayout2->addWidget(addMeshVisualize2);
+    buttonLayout2->addWidget(removeMeshVisualize2);
+    //buttonLayout2->addStretch();
+
+    auto visualizeMeshLayout1 = new QHBoxLayout(this);
+    visualizeMeshLayout1->setSpacing(6);
+    visualizeMeshLayout1->addItem(buttonLayout1);
+    visualizeMeshLayout1->addWidget(listMeshes1);
+    auto visualizeMeshLayout2 = new QHBoxLayout(this);
+    visualizeMeshLayout2->addItem(buttonLayout2);
+    visualizeMeshLayout2->addWidget(listMeshes2);
+
+    auto compareMeshLayout1 = new QHBoxLayout(this);
+    compareMeshLayout1->setSpacing(6);
+    compareMeshLayout1->addWidget(selectMesh1Button);
+    compareMeshLayout1->addWidget(mesh1Path);
+    auto compareMeshLayout2 = new QHBoxLayout(this);
+    compareMeshLayout2->setSpacing(6);
+    compareMeshLayout2->addWidget(selectMesh2Button);
+    compareMeshLayout2->addWidget(mesh2Path);
+
 
     auto stats1layout = new QHBoxLayout(this);
     auto stats2layout = new QHBoxLayout(this);
@@ -87,15 +117,31 @@ void CompareMeshesWidget::initUi() {
     stats2layout->addWidget(minLabel2);
     stats2layout->addWidget(meanLabel2);
 
+    auto line = new QFrame(this);
+    line->setFrameShape(QFrame::HLine);
+    line->setFrameShadow(QFrame::Sunken);
+
+    auto checkboxLayout = new QHBoxLayout(this);
+    checkboxLayout->setSpacing(6);
+    checkboxLayout->addWidget(comparaMeshesCheckbox);
+    checkboxLayout->addWidget(new QLabel("Meshes to be compare",this));
+    checkboxLayout->addStretch();
+
     auto gridLayout = new QGridLayout(this);
     gridLayout->setSpacing(8);
-    gridLayout->addItem(header1layout,0,0);
-    gridLayout->addItem(header2layout,0,1);
-    gridLayout->addItem(stats1layout, 1, 0);
-    gridLayout->addItem(stats2layout, 1, 1);
-    gridLayout->addItem(render1, 2, 0);
-    gridLayout->addItem(render2, 2, 1);
+    gridLayout->addWidget(new QLabel("Meshes to be viewed:",this),0,0,1,2);
+    gridLayout->addItem(visualizeMeshLayout1,1,0);
+    gridLayout->addItem(visualizeMeshLayout2,1,1);
+    gridLayout->addWidget(line,2,0,1,2);
+    gridLayout->addItem(checkboxLayout,3,0,1,2);
+    gridLayout->addItem(compareMeshLayout1,4,0);
+    gridLayout->addItem(compareMeshLayout2,4,1);
+    gridLayout->addItem(stats1layout, 5, 0);
+    gridLayout->addItem(stats2layout, 5, 1);
+    gridLayout->addItem(render1, 6, 0);
+    gridLayout->addItem(render2, 6, 1);
 
+    onColorsChange(Qt::Unchecked);
     mainLayout->addItem(gridLayout);
 
     setLayout(mainLayout);
@@ -106,11 +152,11 @@ void CompareMeshesWidget::initConnections() {
             [=]() { loadFileDialog(mesh1Path, "Select Mesh File", "Mesh(*.obj *.off *.ply *.stl)"); });
     connect(selectMesh2Button, &QPushButton::released, this,
             [=]() { loadFileDialog(mesh2Path, "Select Mesh File", "Mesh(*.obj *.off *.ply *.stl)"); });
-
-    connect(selectNoDistMesh1Button, &QPushButton::released, this,
-            [=]() { loadExtraMesh(noDistMesh1Path, "Select Mesh File", "Mesh(*.obj *.off *.ply *.stl)",viewer1); });
-    connect(selectNoDistMesh2Button, &QPushButton::released, this,
-            [=]() { loadExtraMesh(noDistMesh2Path, "Select Mesh File", "Mesh(*.obj *.off *.ply *.stl)",viewer2); });
+    connect(addMeshVisualize1,&QPushButton::released,this,[=](){ addMesh(listMeshes1,viewer1);});
+    connect(addMeshVisualize2,&QPushButton::released,this,[=](){ addMesh(listMeshes2,viewer2);});
+    connect(removeMeshVisualize1,&QPushButton::released,this,[=](){removeMesh(listMeshes1,viewer1);});
+    connect(removeMeshVisualize2,&QPushButton::released,this,[=](){removeMesh(listMeshes2,viewer2);});
+    connect(comparaMeshesCheckbox,&QCheckBox::stateChanged,this,&CompareMeshesWidget::onColorsChange);
 
     connect(viewer1,&CompareMeshWidgetViewer::viewChanged,viewer2,&CompareMeshWidgetViewer::onViewChanged);
     connect(viewer2,&CompareMeshWidgetViewer::viewChanged,viewer1,&CompareMeshWidgetViewer::onViewChanged);
@@ -120,17 +166,7 @@ void CompareMeshesWidget::loadFileDialog(QLineEdit *target, const QString &title
     auto file = QFileDialog::getOpenFileName(this,title,QString(),types);
     target->setText(file);
     if (!mesh1Path->text().isEmpty() && !mesh2Path->text().isEmpty()) {
-        initRender();
-    }
-
-}
-
-
-void CompareMeshesWidget::loadExtraMesh(QLineEdit* target,const QString& title,const QString& types,CompareMeshWidgetViewer* viewer) {
-    auto file = QFileDialog::getOpenFileName(this,title,QString(),types);
-    target->setText(file);
-    if (!target->text().isEmpty()) {
-        viewer->setExtraMesh(target->text().toStdString());
+       initRender();
     }
 
 }
@@ -140,9 +176,20 @@ void CompareMeshesWidget::initRender() {
     auto mes2text = mesh2Path->text();
     MeshVCG mesh1 (mesh1text.toStdString());
     MeshVCG mesh2 (mes2text.toStdString());
-    auto hausdorffResult = mesh1.hausdorffDistance(mesh2, tmpPath);
 
+    QFuture<HausdorffRet> future = QtConcurrent::run([&](){return mesh1.hausdorffDistance(mesh2, tmpPath);});
+    QFutureWatcher<HausdorffRet> watcher;
+    watcher.setFuture(future);
 
+    QProgressDialog progress(this);
+    connect(&watcher, SIGNAL(finished()), &progress, SLOT(close()));
+    progress.setLabelText("calculating the distances between the meshes");
+    progress.setCancelButton(0);
+    progress.setMaximum(0);
+    progress.setMinimum(0);
+    progress.exec();
+
+    auto hausdorffResult = future.result();
     if (hausdorffResult.max1 > 1.0f) {
         auto messageBox = new QMessageBox(this);
         messageBox->setText("A too-large distance has been found");
@@ -159,6 +206,7 @@ void CompareMeshesWidget::initRender() {
         }
     }
 
+
     QFileInfo fi (mesh1text);
     auto mesh1Filename = fi.fileName().toStdString();
     QFileInfo fi2(mes2text);
@@ -166,9 +214,9 @@ void CompareMeshesWidget::initRender() {
 
     viewer1->setMesh(tmpPath + "/" + mesh1Filename );
     viewer2->setMesh(tmpPath + "/" + mesh2Filemane );
-
-    viewer1->setDisplacement(hausdorffResult.displacement);
-    viewer2->setDisplacement(hausdorffResult.displacement);
+    auto center = viewer1->getSceneCenter();
+    viewer1->setDisplacement(center);
+    viewer2->setDisplacement(center);
 
     updateLabels(hausdorffResult);
 }
@@ -256,3 +304,48 @@ void CompareMeshesWidget::updateLabels(HausdorffRet dists) {
     minLabel2->setText(tr("Min Dist: ") + QString::number(dists.min2));
     meanLabel2->setText(tr("Mean Dist: ") + QString::number(dists.mean2));
 }
+
+void CompareMeshesWidget::addMesh(QListWidget *list,CompareMeshWidgetViewer* viewer) {
+    auto file = QFileDialog::getOpenFileName(this,"Open mesh",QString(),"Mesh(*.obj *.off *.ply *.stl)");
+    if (!file.isEmpty()) {
+        QFileInfo fileInfo (file);
+        list->addItem(fileInfo.fileName());
+        viewer->addVisualizeMesh(file.toStdString());
+        auto center = viewer->getSceneCenter();
+        viewer1->setDisplacement(center);
+        viewer2->setDisplacement(center);
+
+    }
+
+}
+
+void CompareMeshesWidget::removeMesh(QListWidget *list,CompareMeshWidgetViewer* viewer) {
+    auto selectedItems = list->selectedItems();
+    for (const auto& item : selectedItems) {
+        int index = list->row(item);
+        list->takeItem(index);
+        viewer->removeVisualizeMesh(index);
+    }
+}
+
+void CompareMeshesWidget::onColorsChange(int state) {
+    bool visible = state == Qt::Checked;
+    mesh1Path->setVisible(visible);
+    mesh2Path->setVisible(visible);
+    selectMesh1Button->setVisible(visible);
+    selectMesh2Button->setVisible(visible);
+    maxLabel1->setVisible(visible);
+    maxLabel2->setVisible(visible);
+    minLabel1->setVisible(visible);
+    minLabel2->setVisible(visible);
+    meanLabe1->setVisible(visible);
+    meanLabel2->setVisible(visible);
+    if (visible) {
+        QMessageBox::information(this,tr("Neuronize"),tr("Please note that mesh comparison is"
+                                                         " intended for the comparison of two individual objects"));
+    }
+}
+
+
+
+

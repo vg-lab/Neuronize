@@ -17,13 +17,12 @@ class CompareMeshWidgetViewer: public QGLViewer {
     Q_OBJECT
     NSLightManager::LightManager* lights;
     NSMeshRenderer::MeshRenderer* meshRend;
-    NSMeshRenderer::MeshRenderer* extraMeshRend;
+    std::vector<NSMeshRenderer::MeshRenderer*> visualizeMeshRends;
     unsigned int renderMask;
     BaseMesh* mesh;
-    BaseMesh* extraMesh;
     int number;
     double maxDist;
-    Eigen::Vector3d displacement;
+    Eigen::Vector3f displacement;
 public:
     double getMaxDist() const;
 
@@ -33,8 +32,11 @@ public:
     explicit CompareMeshWidgetViewer ( int number,QWidget* parent = 0);
     void setupViewer();
     void setMesh(const std::string& filename );
-    void setExtraMesh(const std::string& filename);
-    void setDisplacement(Eigen::Vector3d displacement);
+    void addVisualizeMesh(const std::string& filename);
+    void removeVisualizeMesh(int i);
+    void setDisplacement(Eigen::Vector3f displacement);
+    Eigen::Vector3f getSceneCenter();
+    bool isRendering();
 
 signals:
     void viewChanged( QMouseEvent *mouseMoveEvent, QWheelEvent* whellEvent, QMouseEvent* mousePressEvent, QMouseEvent* mouseReleaseEvent);
@@ -44,6 +46,7 @@ public slots:
 
 private:
     void initLight();
+    std::pair<Eigen::Vector3f,Eigen::Vector3f> getBoundingBox(BaseMesh* mesh);
 
 protected:
     virtual void draw ();

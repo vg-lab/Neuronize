@@ -24,7 +24,6 @@ struct HausdorffRet {
     double mean2;
     double min1;
     double min2;
-    Eigen::Vector3d displacement;
 };
 
 class MyVertex; class MyEdge; class MyFace;

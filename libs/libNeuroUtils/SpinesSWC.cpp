@@ -35,7 +35,10 @@
 namespace NSSpinesSWC
 {
 
-    const std::vector<MeshDef::Color> SpinesSWC::spineColors={{1,0,0,1},{0,1,0,1},{0,0,1,1},{1,1,0,1},{1,0,1,1}};
+    const std::vector<Qt::GlobalColor > SpinesSWC::spineColors={
+            Qt::cyan, Qt::darkCyan, Qt::red,Qt::darkRed,Qt::magenta, Qt::darkMagenta,
+            Qt::green,Qt::darkGreen,Qt::yellow,Qt::darkYellow,Qt::blue,Qt::darkBlue
+    };
     QRandomGenerator SpinesSWC::random;
 
     SpinesSWC::SpinesSWC ( ): BaseMesh ( )
@@ -1922,7 +1925,7 @@ namespace NSSpinesSWC
         //////!!!!!!
         tmpMesh = new BaseMesh ( );
         tmpMesh->loadModel(std::get<1>(spine));
-        MeshDef::Color color = SpinesSWC::spineColors[SpinesSWC::random.bounded(0,SpinesSWC::spineColors.size())];
+        MeshDef::Color color = getRandomColor();
         tmpMesh->setVertexColor(tmpMesh->getMesh()->vertices_begin(),tmpMesh->getMesh()->vertices_end(),color);
         //tmpMesh->JoinBaseMesh ( mSpinesModeledContainer->getElementAt ( lSpineModelSelected ));
         //tmpMesh->scaleBaseMesh(lSpineScale);
@@ -3056,7 +3059,7 @@ namespace NSSpinesSWC
           //////!!!!!!
           tmpMesh = new BaseMesh();
           tmpMesh->loadModel(std::get<1>(spine));
-          MeshDef::Color color = SpinesSWC::spineColors[random.bounded(0,spineColors.size())];
+          MeshDef::Color color = getRandomColor();
           tmpMesh->setVertexColor(tmpMesh->getMesh()->vertices_begin(),tmpMesh->getMesh()->vertices_end(),color);
           //tmpMesh->scaleBaseMesh(lSpineScale);
 
@@ -3238,6 +3241,11 @@ namespace NSSpinesSWC
       ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+    }
+
+    MeshDef::Color SpinesSWC::getRandomColor() {
+        auto qtColor = QColor(SpinesSWC::spineColors[SpinesSWC::random.bounded(0,SpinesSWC::spineColors.size())]);
+        return {qtColor.redF(),qtColor.greenF(),qtColor.blueF(),1.0f};
     }
 }
 

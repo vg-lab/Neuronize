@@ -238,7 +238,7 @@ void NeuroGeneratorWidget::generateDendrites ( )
     delete msgBox;
   msgBox = new QMessageBox ( NULL );
 
-  QString lMsge = "The dendrites will be build now,\n";
+  QString lMsge = "The neurites will be build now,\n";
   lMsge += "please wait until finish.";// in a few secods.";
 
   msgBox->setWindowTitle ( "Neuronize" );
@@ -287,6 +287,11 @@ void NeuroGeneratorWidget::loadNeuronDefinitionAndGenerateMesh ( )
 
   if ( mMsgTimer != NULL )
     mMsgTimer->stop ( );
+
+  msgBox->close();
+  msgBox->setWindowTitle("Neuronize");
+  msgBox->setText("The construction of the neurites is over");
+  msgBox->exec();
 }
 
 NeuroGeneratorWidget::~NeuroGeneratorWidget ( )
@@ -574,6 +579,12 @@ void NeuroGeneratorWidget::generateSpines ( )
       case 8:
           viewer->generateRepairedImarisSpines(this->neuron, mTempDir.toStdString());
   }
+
+
+  this->msgBox->setText("The construction of the spines is over");
+  this->msgBox->setWindowTitle("Build Spines");
+  this->msgBox->exec();
+
 }
 
 void NeuroGeneratorWidget::batchSpinesGeneration(skelgenerator::Neuron *pNeuron, vector<Spine> spines) {
@@ -853,6 +864,8 @@ void NeuroGeneratorWidget::exportNeuronAndSpines ( )
       QMessageBox::information(this,tr("Neuronize"),tr("Please select a file to save the spines mesh"));
       exportSpines ( );
   }
+
+  QMessageBox::information(this, tr("Neuronize"),tr("The process with this neuron is over. You can process a new neuron, repair meshes, or compare exported meshes."));
 }
 
 void NeuroGeneratorWidget::joinSpines ( )

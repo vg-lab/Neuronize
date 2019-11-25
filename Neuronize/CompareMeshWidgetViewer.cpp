@@ -1,15 +1,13 @@
 //
 // Created by ivelascog on 19/9/19.
 //
-
+#include <limits>
 #include "CompareMeshWidgetViewer.h"
 
 CompareMeshWidgetViewer::CompareMeshWidgetViewer(int number,QWidget *parent): QGLViewer( parent){
     this->number = number;
     meshRend = nullptr;
     mesh = nullptr;
-    extraMesh = nullptr;
-    extraMeshRend = nullptr;
     this->displacement = {0,0,0};
     renderMask = 0;
     renderMask = NSMeshRenderer::MeshRenderer::RENDER_SURFACE;
@@ -34,8 +32,8 @@ void CompareMeshWidgetViewer::draw() {
         meshRend->Render ( );
     }
 
-    if (extraMeshRend != nullptr) {
-        extraMeshRend->Render();
+    for (const auto& renderer:visualizeMeshRends){
+        renderer->Render();
     }
 }
 
@@ -63,6 +61,11 @@ void CompareMeshWidgetViewer::setMesh(const std::string& filename) {
     }
 
     mesh = new BaseMesh(filename);
+
+    boost::numeric::ublas::matrix<float> translationMatrix (4,4);
+    generateSquareTraslationMatrix(translationMatrix,-displacement[0],-displacement[1],-displacement[2]);
+    mesh->applyMatrixTransform(translationMatrix,4);
+
     meshRend = new NSMeshRenderer::MeshRenderer();
 
     meshRend->setMeshToRender(mesh);
@@ -70,28 +73,27 @@ void CompareMeshWidgetViewer::setMesh(const std::string& filename) {
     updateGL();
 }
 
-void CompareMeshWidgetViewer::setExtraMesh(const std::string& filename) {
-    if (extraMesh != nullptr) {
-        delete extraMesh;
-    }
+void CompareMeshWidgetViewer::addVisualizeMesh(const std::string& filename) {
 
-    if (extraMeshRend != nullptr) {
-        delete extraMeshRend;
-    }
+    auto mesh = new BaseMesh(filename);
+    auto renderer = new NSMeshRenderer::MeshRenderer;
 
-    extraMesh = new BaseMesh(filename);
-    extraMeshRend = new NSMeshRenderer::MeshRenderer;
-
-    extraMesh->setVertexColor ( extraMesh->getMesh ( )->vertices_begin ( ),
-                          extraMesh->getMesh ( )->vertices_end ( ),
+    mesh->setVertexColor ( mesh->getMesh ( )->vertices_begin ( ),
+                           mesh->getMesh ( )->vertices_end ( ),
                           MeshDef::Color ( 0.5, 0.5, 1.0, 1.0 ));
 
     boost::numeric::ublas::matrix<float> translationMatrix (4,4);
     generateSquareTraslationMatrix(translationMatrix,-displacement[0],-displacement[1],-displacement[2]);
-    extraMesh->applyMatrixTransform(translationMatrix,4);
+    mesh->applyMatrixTransform(translationMatrix,4);
 
-    extraMeshRend->setMeshToRender(extraMesh);
-    extraMeshRend->setRenderOptions(renderMask);
+    renderer->setMeshToRender(mesh);
+    renderer->setRenderOptions(renderMask);
+    visualizeMeshRends.push_back(renderer);
+    updateGL();
+}
+
+void CompareMeshWidgetViewer::removeVisualizeMesh(int i) {
+    visualizeMeshRends.erase(visualizeMeshRends.begin() + i);
     updateGL();
 }
 
@@ -143,20 +145,63 @@ void CompareMeshWidgetViewer::setMaxDist(double maxDist) {
     CompareMeshWidgetViewer::maxDist = maxDist;
 }
 
-void CompareMeshWidgetViewer::setDisplacement(Eigen::Vector3d displacement_){
-    if (extraMesh != nullptr) {
-        boost::numeric::ublas::matrix<float> inverseTranslationMatrix (4,4);
-        generateSquareTraslationMatrix(inverseTranslationMatrix,displacement[0],displacement[1],displacement[2]);
+void CompareMeshWidgetViewer::setDisplacement(Eigen::Vector3f displacement_){
+    boost::numeric::ublas::matrix<float> inverseTranslationMatrix (4,4);
+    generateSquareTraslationMatrix(inverseTranslationMatrix,displacement[0],displacement[1],displacement[2]);
 
-        boost::numeric::ublas::matrix<float> translationMatrix (4,4);
-        generateSquareTraslationMatrix(translationMatrix,-displacement_[0],-displacement_[1],-displacement_[2]);
+    boost::numeric::ublas::matrix<float> translationMatrix (4,4);
+    generateSquareTraslationMatrix(translationMatrix,-displacement_[0],-displacement_[1],-displacement_[2]);
 
-        extraMesh->applyMatrixTransform(inverseTranslationMatrix,4);
-        extraMesh->applyMatrixTransform(translationMatrix,4);
+    if (meshRend != nullptr && meshRend->getBaseMesh() != nullptr) {
+        meshRend->getBaseMesh()->applyMatrixTransform(inverseTranslationMatrix,4);
+        meshRend->getBaseMesh()->applyMatrixTransform(translationMatrix,4);
+    }
+
+   for (const auto& renderer:visualizeMeshRends) {
+        renderer->getBaseMesh()->applyMatrixTransform(inverseTranslationMatrix,4);
+        renderer->getBaseMesh()->applyMatrixTransform(translationMatrix,4);
     }
 
     this->displacement = displacement_;
     updateGL();
+}
+
+bool CompareMeshWidgetViewer::isRendering() {
+    return meshRend != nullptr || !visualizeMeshRends.empty();
+}
+
+Eigen::Vector3f CompareMeshWidgetViewer::getSceneCenter(){
+    Eigen::Vector3f min = {std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),std::numeric_limits<float>::max()};
+    Eigen::Vector3f max = {-std::numeric_limits<float>::max(),-std::numeric_limits<float>::max(),-std::numeric_limits<float>::max()};
+    if (meshRend != nullptr && meshRend->getBaseMesh() != nullptr) {
+        auto boundingBox = getBoundingBox(meshRend->getBaseMesh());
+        min = boundingBox.first;
+        max = boundingBox.second;
+    }
+
+    for (const auto& rend : visualizeMeshRends) {
+        auto boundingBox = getBoundingBox(rend->getBaseMesh());
+        min = min.cwiseMin(boundingBox.first);
+        max = max.cwiseMax(boundingBox.second);
+    }
+    std::cout << (max - min) / 2 + min << std::endl;
+    return (max - min) / 2 + min + displacement;
+}
+
+std::pair<Eigen::Vector3f, Eigen::Vector3f> CompareMeshWidgetViewer::getBoundingBox(BaseMesh* baseMesh) {
+    Eigen::Vector3f min = {std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),std::numeric_limits<float>::max()};
+    Eigen::Vector3f max = {-std::numeric_limits<float>::max(),-std::numeric_limits<float>::max(),-std::numeric_limits<float>::max()};
+    for (const auto& vertex:baseMesh->getMesh()->vertices()) {
+        auto p = baseMesh->getMesh()->point(vertex);
+        min[0] = std::min(min[0], p[0]);
+        min[1] = std::min(min[1], p[1]);
+        min[2] = std::min(min[2], p[2]);
+
+        max[0] = std::max(max[0], p[0]);
+        max[1] = std::max(max[1], p[1]);
+        max[2] = std::max(max[2], p[2]);
+    }
+    return {min,max};
 }
 
 

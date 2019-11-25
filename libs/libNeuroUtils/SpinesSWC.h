@@ -230,7 +230,9 @@ namespace NSSpinesSWC
 
       void distributeSpines(const vector<Spine> &spines,const std::string& neuronName,const OpenMesh::Vec3f& diplacement, BBDD::BBDD bbdd, const std::string& tmpPath);
 
-      static const std::vector<MeshDef::Color> spineColors;
+      static MeshDef::Color getRandomColor();
+
+      static const std::vector<Qt::GlobalColor > spineColors;
       static QRandomGenerator random;
   };
 }
