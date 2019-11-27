@@ -38,8 +38,8 @@ private:
     QCheckBox* comparaMeshesCheckbox;
     QHBoxLayout* render1;
     QHBoxLayout* render2;
-    QHBoxLayout* transferGrid1;
-    QHBoxLayout* transferGrid2;
+    QWidget* transfer1;
+    QWidget* transfer2;
     CompareMeshWidgetViewer* viewer1;
     CompareMeshWidgetViewer* viewer2;
     std::string tmpPath;

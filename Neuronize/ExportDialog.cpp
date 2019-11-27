@@ -29,7 +29,7 @@ ExportDialog::ExportDialog(QWidget *parent): QDialog(parent) {
 
     allCheckBox = new QCheckBox(tr("Select All"), this);
 
-    auto title = new QLabel("Select neurons for export");
+    auto title = new QLabel("Select neurons to export");
     title->setAlignment(Qt::AlignHCenter);
 
     auto mainLayout = new QVBoxLayout();

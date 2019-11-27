@@ -58,7 +58,7 @@ void CompareMeshesWidget::initUi() {
     viewer1->setSizePolicy(QSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding));
     viewer1->setMaximumSize(1000,1000);
     render1->setSpacing(6);
-    render1->addItem(transferGrid1);
+    render1->addWidget(transfer1);
     render1->addWidget(viewer1);
 
     viewer2 = new CompareMeshWidgetViewer(2,this);
@@ -66,7 +66,7 @@ void CompareMeshesWidget::initUi() {
     viewer2->setMaximumSize(1000,1000);
     render2->setSpacing(6);
     render2->addWidget(viewer2);
-    render2->addItem(transferGrid2);
+    render2->addWidget(transfer2);
 
     viewer1->setupViewer();
     viewer2->setupViewer();
@@ -222,17 +222,20 @@ void CompareMeshesWidget::initRender() {
 }
 
 void CompareMeshesWidget::generateTransfer() {
-    transferGrid1 = new QHBoxLayout(this);
-    transferGrid2 = new QHBoxLayout(this);
+    transfer1 = new QWidget(this);
+    transfer2 = new QWidget(this);
 
-    auto transferLayout1 = new QVBoxLayout(this);
-    auto transferLayout2 = new QVBoxLayout(this);
+    auto transferGrid1 = new QHBoxLayout(transfer1);
+    auto transferGrid2 = new QHBoxLayout(transfer2);
+
+    auto transferLayout1 = new QVBoxLayout(transfer1);
+    auto transferLayout2 = new QVBoxLayout(transfer2);
 
     float inc = 1.0f/ NUMBER_OF_COLORS;
     float value = 0.0f;
-    for (int i=0 ; i< NUMBER_OF_COLORS; i++) {
-        auto widget1 = new QWidget(this);
-        auto widget2 = new QWidget(this);
+    for (size_t i=0 ; i< NUMBER_OF_COLORS; i++) {
+        auto widget1 = new QWidget(transfer1);
+        auto widget2 = new QWidget(transfer2);
         auto color = MeshVCG::getColor(value);
         widget1->setStyleSheet("background-color:" + color.name() + ";" );
         widget2->setStyleSheet("background-color:" + color.name() + ";");
@@ -245,14 +248,14 @@ void CompareMeshesWidget::generateTransfer() {
         transferLayout2->addWidget(widget2);
     }
 
-    auto textLayout1 = new QVBoxLayout(this);
-    auto textLayout2 = new QVBoxLayout(this);
+    auto textLayout1 = new QVBoxLayout(transfer1);
+    auto textLayout2 = new QVBoxLayout(transfer2);
 
     for (int i =0 ; i< NUMBER_OF_TEXT - 1; i++) {
-        auto label1 = new QLabel(this);
+        auto label1 = new QLabel(transfer1);
         label1->setSizePolicy(QSizePolicy(QSizePolicy::Maximum,QSizePolicy::Minimum));
         label1->setText("0");
-        auto label2 = new QLabel(this);
+        auto label2 = new QLabel(transfer2);
         label2->setSizePolicy(QSizePolicy(QSizePolicy::Maximum,QSizePolicy::Minimum));
         label2->setText("0");
 
@@ -265,9 +268,9 @@ void CompareMeshesWidget::generateTransfer() {
         textLayout2->addStretch();
     }
 
-    auto label1 = new QLabel(this);
+    auto label1 = new QLabel(transfer1);
     label1->setText("0");
-    auto label2 = new QLabel(this);
+    auto label2 = new QLabel(transfer2);
     label2->setText("0");
 
     labels1.push_back(label1);
@@ -280,6 +283,9 @@ void CompareMeshesWidget::generateTransfer() {
     transferGrid1->addItem(textLayout1);
     transferGrid2->addItem(textLayout2);
     transferGrid2->addItem(transferLayout2);
+
+    transfer1->setLayout(transferGrid1);
+    transfer2->setLayout(transferGrid2);
 
 }
 
@@ -340,6 +346,8 @@ void CompareMeshesWidget::onColorsChange(int state) {
     minLabel2->setVisible(visible);
     meanLabe1->setVisible(visible);
     meanLabel2->setVisible(visible);
+    transfer1->setVisible(visible);
+    transfer2->setVisible(visible);
     if (visible) {
         QMessageBox::information(this,tr("Neuronize"),tr("Please note that mesh comparison is"
                                                          " intended for the comparison of two individual objects"));
