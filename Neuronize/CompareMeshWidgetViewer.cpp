@@ -51,6 +51,14 @@ void CompareMeshWidgetViewer::initLight() {
     lights->SetLightType ( 0 );
 }
 
+void CompareMeshWidgetViewer::removeMesh() {
+    delete mesh;
+    mesh = nullptr;
+    delete meshRend;
+    meshRend = nullptr;
+    updateGL();
+}
+
 void CompareMeshWidgetViewer::setMesh(const std::string& filename) {
     if (mesh != nullptr) {
         delete mesh;

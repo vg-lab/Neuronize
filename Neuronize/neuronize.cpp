@@ -153,6 +153,9 @@ void Neuronize::resetNeuronnizeInterface ( )
   mNeuroGeneratorWidget = new NeuroGeneratorWidget ( tempDir.path(), this );
   ui.verticalLayout_DendritesGenerator->addWidget ( mNeuroGeneratorWidget );
   mNeuroGeneratorWidget->loadSpinesModelFromPath ( QCoreApplication::applicationDirPath() + "/Content/Spines/Low/" );
+  connect(mNeuroGeneratorWidget,&NeuroGeneratorWidget::finish,this,[=](){
+     resetNeuronnizeInterface();
+  });
 
   //mNeuroGeneratorWidget ->getUI().tabWidget_RenderControl->removeTab(1);
 
@@ -219,11 +222,10 @@ void Neuronize::showSomaDeformer ( )
 
   mFullSWCFilePath = mSomaCreatorWidget->getFullPathToSWCFile ( );
 
-    ui.tabWidget_MainContainer->removeTab(0);
-    ui.tabWidget_MainContainer->removeTab(0);
   ui.tabWidget_MainContainer->removeTab ( 0 );
   ui.tabWidget_MainContainer->insertTab ( 0, ui.tab_SomaGenerator, "Soma builder" );
-
+  ui.tabWidget_MainContainer->setTabEnabled(1,false);
+  ui.tabWidget_MainContainer->setTabEnabled(2,false);
 
   mSomaDeformerWidget->loadPredefinedXMLSomaDef();
   //mSomaDeformerWidget->startDeformation();
@@ -241,6 +243,7 @@ void Neuronize::showDendriteGenerator ( )
 
   ui.tabWidget_MainContainer->removeTab ( 0 );
   ui.tabWidget_MainContainer->insertTab ( 0, ui.tab_DendritesGenerator, "Neurites/Spines builder" );
+  ui.tabWidget_MainContainer->setCurrentIndex(0);
 
   mNeuroGeneratorWidget->setSpines(mSomaCreatorWidget->getSpines());
   mNeuroGeneratorWidget->setContours(mSomaCreatorWidget->getContours());

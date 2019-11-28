@@ -1174,6 +1174,10 @@ void SomaCreatorWidget::onGenerateNeurons() {
     emit generateNeurons(inputDir,outputDir,subdivisions,baseName);
 }
 
+SWCImporter *SomaCreatorWidget::getMswcImporter() const {
+    return mSWCImporter;
+}
+
 
 
 

@@ -107,6 +107,8 @@ public slots:
 
     void resetToSomaState ( );
 
+    void finish();
+
   private:
     Ui::NeuroGeneratorWidget ui;
 

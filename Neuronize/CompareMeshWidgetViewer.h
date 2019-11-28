@@ -37,6 +37,7 @@ public:
     void setDisplacement(Eigen::Vector3f displacement);
     Eigen::Vector3f getSceneCenter();
     bool isRendering();
+    void removeMesh();
 
 signals:
     void viewChanged( QMouseEvent *mouseMoveEvent, QWheelEvent* whellEvent, QMouseEvent* mousePressEvent, QMouseEvent* mouseReleaseEvent);

@@ -580,10 +580,12 @@ void NeuroGeneratorWidget::generateSpines ( )
           viewer->generateRepairedImarisSpines(this->neuron, mTempDir.toStdString());
   }
 
-
+  delete this->msgBox;
+  this->msgBox = new QMessageBox(this);
   this->msgBox->setText("The construction of the spines is over");
   this->msgBox->setWindowTitle("Build Spines");
   this->msgBox->exec();
+
 
 }
 
@@ -866,6 +868,7 @@ void NeuroGeneratorWidget::exportNeuronAndSpines ( )
   }
 
   QMessageBox::information(this, tr("Neuronize"),tr("The process with this neuron is over. You can process a new neuron, repair meshes, or compare exported meshes."));
+  emit finish();
 }
 
 void NeuroGeneratorWidget::joinSpines ( )

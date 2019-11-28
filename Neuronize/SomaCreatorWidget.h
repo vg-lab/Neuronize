@@ -173,6 +173,8 @@ public:
     const vector<Spine> &getSpines() const;
     const vector<vector<OpenMesh::Vec3d>> &getContours() const;
 
+    SWCImporter *getMswcImporter() const;
+
 private:
 
     bool isIdInContainer ( unsigned int pId, std::vector < unsigned int > pVector );

@@ -74,19 +74,18 @@ void CompareMeshesWidget::initUi() {
     auto buttonLayout1 = new QVBoxLayout(this);
     buttonLayout1->addWidget(addMeshVisualize1);
     buttonLayout1->addWidget(removeMeshVisualize1);
-   // buttonLayout1->addStretch();
 
 
     auto buttonLayout2 = new QVBoxLayout(this);
     buttonLayout2->addWidget(addMeshVisualize2);
     buttonLayout2->addWidget(removeMeshVisualize2);
-    //buttonLayout2->addStretch();
 
     auto visualizeMeshLayout1 = new QHBoxLayout(this);
     visualizeMeshLayout1->setSpacing(6);
     visualizeMeshLayout1->addItem(buttonLayout1);
     visualizeMeshLayout1->addWidget(listMeshes1);
     auto visualizeMeshLayout2 = new QHBoxLayout(this);
+    visualizeMeshLayout2->setSpacing(6);
     visualizeMeshLayout2->addItem(buttonLayout2);
     visualizeMeshLayout2->addWidget(listMeshes2);
 
@@ -163,8 +162,16 @@ void CompareMeshesWidget::initConnections() {
 }
 
 void CompareMeshesWidget::loadFileDialog(QLineEdit *target, const QString &title, const QString &types) {
+    if (!mesh1Path->text().isEmpty() && !mesh2Path->text().isEmpty()) {
+        mesh1Path->setText("");
+        mesh2Path->setText("");
+        viewer1->removeMesh();
+        viewer2->removeMesh();
+
+    }
     auto file = QFileDialog::getOpenFileName(this,title,QString(),types);
     target->setText(file);
+
     if (!mesh1Path->text().isEmpty() && !mesh2Path->text().isEmpty()) {
        initRender();
     }
@@ -327,6 +334,9 @@ void CompareMeshesWidget::addMesh(QListWidget *list,CompareMeshWidgetViewer* vie
 
 void CompareMeshesWidget::removeMesh(QListWidget *list,CompareMeshWidgetViewer* viewer) {
     auto selectedItems = list->selectedItems();
+    if (selectedItems.isEmpty()) {
+        QMessageBox::warning(this,tr("Neuronize"),tr("Please select a mesh to remove from view"));
+    }
     for (const auto& item : selectedItems) {
         int index = list->row(item);
         list->takeItem(index);

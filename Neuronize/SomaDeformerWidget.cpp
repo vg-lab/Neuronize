@@ -342,10 +342,21 @@ void SomaDeformerWidget::exportModel ( )
   }
   else
   {
-      fileName += ".obj";
+      auto fileNameModel = fileName;
+      fileNameModel += ".obj";
     viewer->setNormalizeExportedModel ( ui.checkBox_NormalizeModel->isChecked ( ));
-    viewer->exportModel ( fileName );
+    viewer->exportModel ( fileNameModel );
+    MeshVCG meshVcg (fileNameModel.toStdString());
+    std::ofstream csvFile;
+    csvFile.open(fileName.toStdString() + ".csv",std::ofstream::out);
+    csvFile << "Area;Area2D;Volume;Mass Center-x;Mass Center-y;Mass Center-z" << std::endl;
+    auto massCenter = meshVcg.getCenter();
+    auto displacement = this->somaCreator->getMswcImporter()->getDisplacement();
+    massCenter += displacement;
+    csvFile << meshVcg.getArea() << ";" << meshVcg.getMax2DArea(0.5f) << ";" << meshVcg.getVolume() << ";" <<
+                massCenter[0] << ";" << massCenter[1] << ";" << massCenter[2] << std::endl;
 
+    csvFile.close();
     //Export configuration name
     QString result = viewer->configurationToString ( );
     strToFile ( result.toStdString ( ), ( fileName.toStdString ( ) + ".cfg" ));
