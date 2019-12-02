@@ -357,6 +357,10 @@ void SomaDeformerWidget::exportModel ( )
                 massCenter[0] << ";" << massCenter[1] << ";" << massCenter[2] << std::endl;
 
     csvFile.close();
+
+    if (this->somaCreator->getNeuron() != nullptr) {
+        this->somaCreator->getNeuron()->to_asc(meshVcg.get)
+    }
     //Export configuration name
     QString result = viewer->configurationToString ( );
     strToFile ( result.toStdString ( ), ( fileName.toStdString ( ) + ".cfg" ));

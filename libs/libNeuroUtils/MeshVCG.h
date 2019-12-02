@@ -82,6 +82,7 @@ class MyFace
         double getArea();
 
         std::vector<MeshVCG*> slice(float zStep);
+        std::vector<std::vector<Eigen::Vector3f>> sliceContours(float zStep);
         const std::string &getPath() const;
 
         float getMax2DArea(float zStep = 0.1f);
