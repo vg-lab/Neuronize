@@ -100,9 +100,9 @@ class SomaCreatorWidget: public QWidget, public Ui::SomaCreatorWidget
 
     void onProcessFinish();
 
-    void showWarningDialogIncorrectConnections(int &newThreshold);
+    void showWarningDialogIncorrectConnections(float &newThreshold);
 
-    void showWarningDialogReaminingSegments(int sobrantes, int &newThreshold);
+    void showWarningDialogReaminingSegments(int sobrantes, float &newThreshold);
 
     void onOkPressed();
 

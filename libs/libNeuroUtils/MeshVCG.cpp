@@ -264,13 +264,16 @@ std::vector<MeshVCG*> MeshVCG::slice(float zStep) {
 
 std::vector<std::vector<Eigen::Vector3f>> MeshVCG::sliceContours(float zStep){
     auto contours = slice(zStep);
+    std::vector<std::vector<Eigen::Vector3f>> contoursEigen;
     for (const auto& contour: contours) {
         std::vector<Eigen::Vector3f> contourEigen;
         for ( auto vi = contour->mesh.vert.begin(); vi != contour->mesh.vert.end();++vi){
             auto point = vi->P();
             contourEigen.emplace_back(point[0],point[1],point[2]);
         }
+        contoursEigen.push_back(contourEigen);
     }
+    return contoursEigen;
 }
 
 

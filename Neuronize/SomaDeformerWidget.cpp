@@ -359,7 +359,10 @@ void SomaDeformerWidget::exportModel ( )
     csvFile.close();
 
     if (this->somaCreator->getNeuron() != nullptr) {
-        this->somaCreator->getNeuron()->to_asc(meshVcg.get)
+        std::ofstream ascFile;
+        ascFile.open(fileName.toStdString() + ".asc",std::ofstream::out);
+        ascFile << this->somaCreator->getNeuron()->to_asc(meshVcg.sliceContours(0.1f));
+        ascFile.close();
     }
     //Export configuration name
     QString result = viewer->configurationToString ( );

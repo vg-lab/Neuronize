@@ -965,19 +965,19 @@ void SomaCreatorWidget::processSkel(const std::string &fileName) {
         basalFilesStd.push_back(string.toStdString());
     }
 
-    int newThreshold = 3;
+    float newThreshold = 0.5f;
     auto neuron = new skelgenerator::Neuron(apiFile, basalFilesStd, imarisFile, longsFile, newThreshold);
     bool ignore = false;
     while (neuron->isIncorrectConecctions() || neuron->getReamingSegments() > 0 && !ignore) {
         if (neuron->isIncorrectConecctions()) {
             QMetaObject::invokeMethod(this, "showWarningDialogIncorrectConnections", Qt::BlockingQueuedConnection,
-                                      Q_ARG(int &, newThreshold));
+                                      Q_ARG(float &, newThreshold));
 
         } else {
             if (neuron->getReamingSegments() > 0) {
                 QMetaObject::invokeMethod(this, "showWarningDialogReaminingSegments", Qt::BlockingQueuedConnection,
                                           Q_ARG(int, neuron->getReamingSegments()),
-                                          Q_ARG(int &, newThreshold));
+                                          Q_ARG(float &, newThreshold));
             }
         }
 
@@ -1014,7 +1014,7 @@ void SomaCreatorWidget::onProcessFinish() {
     generateXMLSoma(outPath, true);
 }
 
-void SomaCreatorWidget::showWarningDialogIncorrectConnections(int &newThreshold) {
+void SomaCreatorWidget::showWarningDialogIncorrectConnections(float &newThreshold) {
     auto *msgBox = new QMessageBox(this);;
     std::string msg = "The neuron maybe has incorrect connections.\t";
     msgBox->setIcon(QMessageBox::Warning);
@@ -1032,18 +1032,19 @@ void SomaCreatorWidget::showWarningDialogIncorrectConnections(int &newThreshold)
         inputDialog.setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
         inputDialog.setLabelText("New Connection Threshold");
         inputDialog.setTextValue("Insert new value");
-        inputDialog.setInputMode(QInputDialog::IntInput);
-        inputDialog.setIntRange(0, 40);
-        inputDialog.setIntStep(1);
-        inputDialog.setIntValue(newThreshold);
+        inputDialog.setInputMode(QInputDialog::DoubleInput);
+        inputDialog.setDoubleRange(0.0,40.0);
+        inputDialog.setDoubleStep(0.1f);
+        inputDialog.setDoubleDecimals(2);
+        inputDialog.setDoubleValue(newThreshold);
         inputDialog.exec();
-        newThreshold = inputDialog.intValue();
+        newThreshold = inputDialog.doubleValue();
     } else {
         newThreshold = -1;
     }
 }
 
-void SomaCreatorWidget::showWarningDialogReaminingSegments(int sobrantes, int &newThreshold) {
+void SomaCreatorWidget::showWarningDialogReaminingSegments(int sobrantes, float &newThreshold) {
     QMessageBox *msgBox = new QMessageBox(this);;
     std::string msg = "This neuron has " + std::to_string(sobrantes) +
                       " segments that have not been connected and therefore will be ignored.";
@@ -1062,12 +1063,13 @@ void SomaCreatorWidget::showWarningDialogReaminingSegments(int sobrantes, int &n
         inputDialog.setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
         inputDialog.setLabelText("New Connection Threshold");
         inputDialog.setTextValue("Insert new value");
-        inputDialog.setInputMode(QInputDialog::IntInput);
-        inputDialog.setIntRange(0, 40);
-        inputDialog.setIntStep(1);
-        inputDialog.setIntValue(newThreshold);
+        inputDialog.setInputMode(QInputDialog::DoubleInput);
+        inputDialog.setDoubleRange(0.0,40.0);
+        inputDialog.setDoubleStep(0.1f);
+        inputDialog.setDoubleDecimals(2);
+        inputDialog.setDoubleValue(newThreshold);
         inputDialog.exec();
-        newThreshold = inputDialog.intValue();
+        newThreshold = inputDialog.doubleValue();
 
 
     } else {
