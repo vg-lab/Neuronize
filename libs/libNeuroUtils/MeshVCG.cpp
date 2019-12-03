@@ -262,15 +262,32 @@ std::vector<MeshVCG*> MeshVCG::slice(float zStep) {
     return contours;
 }
 
-std::vector<std::vector<Eigen::Vector3f>> MeshVCG::sliceContours(float zStep){
+std::vector<std::vector<Eigen::Vector3f>> MeshVCG::sliceContours(float zStep) {
     auto contours = slice(zStep);
     std::vector<std::vector<Eigen::Vector3f>> contoursEigen;
-    for (const auto& contour: contours) {
+    for (const auto &contour: contours) {
         std::vector<Eigen::Vector3f> contourEigen;
-        for ( auto vi = contour->mesh.vert.begin(); vi != contour->mesh.vert.end();++vi){
-            auto point = vi->P();
-            contourEigen.emplace_back(point[0],point[1],point[2]);
-        }
+        MyVertex* initVertex = &(*(contour->mesh.vert.begin()));
+        vcg::tri::UpdateTopology<MyMesh>::VertexEdge(contour->mesh);
+        MyVertex* currentVertex = initVertex;
+        MyEdge* lastEdge = nullptr;
+        do {
+            auto point = currentVertex->P();
+            contourEigen.emplace_back(point[0], point[1], point[2]);
+
+            vcg::edge::VEIterator<MyEdge> vei (currentVertex);
+            MyEdge *edge = nullptr;
+            if (vei.e == lastEdge) {
+                ++vei;
+                edge = vei.e;
+            } else {
+                edge = vei.e;
+            }
+
+            lastEdge = edge;
+            currentVertex = currentVertex == edge->V(0) ? edge->V(1) : edge->V(0);
+        } while (initVertex != currentVertex);
+        delete contour;
         contoursEigen.push_back(contourEigen);
     }
     return contoursEigen;

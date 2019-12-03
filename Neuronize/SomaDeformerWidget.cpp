@@ -344,8 +344,11 @@ void SomaDeformerWidget::exportModel ( )
   {
       auto fileNameModel = fileName;
       fileNameModel += ".obj";
-    viewer->setNormalizeExportedModel ( ui.checkBox_NormalizeModel->isChecked ( ));
+    //viewer->setNormalizeExportedModel ( ui.checkBox_NormalizeModel->isChecked ( ));
+    viewer->setNormalizeExportedModel ( false);
     viewer->exportModel ( fileNameModel );
+
+
     MeshVCG meshVcg (fileNameModel.toStdString());
     std::ofstream csvFile;
     csvFile.open(fileName.toStdString() + ".csv",std::ofstream::out);
@@ -361,7 +364,7 @@ void SomaDeformerWidget::exportModel ( )
     if (this->somaCreator->getNeuron() != nullptr) {
         std::ofstream ascFile;
         ascFile.open(fileName.toStdString() + ".asc",std::ofstream::out);
-        ascFile << this->somaCreator->getNeuron()->to_asc(meshVcg.sliceContours(0.1f));
+        ascFile << this->somaCreator->getNeuron()->to_asc(meshVcg.sliceContours(0.5f),{displacement[0],displacement[1],displacement[2]});
         ascFile.close();
     }
     //Export configuration name
