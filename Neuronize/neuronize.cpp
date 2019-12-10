@@ -30,7 +30,6 @@
 #include <QFutureWatcher>
 #include <clocale>
 
-#include <QSettings>
 #include <QtWidgets/QDialog>
 
 #define ENV "env"
@@ -685,19 +684,33 @@ void Neuronize::initPythonEnv() {
         envPath = configPath + "/" + ENV;
 
         if (!QFileInfo(envPath).exists()) {
-            string command = "\"\"" + QCoreApplication::applicationDirPath().toStdString() + "/" + INSTALL + " " + envPath.toStdString()+"\"";
-
-            QFuture<void> future = QtConcurrent::run([=]() { system(command.c_str()); });
-            QFutureWatcher<void> watcher;
-            watcher.setFuture(future);
+            std::string command = "\"" + QCoreApplication::applicationDirPath().toStdString() + "/" + INSTALL + "\" " + envPath.toStdString();
+            boost::process::ipstream errStream;
+            QFuture<int> future = QtConcurrent::run([&]() {
+                return boost::process::system(command, boost::process::std_out > stdout, boost::process::std_err > errStream,boost::process::std_in < stdin);
+            });
+            QFutureWatcher<int> watcher;
 
             QProgressDialog progress(this);
             connect(&watcher, SIGNAL(finished()), &progress, SLOT(close()));
+            watcher.setFuture(future);
             progress.setLabelText("Installing python dependencies");
             progress.setCancelButton(0);
             progress.setMaximum(0);
             progress.setMinimum(0);
             progress.exec();
+
+            std::string line;
+            std::string error;
+            while (errStream && std::getline(errStream, line) && !line.empty()) {
+                error += line;
+            }
+
+            if (future.result() != 0 || error.find("ERROR") != std::string::npos) {
+                QMessageBox::critical(this,tr("Neuronize"),tr("There was a problem initializing the python environment"));
+                hasPython = false;
+                ui.tabWidget_MainContainer->setTabEnabled(1,false);
+            }
         }
     } else {
         hasPython = false;
