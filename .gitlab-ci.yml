@@ -60,7 +60,7 @@ Win7-VS14-x64-subproject:
   - call %ENVFILESDIR%\eigen-3.1.2-vs12-x64.bat
   - call %ENVFILESDIR%\OpenMesh-6.3-vs14-x64.bat
   - call %ENVFILESDIR%\QGLViewer-2.6.3-vs14-x64.bat
-  - call %ENVFILESDIR%\Boost-1.64-vs14-x64.bat
+  - call %ENVFILESDIR%\Boost-1.71-vs14-x64.bat
   - call %ENVFILESDIR%\soil-vs14-x64.bat
   - call %ENVFILESDIR%\glm.bat
   - call %ENVFILESDIR%\glew-1.11.0.bat
