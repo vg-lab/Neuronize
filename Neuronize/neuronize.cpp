@@ -296,6 +296,7 @@ void Neuronize::showDendriteGenerator ( )
                        ->setPosition ( mSomaDeformerWidget->getViewer ( )->camera ( )->position ( ));
   mNeuroGeneratorWidget->getViewer ( )->camera ( )
                        ->setOrientation ( mSomaDeformerWidget->getViewer ( )->camera ( )->orientation ( ));
+  mNeuroGeneratorWidget->generateDendrites();
 }
 
 void Neuronize::showSpinesGenerator ( )

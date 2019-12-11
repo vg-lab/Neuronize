@@ -1161,9 +1161,13 @@ void NeuroGeneratorWidget::showSpinesTab ( )
     ui.tabWidget_RenderControl->removeTab ( 0 );
   }
 
-  ui.tabWidget_RenderControl->insertTab ( 0, ui.tab_SpinesCtrl, "Spines builder." );
-  ui.tabWidget_RenderControl->insertTab ( 1, ui.tab_AdvanceSpinesCtrl, "Advanced spines options." );
+  //ui.tabWidget_RenderControl->insertTab ( 0, ui.tab_SpinesCtrl, "Spines builder." );
+  ui.tabWidget_RenderControl->insertTab ( 0, ui.tab_AdvanceSpinesCtrl, "Advanced spines options." );
     //ui.tabWidget_RenderControl->insertTab ( 2, ui.tab_MoreAdvanceSpinesCtrl, "More Advanced spines options." );
+    ui.tabWidget_RenderControl->setCurrentIndex(0);
+    generateSpines();
+
+
 }
 
 void NeuroGeneratorWidget::RebuildWithAdvancedOptions ( )

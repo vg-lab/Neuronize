@@ -255,6 +255,8 @@ void SomaDeformerWidget::generateSoma ( )
       }
     }
   }
+
+  startDeformation();
 }
 
 void SomaDeformerWidget::startDeformation ( )
