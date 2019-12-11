@@ -273,7 +273,8 @@ std::vector<std::vector<Eigen::Vector3f>> MeshVCG::sliceContours(float zStep) {
         MyEdge* lastEdge = nullptr;
         do {
             auto point = currentVertex->P();
-            contourEigen.emplace_back(point[0], point[1], point[2]);
+            Eigen::Vector3f auxPoint (point[0], point[1], point[2]);
+            contourEigen.push_back(auxPoint);
 
             vcg::edge::VEIterator<MyEdge> vei (currentVertex);
             MyEdge *edge = nullptr;
