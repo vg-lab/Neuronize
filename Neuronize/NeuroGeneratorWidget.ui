@@ -44,7 +44,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>3</number>
+      <number>2</number>
      </property>
      <property name="tabsClosable">
       <bool>false</bool>
@@ -394,13 +394,6 @@
         <widget class="QPushButton" name="pushButton_GoSpinesAdvancedOptions">
          <property name="text">
           <string>Build spines</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButton_FinishNeuron">
-         <property name="text">
-          <string>Export without spines</string>
          </property>
         </widget>
        </item>
@@ -1662,7 +1655,6 @@
   <tabstop>spinBox_TubesHorResolution</tabstop>
   <tabstop>pushButton_GenerateNeuronMesh</tabstop>
   <tabstop>pushButton_NextStep</tabstop>
-  <tabstop>pushButton_FinishNeuron</tabstop>
   <tabstop>radioButton_AdvanceSpinesCtrl_Shape_DefaultDatabase</tabstop>
   <tabstop>radioButton_AdvanceSpinesCtrl_Shape_LoadDatabase</tabstop>
   <tabstop>scrollArea</tabstop>

@@ -104,7 +104,7 @@ private:
     void setMSNodeParams ( );
     void setUnCollapseSprings ( );
 
-    void exportModel ( );
+    void exportModel ( const QString& fileName );
 
     void setNormalizeExport ( );
 

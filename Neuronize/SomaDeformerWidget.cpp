@@ -58,7 +58,6 @@ SomaDeformerWidget::SomaDeformerWidget (const QString &tempDir, QWidget *parent 
                      this,
                      SLOT( loadPredefinedXMLSomaDefAndSimulate ( )) );
 
-  QObject::connect ( ui.pushButton_ExportModel, SIGNAL( clicked ( )), this, SLOT( exportModel ( )) );
   QObject::connect ( ui.pushButton_ImportSWC, SIGNAL( clicked ( )), this, SLOT( loadSWCFile ( )) );
 
   //Mass Spring conections
@@ -207,7 +206,6 @@ void SomaDeformerWidget::loadPredefinedXMLSomaDef ( )
 
   ui.pushButton_FinalizeSoma->setEnabled ( false );
   ui.pushButton_NextStep->setEnabled ( false );
-    ui.pushButton_ExportModel->setEnabled(false);
 }
 
 void SomaDeformerWidget::loadPredefinedXMLSomaDefAndGOAdvancedOptions ( )
@@ -332,18 +330,17 @@ void SomaDeformerWidget::setDendriticParams ( )
   );
 }
 
-void SomaDeformerWidget::exportModel ( )
+void SomaDeformerWidget::exportModel (const QString& fileName )
 {
 
-  QString fileName = QFileDialog::getSaveFileName ( this );
-  if ( fileName.isEmpty ( ))
-  {
-    return;
-  }
-  else
-  {
-      auto fileNameModel = fileName;
-      fileNameModel += ".obj";
+//  QString fileName = QFileDialog::getSaveFileName ( this );
+//  if ( fileName.isEmpty ( ))
+//  {
+//    return;
+//  }
+//  else
+//  {
+      auto fileNameModel = fileName + "/soma.obj";
     //viewer->setNormalizeExportedModel ( ui.checkBox_NormalizeModel->isChecked ( ));
     viewer->setNormalizeExportedModel ( false);
     viewer->exportModel ( fileNameModel );
@@ -351,7 +348,7 @@ void SomaDeformerWidget::exportModel ( )
 
     MeshVCG meshVcg (fileNameModel.toStdString());
     std::ofstream csvFile;
-    csvFile.open(fileName.toStdString() + ".csv",std::ofstream::out);
+    csvFile.open(fileName.toStdString() + "/soma.csv",std::ofstream::out);
     csvFile << "Area;Area2D;Volume;Mass Center-x;Mass Center-y;Mass Center-z" << std::endl;
     auto massCenter = meshVcg.getCenter();
     auto displacement = this->somaCreator->getMswcImporter()->getDisplacement();
@@ -363,14 +360,14 @@ void SomaDeformerWidget::exportModel ( )
 
     if (this->somaCreator->getNeuron() != nullptr) {
         std::ofstream ascFile;
-        ascFile.open(fileName.toStdString() + ".asc",std::ofstream::out);
+        ascFile.open(fileName.toStdString() + "/skel.asc",std::ofstream::out);
         ascFile << this->somaCreator->getNeuron()->to_asc(meshVcg.sliceContours(0.5f),{displacement[0],displacement[1],displacement[2]});
         ascFile.close();
     }
     //Export configuration name
     QString result = viewer->configurationToString ( );
-    strToFile ( result.toStdString ( ), ( fileName.toStdString ( ) + ".cfg" ));
-  }
+    strToFile ( result.toStdString ( ), ( fileName.toStdString ( ) + "/soma.cfg" ));
+  //}
 }
 
 void SomaDeformerWidget::exportModelWithSTDName ( )
@@ -383,6 +380,8 @@ void SomaDeformerWidget::exportModelWithSTDName ( )
   viewer->setNormalizeExportedModel(true);
   QString fileName = mtmpDir + "/SomaGenerated/SomaDeformed.obj";
   viewer->exportModel ( fileName );
+
+  this->exportModel(Neuronize::outPath);
 
 
     //Export configuration name
@@ -492,7 +491,6 @@ void SomaDeformerWidget::showContinueMsg ( )
 
   ui.pushButton_FinalizeSoma->setEnabled ( true );
   ui.pushButton_NextStep->setEnabled ( true );
-    ui.pushButton_ExportModel->setEnabled(true);
 }
 
 void SomaDeformerWidget::setModeledSoma(std::string path) {

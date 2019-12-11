@@ -24,7 +24,7 @@
 #include <libs/libQtNeuroUtils/QtThreadsManager.hpp>
 
 //#include <QtGui>
-
+std::vector<QString> NeuroGeneratorWidget::spineNames = {"Distribution","RealPos","Filament","Imaris","Repaired"};
 NeuroGeneratorWidget::NeuroGeneratorWidget (const QString &tmpDir, QWidget *parent )
   : QWidget ( parent )
 {
@@ -167,7 +167,6 @@ NeuroGeneratorWidget::NeuroGeneratorWidget (const QString &tmpDir, QWidget *pare
                      this,
                      SLOT( RebuildWithAdvancedOptions ( )) );
 
-  QObject::connect ( ui.pushButton_FinishNeuron, SIGNAL( clicked ( )), this, SLOT( emitFinishSpinesAndRestart ( )) );
 
   //Modificaciones Presentaci�n -> Javier de DeFelipe
   ui.checkBox_piramidalSoma->setCheckState (( Qt::Checked ));
@@ -493,7 +492,7 @@ void NeuroGeneratorWidget::generateSpines ( )
   else if ( ui.radioButton_RealSpines->isChecked ( ))
     lGenerateOption = 3;
   else if ( ui.radioButton_SegmentSpines->isChecked ( ))
-    lGenerateOption = 4;
+      lGenerateOption = 4;
   else if (ui.radioButton_VrmlSpines->isChecked ( ))
     lGenerateOption = 5;
   else if (ui.radioButton_RealAscPos->isChecked ( ))
@@ -586,6 +585,7 @@ void NeuroGeneratorWidget::generateSpines ( )
   this->msgBox->setWindowTitle("Build Spines");
   this->msgBox->exec();
 
+  this->exportSpinesInmediatly(Neuronize::outPath + "/spines" + NeuroGeneratorWidget::spineNames[lGenerateOption - 4]+".obj");
 
 }
 
@@ -1125,6 +1125,7 @@ void NeuroGeneratorWidget::emitFinishNeuronSurfaceAndRestart ( )
 
 void NeuroGeneratorWidget::emitFinishNeuronSurfaceAndGoToSpines ( )
 {
+  viewer->exportNeuron(Neuronize::outPath + "/Neuron.obj");
   emit finishNeuronSurfaceAndGoToSpines ( );
 }
 

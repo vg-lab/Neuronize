@@ -21,6 +21,7 @@
 #include "SomaCreatorWidget.h"
 #include "CompareMeshesWidget.h"
 #include "RepairWidget.h"
+#include "neuronize.h"
 
 #include <string>
 #include <fstream>
@@ -105,7 +106,6 @@ SomaCreatorWidget::SomaCreatorWidget (const QString &tempDir, QWidget *parent )
 
     // Connections of load files
     connect(ui.traces, &QRadioButton::toggled, this, &SomaCreatorWidget::onRadioChanged);
-    connect(ui.saveCheckBox, &QCheckBox::stateChanged, this, &SomaCreatorWidget::onSaveChanged);
     connect(ui.tracePathButton, &QPushButton::released, [=]() {
         openSelectFileDialog(ui.tracePath, "Select trace file",
                              "NeuroMorpho(*.swc *.SWC);;Neurolucida ASC(*.asc *.ASC)", false);
@@ -125,8 +125,8 @@ SomaCreatorWidget::SomaCreatorWidget (const QString &tempDir, QWidget *parent )
 
     connect(ui.pushButton_GoToSomaDeformer, &QPushButton::released, this, &SomaCreatorWidget::onOkPressed);
 
-    connect(ui.ascButton, &QPushButton::released, [=]() {
-        openSaveFileDialog(ui.ascPath, "Select ASC file", "Neurolucida (*.asc *.ASC)");
+    connect(ui.outputButton, &QPushButton::released, [=]() {
+        openDirectory(ui.outputPath, "Select output directory");
     });
 
 
@@ -572,9 +572,7 @@ void SomaCreatorWidget::resetInterface ( )
     ui.apiPath->setText("");
     ui.basalPath->setText("");
     ui.imarisPath->setText("");
-    ui.saveCheckBox->setChecked(false);
-    ui.ascPath->setDisabled(true);
-    ui.ascPath->setText("");
+    ui.outputPath->setText("");
     ui.horizontalWidget->hide();
     //ui.pushButton_GoToSomaDeformer->setEnabled ( false );
 }
@@ -881,21 +879,6 @@ void SomaCreatorWidget::onRadioChanged(bool b) {
     ui.longsPath->setDisabled(b);
     ui.imarisPath->setDisabled(b);
     ui.imarisPathButton->setDisabled(b);
-    ui.saveCheckBox->setDisabled(b);
-    if (b) {
-        ui.ascButton->setDisabled(b);
-        ui.ascPath->setDisabled(b);
-    } else {
-        bool active = ui.saveCheckBox->checkState() == Qt::Checked;
-        ui.ascPath->setDisabled(!active);
-        ui.ascButton->setDisabled(!active);
-    }
-}
-
-void SomaCreatorWidget::onSaveChanged(int state) {
-    bool active = state == Qt::Checked;
-    ui.ascPath->setDisabled(!active);
-    ui.ascButton->setDisabled(!active);
 }
 
 void
@@ -923,33 +906,41 @@ void SomaCreatorWidget::openSaveFileDialog(QLineEdit *target, const QString &tit
 
 }
 
+void SomaCreatorWidget::openDirectory(QLineEdit* target, const QString& title){
+    auto dir = QFileDialog::getExistingDirectory(this,title,QString());
+    target->setText(dir);
+}
+
 void SomaCreatorWidget::onOkPressed() {
-    if (ui.traces->isChecked()) {
-        if (ui.tracePath->text().isEmpty()) {
-            QToolTip::showText(ui.tracePath->mapToGlobal(QPoint(0, 0)), "Need a Input File");
-        } else {
-            generateXMLSoma(ui.tracePath->text(), true);
-        }
+    if (ui.outputPath->text().isEmpty()) {
+        QToolTip::showText(ui.outputPath->mapToGlobal(QPoint(0, 0)), "Need a Output File");
     } else {
-        if (ui.basalPath->text().isEmpty()) {
-            QToolTip::showText(ui.tracePath->mapToGlobal(QPoint(0, 0)), "Need a Input File");
-        } else if (ui.saveCheckBox->checkState() == Qt::Checked && ui.ascPath->text().isEmpty()) {
-            QToolTip::showText(ui.ascPath->mapToGlobal(QPoint(0, 0)), "Need a Output File");
+        Neuronize::outPath = ui.outputPath->text();
+        if (ui.traces->isChecked()) {
+            if (ui.tracePath->text().isEmpty()) {
+                QToolTip::showText(ui.tracePath->mapToGlobal(QPoint(0, 0)), "Need a Input File");
+            } else {
+                generateXMLSoma(ui.tracePath->text(), true);
+            }
         } else {
-            QFileInfo fi (ui.basalPath->text());
-            auto name = fi.dir().dirName();
+            if (ui.basalPath->text().isEmpty()) {
+                QToolTip::showText(ui.tracePath->mapToGlobal(QPoint(0, 0)), "Need a Input File");
+            } else {
+                QFileInfo fi(ui.basalPath->text());
+                auto name = fi.dir().dirName();
 
-            this->mInputFile = this->mExitDirectory + "/" + name + ".asc";
+                this->mInputFile = this->mExitDirectory + "/" + name + ".asc";
 
-            QFuture<void> future = QtConcurrent::run(
-                    [=]() { processSkel(this->mInputFile.toStdString());});
+                QFuture<void> future = QtConcurrent::run(
+                        [=]() { processSkel(this->mInputFile.toStdString()); });
 
-            futureWatcher->setFuture(future);
-            progresDialog = new QProgressDialog("Generating tracing", "Cancel", 0, 0, this);
-            progresDialog->setValue(0);
-            progresDialog->setCancelButton(0);
-            progresDialog->setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
-            progresDialog->exec();
+                futureWatcher->setFuture(future);
+                progresDialog = new QProgressDialog("Generating tracing", "Cancel", 0, 0, this);
+                progresDialog->setValue(0);
+                progresDialog->setCancelButton(0);
+                progresDialog->setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
+                progresDialog->exec();
+            }
         }
     }
 }
@@ -996,22 +987,16 @@ void SomaCreatorWidget::onProcessFinish() {
     progresDialog->setMaximum(1);
     progresDialog->setValue(1);
     QMessageBox msgBox(this);
-    QString outPath;
-    if (ui.saveCheckBox->checkState() == Qt::Checked && ui.ascPath->text() != nullptr && ui.ascPath->text() != "") {
-        outPath = ui.ascPath->text();
-    } else {
-        outPath = this->mInputFile;
-    }
 
     std::ofstream file;
-    file.open(outPath.toStdString());
+    file.open(this->mInputFile.toStdString());
     file << this->neuron->to_asc();
     file.close();
 
     msgBox.setText("Task Finished");
     msgBox.setIcon(QMessageBox::Information);
     msgBox.exec();
-    generateXMLSoma(outPath, true);
+    generateXMLSoma(this->mInputFile, true);
 }
 
 void SomaCreatorWidget::showWarningDialogIncorrectConnections(float &newThreshold) {
@@ -1098,11 +1083,6 @@ void SomaCreatorWidget::onRadioChanged2(bool b) {
         ui.basalPathButton->setEnabled(!trace);
         ui.apiPath->setEnabled(!trace);
         ui.apiPathButton->setEnabled(!trace);
-        ui.saveCheckBox->setEnabled(!trace);
-        if (ui.saveCheckBox->isChecked()) {
-            ui.ascPath->setEnabled(!trace);
-            ui.ascButton->setEnabled(!trace);
-        }
 
         ui.inputDirectoryButton->setEnabled(false);
         ui.inputDirectoryPath->setEnabled(false);
@@ -1123,14 +1103,11 @@ void SomaCreatorWidget::onRadioChanged2(bool b) {
         ui.tracePathButton->setEnabled(false);
         ui.basalPathButton->setEnabled(false);
         ui.apiPathButton->setEnabled(false);
-        ui.saveCheckBox->setEnabled(false);
-        ui.ascButton->setEnabled(false);
+
 
         ui.tracePath->setEnabled(false);
         ui.basalPath->setEnabled(false);
         ui.apiPath->setEnabled(false);
-        ui.saveCheckBox->setEnabled(false);
-        ui.ascPath->setEnabled(false);
 
         ui.pushButton_GoToSomaDeformer->setEnabled(false);
 

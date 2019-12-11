@@ -96,6 +96,8 @@ class SomaCreatorWidget: public QWidget, public Ui::SomaCreatorWidget
 
     void openSaveFileDialog(QLineEdit *target, const QString &title, const QString &types);
 
+    void openDirectory(QLineEdit* target, const QString& title);
+
     void processSkel(const std::string &fileName);
 
     void onProcessFinish();
@@ -107,8 +109,6 @@ class SomaCreatorWidget: public QWidget, public Ui::SomaCreatorWidget
     void onOkPressed();
 
     void onRadioChanged(bool b);
-
-    void onSaveChanged(int state);
 
     void openSelectFileDialog(QLineEdit *target, const QString &title, const QString &types, bool multiFile);
 

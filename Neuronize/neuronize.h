@@ -60,6 +60,7 @@ class Neuronize: public QMainWindow
     static QString tmpPath;
     static QString configPath;
     static QString envPath;
+    static QString outPath;
     static bool hasPython;
 
   private:

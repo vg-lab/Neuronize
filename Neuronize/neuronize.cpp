@@ -41,6 +41,7 @@
 
 QString Neuronize::configPath;
 QString Neuronize::envPath;
+QString Neuronize::outPath;
 BBDD::BBDD Neuronize::bbdd;
 QString Neuronize::tmpPath;
 bool Neuronize::hasPython;
