@@ -98,25 +98,13 @@ class SomaCreatorWidget: public QWidget, public Ui::SomaCreatorWidget
 
     void openDirectory(QLineEdit* target, const QString& title);
 
-    void processSkel(const std::string &fileName);
-
-    void onProcessFinish();
-
-    void showWarningDialogIncorrectConnections(float &newThreshold);
-
-    void showWarningDialogReaminingSegments(int sobrantes, float &newThreshold);
-
-    void onOkPressed();
-
-    void onRadioChanged(bool b);
-
     void openSelectFileDialog(QLineEdit *target, const QString &title, const QString &types, bool multiFile);
-
-    void onRadioChanged2(bool b);
 
     void openDir(QLineEdit* des,QString test);
 
     void onGenerateNeurons();
+
+    void onGenerateOneNeuron();
 
   signals:
 
@@ -157,7 +145,6 @@ private:
     QString mMehsFileName;
     QString mExitDirectory;
     QString mInputFile;
-    QFutureWatcher<void> *futureWatcher;
 public:
     const QString &getInputFile() const;
 

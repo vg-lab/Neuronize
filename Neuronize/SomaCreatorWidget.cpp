@@ -22,6 +22,7 @@
 #include "CompareMeshesWidget.h"
 #include "RepairWidget.h"
 #include "neuronize.h"
+#include "WizzardInputOne.h"
 
 #include <string>
 #include <fstream>
@@ -104,40 +105,11 @@ SomaCreatorWidget::SomaCreatorWidget (const QString &tempDir, QWidget *parent )
   //connect(ui.pushButton_LoadSWCFile, &QPushButton::clicked,this, [=]() {generateXMLSoma ( QString("if6 cing porta 1 capa3 cel11 bis.ASC")); });
     //QObject::connect ( ui.pushButton_GoToSomaDeformer, SIGNAL( clicked ( )), this, SIGNAL( somaCreated ( )) );
 
-    // Connections of load files
-    connect(ui.traces, &QRadioButton::toggled, this, &SomaCreatorWidget::onRadioChanged);
-    connect(ui.tracePathButton, &QPushButton::released, [=]() {
-        openSelectFileDialog(ui.tracePath, "Select trace file",
-                             "NeuroMorpho(*.swc *.SWC);;Neurolucida ASC(*.asc *.ASC)", false);
-    });
-    connect(ui.apiPathButton, &QPushButton::released, [=]() {
-        openSelectFileDialog(ui.apiPath, "Select apical file", "Imaris VRML (*.vrml *.wrl)", false);
-    });
-    connect(ui.basalPathButton, &QPushButton::released, [=]() {
-        openSelectFileDialog(ui.basalPath, "Select basal file", "Imaris VRML (*.vrml *.wrl)", true);
-    });
-    connect(ui.imarisPathButton, &QPushButton::released, [=]() {
-        openSelectFileDialog(ui.imarisPath, "Select imaris spines volumes file", "Imaris VRML (*.vrml *.wrl)", false);
-    });
-    connect(ui.longsButton, &QPushButton::released, [=]() {
-        openSelectFileDialog(ui.longsPath, "Select imaris spines longs file", "Imaris VRML (*.vrml *.wrl)", false);
-    });
-
-    connect(ui.pushButton_GoToSomaDeformer, &QPushButton::released, this, &SomaCreatorWidget::onOkPressed);
-
-    connect(ui.outputButton, &QPushButton::released, [=]() {
-        openDirectory(ui.outputPath, "Select output directory");
-    });
 
 
-    futureWatcher = new QFutureWatcher<void>();
-    connect(futureWatcher, &QFutureWatcher<void>::finished, this, &SomaCreatorWidget::onProcessFinish);
-
-    connect(ui.oneNeuronRadio,&QRadioButton::toggled,this,&SomaCreatorWidget::onRadioChanged2);
     connect(ui.adavencedOptionsButton,&QPushButton::released,this,[&](){ui.horizontalWidget->setVisible(!ui.horizontalWidget->isVisible());});
-    connect(ui.inputDirectoryButton,&QPushButton::released,this,[&](){openDir(ui.inputDirectoryPath,"Select input folder");});
-    connect(ui.outputDirectoryButton,&QPushButton::released,this,[&](){openDir(ui.outputDirectoryPath,"Select output directory");});
     connect(ui.pushButton_GenerateNeurons,&QPushButton::released,this,&SomaCreatorWidget::onGenerateNeurons);
+    connect(ui.generateOnePushButton,&QPushButton::released,this,&SomaCreatorWidget::onGenerateOneNeuron);
 
   ui.tabWidget_Main->setVisible ( false );
 
@@ -568,11 +540,6 @@ void SomaCreatorWidget::setExitDirectory ( )
 
 void SomaCreatorWidget::resetInterface ( )
 {
-    ui.tracePath->setText("");
-    ui.apiPath->setText("");
-    ui.basalPath->setText("");
-    ui.imarisPath->setText("");
-    ui.outputPath->setText("");
     ui.horizontalWidget->hide();
     //ui.pushButton_GoToSomaDeformer->setEnabled ( false );
 }
@@ -868,18 +835,6 @@ const vector<Spine> &SomaCreatorWidget::getSpines() const {
   return spines;
 }
 
-void SomaCreatorWidget::onRadioChanged(bool b) {
-    ui.tracePath->setDisabled(!b);
-    ui.tracePathButton->setDisabled(!b);
-    ui.apiPath->setDisabled(b);
-    ui.apiPathButton->setDisabled(b);
-    ui.basalPath->setDisabled(b);
-    ui.basalPathButton->setDisabled(b);
-    ui.longsButton->setDisabled(b);
-    ui.longsPath->setDisabled(b);
-    ui.imarisPath->setDisabled(b);
-    ui.imarisPathButton->setDisabled(b);
-}
 
 void
 SomaCreatorWidget::openSelectFileDialog(QLineEdit *target, const QString &title, const QString &types, bool multiFile) {
@@ -911,219 +866,10 @@ void SomaCreatorWidget::openDirectory(QLineEdit* target, const QString& title){
     target->setText(dir);
 }
 
-void SomaCreatorWidget::onOkPressed() {
-    if (ui.outputPath->text().isEmpty()) {
-        QToolTip::showText(ui.outputPath->mapToGlobal(QPoint(0, 0)), "Need a Output File");
-    } else {
-        Neuronize::outPath = ui.outputPath->text();
-        if (ui.traces->isChecked()) {
-            if (ui.tracePath->text().isEmpty()) {
-                QToolTip::showText(ui.tracePath->mapToGlobal(QPoint(0, 0)), "Need a Input File");
-            } else {
-                generateXMLSoma(ui.tracePath->text(), true);
-            }
-        } else {
-            if (ui.basalPath->text().isEmpty()) {
-                QToolTip::showText(ui.tracePath->mapToGlobal(QPoint(0, 0)), "Need a Input File");
-            } else {
-                QFileInfo fi(ui.basalPath->text());
-                auto name = fi.dir().dirName();
-
-                this->mInputFile = this->mExitDirectory + "/" + name + ".asc";
-
-                QFuture<void> future = QtConcurrent::run(
-                        [=]() { processSkel(this->mInputFile.toStdString()); });
-
-                futureWatcher->setFuture(future);
-                progresDialog = new QProgressDialog("Generating tracing", "Cancel", 0, 0, this);
-                progresDialog->setValue(0);
-                progresDialog->setCancelButton(0);
-                progresDialog->setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
-                progresDialog->exec();
-            }
-        }
-    }
-}
-
-
-void SomaCreatorWidget::processSkel(const std::string &fileName) {
-    auto basalFiles = ui.basalPath->text().split(";");
-    auto apiFile = ui.apiPath->text().toStdString();
-    auto imarisFile = ui.imarisPath->text().toStdString();
-    auto longsFile = ui.longsPath->text().toStdString();
-    std::vector<std::string> basalFilesStd;
-    for (const auto &string: basalFiles) {
-        basalFilesStd.push_back(string.toStdString());
-    }
-
-    float newThreshold = 0.5f;
-    auto neuron = new skelgenerator::Neuron(apiFile, basalFilesStd, imarisFile, longsFile, newThreshold);
-    bool ignore = false;
-    while (neuron->isIncorrectConecctions() || neuron->getReamingSegments() > 0 && !ignore) {
-        if (neuron->isIncorrectConecctions()) {
-            QMetaObject::invokeMethod(this, "showWarningDialogIncorrectConnections", Qt::BlockingQueuedConnection,
-                                      Q_ARG(float &, newThreshold));
-
-        } else {
-            if (neuron->getReamingSegments() > 0) {
-                QMetaObject::invokeMethod(this, "showWarningDialogReaminingSegments", Qt::BlockingQueuedConnection,
-                                          Q_ARG(int, neuron->getReamingSegments()),
-                                          Q_ARG(float &, newThreshold));
-            }
-        }
-
-        ignore = newThreshold < 0;
-        if (!ignore) {
-            delete (neuron);
-            neuron = new skelgenerator::Neuron(apiFile, basalFilesStd, imarisFile,longsFile, newThreshold);
-        }
-
-    }
-    this->neuron = neuron;
-
-}
-
-void SomaCreatorWidget::onProcessFinish() {
-    progresDialog->setMaximum(1);
-    progresDialog->setValue(1);
-    QMessageBox msgBox(this);
-
-    std::ofstream file;
-    file.open(this->mInputFile.toStdString());
-    file << this->neuron->to_asc();
-    file.close();
-
-    msgBox.setText("Task Finished");
-    msgBox.setIcon(QMessageBox::Information);
-    msgBox.exec();
-    generateXMLSoma(this->mInputFile, true);
-}
-
-void SomaCreatorWidget::showWarningDialogIncorrectConnections(float &newThreshold) {
-    auto *msgBox = new QMessageBox(this);;
-    std::string msg = "The neuron maybe has incorrect connections.\t";
-    msgBox->setIcon(QMessageBox::Warning);
-    msgBox->setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
-    msgBox->setInformativeText(
-            "Do you want to process the neuron again changing the \"Connection Threshold\" or ignore the maybe incorrect conections?");
-    msgBox->setText(QString::fromStdString(msg));
-    QPushButton *changeButton = msgBox->addButton(tr(" Change Threshold "), QMessageBox::NoRole);
-    QPushButton *ignoreButton = msgBox->addButton(tr("Ignore"), QMessageBox::NoRole);
-    msgBox->setDefaultButton(changeButton);
-    msgBox->exec();
-
-    if (msgBox->clickedButton() == changeButton) {
-        QInputDialog inputDialog(this);
-        inputDialog.setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
-        inputDialog.setLabelText("New Connection Threshold");
-        inputDialog.setTextValue("Insert new value");
-        inputDialog.setInputMode(QInputDialog::DoubleInput);
-        inputDialog.setDoubleRange(0.0,40.0);
-        inputDialog.setDoubleStep(0.1f);
-        inputDialog.setDoubleDecimals(2);
-        inputDialog.setDoubleValue(newThreshold);
-        inputDialog.exec();
-        newThreshold = inputDialog.doubleValue();
-    } else {
-        newThreshold = -1;
-    }
-}
-
-void SomaCreatorWidget::showWarningDialogReaminingSegments(int sobrantes, float &newThreshold) {
-    QMessageBox *msgBox = new QMessageBox(this);;
-    std::string msg = "This neuron has " + std::to_string(sobrantes) +
-                      " segments that have not been connected and therefore will be ignored.";
-    msgBox->setIcon(QMessageBox::Warning);
-    msgBox->setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
-    msgBox->setInformativeText(
-            "Do you want to process the neuron again changing the \"Connection Threshold\" or ignore the missing segments?");
-    msgBox->setText(QString::fromStdString(msg));
-    QPushButton *changeButton = msgBox->addButton(tr(" Change Threshold "), QMessageBox::NoRole);
-    QPushButton *ignoreButton = msgBox->addButton(tr("Ignore"), QMessageBox::NoRole);
-    msgBox->setDefaultButton(changeButton);
-    msgBox->exec();
-
-    if (msgBox->clickedButton() == changeButton) {
-        QInputDialog inputDialog;
-        inputDialog.setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
-        inputDialog.setLabelText("New Connection Threshold");
-        inputDialog.setTextValue("Insert new value");
-        inputDialog.setInputMode(QInputDialog::DoubleInput);
-        inputDialog.setDoubleRange(0.0,40.0);
-        inputDialog.setDoubleStep(0.1f);
-        inputDialog.setDoubleDecimals(2);
-        inputDialog.setDoubleValue(newThreshold);
-        inputDialog.exec();
-        newThreshold = inputDialog.doubleValue();
-
-
-    } else {
-        newThreshold = -1;
-    }
-}
-
-
-
 void SomaCreatorWidget::deleteTreeViewer() {
 
 }
 
-void SomaCreatorWidget::onRadioChanged2(bool b) {
-
-    if (b) {
-        ui.traces->setEnabled(true);
-        ui.vrmls->setEnabled(true);
-        ui.pushButton_GoToSomaDeformer->setEnabled(true);
-
-        bool trace = ui.traces->isChecked();
-        ui.tracePathButton->setEnabled(trace);
-        ui.tracePath->setEnabled(trace);
-
-        ui.basalPath->setEnabled(!trace);
-        ui.basalPathButton->setEnabled(!trace);
-        ui.apiPath->setEnabled(!trace);
-        ui.apiPathButton->setEnabled(!trace);
-
-        ui.inputDirectoryButton->setEnabled(false);
-        ui.inputDirectoryPath->setEnabled(false);
-        ui.outputDirectoryButton->setEnabled(false);
-        ui.outputDirectoryPath->setEnabled(false);
-        ui.adavencedOptionsButton->setEnabled(false);
-        ui.subdivisionsLabel->setEnabled(false);
-        ui.subdivisionsSpinBox->setEnabled(false);
-        ui.baseNameLabel->setEnabled(false);
-        ui.baseNameLineEdit->setEnabled(false);
-        ui.pushButton_GenerateNeurons->setEnabled(false);
-
-
-    } else {
-        ui.traces->setEnabled(false);
-        ui.vrmls->setEnabled(false);
-
-        ui.tracePathButton->setEnabled(false);
-        ui.basalPathButton->setEnabled(false);
-        ui.apiPathButton->setEnabled(false);
-
-
-        ui.tracePath->setEnabled(false);
-        ui.basalPath->setEnabled(false);
-        ui.apiPath->setEnabled(false);
-
-        ui.pushButton_GoToSomaDeformer->setEnabled(false);
-
-        ui.inputDirectoryButton->setEnabled(true);
-        ui.inputDirectoryPath->setEnabled(true);
-        ui.outputDirectoryButton->setEnabled(true);
-        ui.outputDirectoryPath->setEnabled(true);
-        ui.adavencedOptionsButton->setEnabled(true);
-        ui.subdivisionsLabel->setEnabled(true);
-        ui.subdivisionsSpinBox->setEnabled(true);
-        ui.baseNameLabel->setEnabled(true);
-        ui.baseNameLineEdit->setEnabled(true);
-        ui.pushButton_GenerateNeurons->setEnabled(true);
-
-    }
-}
 
 const vector<vector<OpenMesh::Vec3d>> &SomaCreatorWidget::getContours() const {
     return contours;
@@ -1136,6 +882,8 @@ void SomaCreatorWidget::openDir(QLineEdit* dest,QString message) {
 }
 
 void SomaCreatorWidget::onGenerateNeurons() {
+    //TODO
+    /**
     auto inputDir = ui.inputDirectoryPath->text();
     auto outputDir = ui.outputDirectoryPath->text();
     if (inputDir.isEmpty()) {
@@ -1151,10 +899,31 @@ void SomaCreatorWidget::onGenerateNeurons() {
     int subdivisions = ui.subdivisionsSpinBox->value();
     auto baseName = ui.baseNameLineEdit->text();
     emit generateNeurons(inputDir,outputDir,subdivisions,baseName);
+     */
 }
 
 SWCImporter *SomaCreatorWidget::getMswcImporter() const {
     return mSWCImporter;
+}
+
+void SomaCreatorWidget::onGenerateOneNeuron() {
+    WizzardInputOne wizzard(this);
+    wizzard.exec();
+    Neuronize::outPath = wizzard.getOutputPath();
+
+    if (wizzard.isFilament()) {
+        this->neuron = wizzard.getNeuron();
+        this->mInputFile = this->mExitDirectory + "/temp.asc";
+        std::ofstream file;
+        file.open(this->mInputFile.toStdString());
+        file << this->neuron->to_asc();
+        file.close();
+
+        generateXMLSoma(this->mInputFile, true);
+    } else {
+        generateXMLSoma(wizzard.getTraceFile(),true);
+    }
+
 }
 
 

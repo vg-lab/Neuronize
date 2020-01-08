@@ -44,7 +44,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>3</number>
      </property>
      <property name="tabsClosable">
       <bool>false</bool>
@@ -459,7 +459,7 @@
              <bool>false</bool>
             </property>
             <property name="text">
-             <string>Real Spines Imaris</string>
+             <string>Surface Generated Spines</string>
             </property>
            </widget>
           </item>
@@ -469,7 +469,7 @@
              <bool>false</bool>
             </property>
             <property name="text">
-             <string>Repaired Spines Imaris</string>
+             <string>Repaired Spines</string>
             </property>
            </widget>
           </item>
