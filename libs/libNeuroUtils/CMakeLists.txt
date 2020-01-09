@@ -21,7 +21,7 @@ set (NEUROUTILS_SOURCES
 		SpinesSWC.cpp
 		SWCImporter.cpp
 		SWCSpinesDistributor.cpp
-		AS2SWCV2.cpp
+        ASC2SWCV2.cpp
 		MeshVCG.cpp
 		BBDD.cpp
 		../../VCG/wrap/ply/plylib.cpp

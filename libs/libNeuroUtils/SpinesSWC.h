@@ -27,7 +27,7 @@
 #include "NeuroSWC.h"
 #include "BaseMeshContainer.h"
 #include "SWCSpinesDistributor.h"
-#include "AS2SWCV2.h"
+#include "ASC2SWCV2.h"
 #include <libs/libNeuroUtils/BBDD.h>
 
 using namespace std;

@@ -50,7 +50,7 @@ using namespace NSLightManager;
 using namespace NSSWCImporter;
 
 #include "ui_NeuroGeneratorWidget.h"
-#include <libs/libNeuroUtils/AS2SWCV2.h>
+#include <libs/libNeuroUtils/ASC2SWCV2.h>
 
 class NeuroGeneratorWidgetViewer: public QGLViewer
 {

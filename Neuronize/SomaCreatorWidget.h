@@ -32,7 +32,7 @@
 
 #include <libs/libNeuroUtils/SWCImporter.h>
 #include <libs/libNeuroUtils/BaseMesh.h>
-#include <libs/libNeuroUtils/AS2SWCV2.h>
+#include <libs/libNeuroUtils/ASC2SWCV2.h>
 #include <QtWidgets/QProgressDialog>
 #include <QFutureWatcher>
 #include <QLineEdit>
@@ -156,9 +156,12 @@ private:
     std::vector<Spine> spines;
     std::vector<std::vector<OpenMesh::Vec3d>> contours;
     QProgressDialog *progresDialog;
+    ASC2SWCV2* ASCparser;
 public:
     const vector<Spine> &getSpines() const;
     const vector<vector<OpenMesh::Vec3d>> &getContours() const;
+
+    ASC2SWCV2 *getASCparser() const;
 
     SWCImporter *getMswcImporter() const;
 

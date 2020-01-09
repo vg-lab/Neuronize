@@ -1269,5 +1269,5 @@ void NeuroGeneratorWidget::hideAdvancedOptions() {
     ui.groupBox_ModifiersCtrlHide->hide();
     ui.groupBox_NeuronCtrlHide->hide();
     ui.groupBox_SpinesCtrlHide->hide();
-    ui.groupBox_RenderCtrlHide->hide();
+    //ui.groupBox_RenderCtrlHide->hide();
 }

@@ -30,7 +30,7 @@
 
 #include "ui_NeuroGeneratorWidget.h"
 #include "NeuroGeneratorWidgetViewer.h"
-#include <libs/libNeuroUtils/AS2SWCV2.h>
+#include <libs/libNeuroUtils/ASC2SWCV2.h>
 
 class NeuroGeneratorWidget: public QWidget, public Ui::NeuroGeneratorWidget
 {

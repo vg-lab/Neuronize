@@ -35,6 +35,7 @@
 #include <map>
 #include <vector>
 #include <fstream>
+#include <Eigen/Eigen>
 
 #include <OpenMesh/Core/Mesh/PolyMesh_ArrayKernelT.hh>
 
@@ -50,206 +51,209 @@ using namespace std;
 
 namespace NSSWCImporter
 {
-  struct SWCBranch
-  {
-    int initialNode;
-    int finalNode;
-    bool consecBranch;
-  };
+    struct SWCBranch
+    {
+        int initialNode;
+        int finalNode;
+        bool consecBranch;
+    };
 
-  struct SWCConnection
-  {
-    int ini;
-    int fin;
-    bool mTermination;
-  };
+    struct SWCConnection
+    {
+        int ini;
+        int fin;
+        bool mTermination;
+    };
 
-  enum DendriticType
-  {
-    BASAL, APICAL, AXON
-  };
+    enum DendriticType
+    {
+        BASAL, APICAL, AXON
+    };
 
-  struct SWCDendriticInfo
-  {
-    int initialNode;
-    int finalNode;
-    DendriticType type;
-  };
+    struct SWCDendriticInfo
+    {
+        int initialNode;
+        int finalNode;
+        DendriticType type;
+    };
 
-  struct SWCNode
-  {
-    int id;
-    int type;
-    //* 0 = undefined
-    //* 1 = soma
-    //* 2 = axon
-    //* 3 = dendrite
-    //* 4 = apical dendrite
-    //* 5 = fork point
-    //* 6 = end point
-    //* 7 = custom
+    struct SWCNode
+    {
+        int id;
+        int type;
+        //* 0 = undefined
+        //* 1 = soma
+        //* 2 = axon
+        //* 3 = dendrite
+        //* 4 = apical dendrite
+        //* 5 = fork point
+        //* 6 = end point
+        //* 7 = custom
 
-    OpenMesh::Vec3f position;
+        OpenMesh::Vec3f position;
 
-    float radius;
-    int parent;
+        float radius;
+        int parent;
 
-    float mDendriticDistanceNorm;
-    float mDendriticDistanceReal;
-    float mDistanceToSoma;
+        float mDendriticDistanceNorm;
+        float mDendriticDistanceReal;
+        float mDistanceToSoma;
 
-  };
+    };
 
-  class NEUROUTILS_API SWCImporter
-  {
-      int mSomaNodesDiscarded;
+    class NEUROUTILS_API SWCImporter
+    {
+        int mSomaNodesDiscarded;
 
-      //File exit
-      std::ifstream inputFileTXT;
+        //File exit
+        std::ifstream inputFileTXT;
 
-      //Descripcion of the file
-      std::string description;
+        //Descripcion of the file
+        std::string description;
 
-      //Collection of the nodes in the original file
-      std::vector <SWCNode> preProcessNodeCollection;
+        //Collection of the nodes in the original file
+        std::vector <SWCNode> preProcessNodeCollection;
 
-      //Collection of the nodes finally processed
-      std::vector <SWCNode> nodeCollection;
+        //Collection of the nodes finally processed
+        std::vector <SWCNode> nodeCollection;
 
-      //Collection of Connections in the file
-      std::vector <SWCConnection> nodeConnections;
+        //Collection of Connections in the file
+        std::vector <SWCConnection> nodeConnections;
 
-      //Collection dendritic finisheds
-      std::vector < int > dendriticTermination;
+        //Collection dendritic finisheds
+        std::vector < int > dendriticTermination;
 
-      //Collection dendritic bifurcations
-      std::vector < int > dendriticBifurcations;
+        //Collection dendritic bifurcations
+        std::vector < int > dendriticBifurcations;
 
-      //Dendritic soma conected
-      std::vector < int > dendriticSomaConnection;
+        //Dendritic soma conected
+        std::vector < int > dendriticSomaConnection;
 
-      //Dendritic max distance
-      std::vector < int > dendriticMaxDistance;
+        //Dendritic max distance
+        std::vector < int > dendriticMaxDistance;
 
-      //Dendritics of the neuron
-      std::vector <SWCDendriticInfo> dendritics;
+        //Dendritics of the neuron
+        std::vector <SWCDendriticInfo> dendritics;
 
-      //branches of the neuron
-      std::vector <SWCBranch> mBranches;
+        //branches of the neuron
+        std::vector <SWCBranch> mBranches;
 
-      OpenMesh::Vec3f displacement;
+        OpenMesh::Vec3f displacement;
 
-      //Load the file
-      void loadFile ( string fileName, bool pApplyStdDims, bool pApplyReplicantNodeTest );
+        //Load the file
+        void loadFile ( string fileName, bool pApplyStdDims, bool pApplyReplicantNodeTest );
 
-      //Generate the connectios between nodes
-      void generateConnectios ( );
+        //Generate the connectios between nodes
+        void generateConnectios ( );
 
-      void generateBifurcations ( );
+        void generateBifurcations ( );
 
-      ///////////////
-      void generateBranches ( );
+        ///////////////
+        void generateBranches ( );
 
-      void centerSomaInOrigin ( );
+        void centerSomaInOrigin ( );
 
-      void SomaThreeCrazyNodesTest ( );
+        void SomaThreeCrazyNodesTest ( );
 
-      void SomaDendriticTest ( );
+        void SomaDendriticTest ( );
 
-      void SomaBeltTest ( );
+        void SomaBeltTest ( );
 
-      void NodeRepetitionTest ( );
+        void NodeRepetitionTest ( );
 
-      void calcDendriticDistance ( );
+        void calcDendriticDistance ( );
 
-      void calcDendritics ( );
+        void calcDendritics ( );
 
-      void restructIdentifiers ( );
+        void restructIdentifiers ( );
 
-      const SWCConnection* findBifurcations(int id);
+        const SWCConnection* findBifurcations(int id);
 
-      double computeAngle(OpenMesh::Vec3f v1 , OpenMesh::Vec3f v2);
+        double computeAngle(OpenMesh::Vec3f v1 , OpenMesh::Vec3f v2);
 
-      bool isIdInContainer ( SWCNode pId, const std::vector <SWCNode> &pVector );
+        bool isIdInContainer ( SWCNode pId, const std::vector <SWCNode> &pVector );
 
     public:
 
-      /**
-       * Default constructor
-       */
-      SWCImporter ( string fileName, bool pApplyStdDims = false, bool pApplyReplicantNodeTest = false );
+        /**
+         * Default constructor
+         */
+        SWCImporter ( string fileName, bool pApplyStdDims = false, bool pApplyReplicantNodeTest = false );
 
-      /**
-       * Destructor
-       */
-      ~SWCImporter ( );
+        /**
+         * Destructor
+         */
+        ~SWCImporter ( );
 
-      //Get the description of the file loaded
-      std::string getDescription ( );
+        //Get the description of the file loaded
+        std::string getDescription ( );
 
-      //Get the content of the nodes from ini to fin
-      std::string getContent ( int ini, int fin );
+        //Get the content of the nodes from ini to fin
+        std::string getContent ( int ini, int fin );
 
-      //Get number of nodes
-      unsigned int getNumNodes ( ) const;
+        //Get number of nodes
+        unsigned int getNumNodes ( ) const;
 
-      OpenMesh::Vec3f getDisplacement() const;
+        OpenMesh::Vec3f getDisplacement() const;
 
-      //Get number of connection
-      unsigned int getNumConnection ( );
+        //Get number of connection
+        unsigned int getNumConnection ( );
 
-      //Get number of dendritic terminations
-      unsigned int getNumDendriticTermination ( ) const;
+        //Get number of dendritic terminations
+        unsigned int getNumDendriticTermination ( ) const;
 
-      //Get number of dendritic bifurcations
-      unsigned int getNumDendriticBifurcations ( ) const;
+        //Get number of dendritic bifurcations
+        unsigned int getNumDendriticBifurcations ( ) const;
 
-      std::vector < int > getDendriticBifurcations ( ) const;
+        std::vector < int > getDendriticBifurcations ( ) const;
 
-      SWCNode getElementAt ( unsigned int i ) const;
+        SWCNode getElementAt ( unsigned int i ) const;
 
-      void modifElement ( unsigned int pId, SWCNode pNewValue );
+        void modifElement ( unsigned int pId, SWCNode pNewValue );
 
-      SWCConnection getConnectionAt ( unsigned int i );
+        SWCConnection getConnectionAt ( unsigned int i );
 
-      SWCBranch getBranchAt ( int i ) { return mBranches[i]; };
+        SWCBranch getBranchAt ( int i ) { return mBranches[i]; };
 
-      bool isDendriticTermination ( int id ) const;
+        bool isDendriticTermination ( int id ) const;
 
-      bool isDendriticBifurcation ( int id ) const;
+        bool isDendriticBifurcation ( int id ) const;
 
-      //Get number of dendritic terminations
-      int getDendriticTermination ( unsigned int index );
-      //---int getDendriticTermination(unsigned int index);
+        //Get number of dendritic terminations
+        int getDendriticTermination ( unsigned int index );
+        //---int getDendriticTermination(unsigned int index);
 
-      //Dendritic soma conected
-      std::vector < int > getDendriticSomaConnection ( );
+        //Dendritic soma conected
+        std::vector < int > getDendriticSomaConnection ( );
 
-      //Dendritic max distance
-      std::vector < int > getDendriticMaxDistance ( );
+        //Dendritic max distance
+        std::vector < int > getDendriticMaxDistance ( );
 
-      //Get dendritics
-      std::vector <SWCDendriticInfo> getDendritics ( ) const;
+        //Get dendritics
+        std::vector <SWCDendriticInfo> getDendritics ( ) const;
 
-      //Get the number of dendritics
-      unsigned int getNumDendritics ( );
+        //Get the number of dendritics
+        unsigned int getNumDendritics ( );
 
-      unsigned int getNumBranches ( ) { return mBranches.size ( ); }
+        unsigned int getNumBranches ( ) { return mBranches.size ( ); }
 
-      //std::string  exportToFile(std::string pFile);
-      void exportToFile ( std::string pFile );
+        //std::string  exportToFile(std::string pFile);
+        void exportToFile ( std::string pFile );
 
-      void applyUniformModifiers ( float pAxonModifier,
-                                   float pDendriticModifier,
-                                   float pApicalModifier,
-                                   float pValBase );
+        void applyUniformModifiers ( float pAxonModifier,
+                                     float pDendriticModifier,
+                                     float pApicalModifier,
+                                     float pValBase );
 
-      void appendSWCImporter ( const SWCImporter *pImporter );
+        void appendSWCImporter ( const SWCImporter *pImporter );
 
-      void applyTranformationMatrix ( boost::numeric::ublas::matrix < float > pMatrixTransform );
+        void applyTranformationMatrix ( boost::numeric::ublas::matrix < float > pMatrixTransform );
 
-      int getSomaNodesDiscarded ( ) { return mSomaNodesDiscarded; }
-  };
+        int getSomaNodesDiscarded ( ) { return mSomaNodesDiscarded; }
+
+        void toASC(const std::vector<std::vector<Eigen::Vector3f>>& contours, const std::string& outFile);
+        void toASCBranch(std::ofstream& file,std::string identation,SWCNode node);
+    };
 }
 
 #endif

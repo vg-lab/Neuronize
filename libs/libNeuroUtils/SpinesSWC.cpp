@@ -3085,9 +3085,9 @@ namespace NSSpinesSWC
           unsigned int lIniOpt;
           unsigned int lFinOpt;
 
-          auxPoint = spines[i].initPoint.point;
+          auxPoint = spines[i].point;
           //auxNormal = NeuronMesh->getMesh()->calc_face_normal(fhandle);
-          auxNormal = spines[i].finalPoint.point - spines[i].initPoint.point;
+          auxNormal = spines[i].finalPoint.point - spines[i].point;
 
           lSpineInfo.mSpineId = lSpineModelSelected;
           lSpineInfo.mSpinePosition = auxPoint;

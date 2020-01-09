@@ -34,7 +34,7 @@
 
 #include <QDebug>
 
-#include <libs/libNeuroUtils/AS2SWCV2.h>
+#include <libs/libNeuroUtils/ASC2SWCV2.h>
 #include <QtWidgets/QInputDialog>
 #include <QtConcurrent/QtConcurrent>
 #include <QtWidgets/QToolTip>
@@ -55,6 +55,7 @@ SomaCreatorWidget::SomaCreatorWidget (const QString &tempDir, QWidget *parent )
   mSWCImporter = NULL;
   mBaseMesh = NULL;
   neuron = nullptr;
+    ASCparser = nullptr;
 
   mDefaultVidsFileName = "GeoVertsIdsDendrite_";
   mDefaultGeoDistFileName = "GeoDistDendrite_";
@@ -567,9 +568,11 @@ void SomaCreatorWidget::generateXMLSoma ( QString fileName, bool useSoma ) {
                 if ((ext == "asc") || (ext == "ASC")) {
                   auto ascPath = lLocalFilePath.toStdString() + "/" + info1.fileName().toStdString();
                   fileName = lLocalFilePath + "/" + info1.fileName() + ".swc";
-                  auto result = AS2SWCV2::asc2swc(ascPath, fileName.toStdString(), useSoma);
-                  somaMesh = std::get<0>(result);
-                  this->spines = std::get<1>(result);                    // PREVIOUS VERSION
+                  delete ASCparser;
+                    ASCparser = new ASC2SWCV2(ascPath, useSoma);
+                  ASCparser->toSWC(fileName.toStdString());
+                  somaMesh = ASCparser->getSomaMesh();
+                  this->spines = ASCparser->getSpines();                    // PREVIOUS VERSION
                   //ASC2SWC::convierteASWC(lLocalFilePath.toStdString(), info1.fileName().toStdString());
                   //fileName = lLocalFilePath + "/" + info1.fileName() + ".swc";
                 }
@@ -924,6 +927,10 @@ void SomaCreatorWidget::onGenerateOneNeuron() {
         generateXMLSoma(wizzard.getTraceFile(),true);
     }
 
+}
+
+ASC2SWCV2 *SomaCreatorWidget::getASCparser() const {
+    return ASCparser;
 }
 
 
