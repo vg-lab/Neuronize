@@ -151,7 +151,7 @@ FilamentPage::FilamentPage(QStringList& filamentFiles_, QWidget* parent) : QWiza
     connect(removeDendrite,&QPushButton::released,this,[&](){
         auto items = dendriteList->selectedItems();
         if (items.isEmpty()) {
-            QMessageBox::warning(this,tr("Neuronize"),tr("Please select a mesh to remove from view"));
+            QMessageBox::warning(this,tr("Neuronize"),tr("Please select a dendrite to remove"));
         }
 
         for (const auto& item: items) {
@@ -172,6 +172,7 @@ FilamentPage::FilamentPage(QStringList& filamentFiles_, QWidget* parent) : QWiza
 }
 
 bool FilamentPage::validatePage() {
+    filamentFiles.clear();
     for (size_t i = 0; i < this->dendriteList->count(); i++) {
         auto item = this->dendriteList->item(i);
         auto file = item->data(Qt::ToolTipRole).toString();
@@ -195,6 +196,7 @@ SelectApicalPage::SelectApicalPage(skelgenerator::Neuron*&neuron_, QStringList& 
 }
 
 void SelectApicalPage::initializePage() {
+    dendriteList->clear();
     for (const auto& file : filamentFiles) {
         QFileInfo fileInfo (file);
         auto item = new QListWidgetItem(fileInfo.baseName(),dendriteList);
