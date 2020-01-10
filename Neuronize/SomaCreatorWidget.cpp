@@ -23,6 +23,7 @@
 #include "RepairWidget.h"
 #include "neuronize.h"
 #include "WizzardInputOne.h"
+#include "NeuronSetDialog.h"
 
 #include <string>
 #include <fstream>
@@ -107,9 +108,7 @@ SomaCreatorWidget::SomaCreatorWidget (const QString &tempDir, QWidget *parent )
     //QObject::connect ( ui.pushButton_GoToSomaDeformer, SIGNAL( clicked ( )), this, SIGNAL( somaCreated ( )) );
 
 
-
-    connect(ui.adavencedOptionsButton,&QPushButton::released,this,[&](){ui.horizontalWidget->setVisible(!ui.horizontalWidget->isVisible());});
-    connect(ui.pushButton_GenerateNeurons,&QPushButton::released,this,&SomaCreatorWidget::onGenerateNeurons);
+    connect(ui.generateSetPushButton,&QPushButton::released,this,&SomaCreatorWidget::onGenerateNeurons);
     connect(ui.generateOnePushButton,&QPushButton::released,this,&SomaCreatorWidget::onGenerateOneNeuron);
 
   ui.tabWidget_Main->setVisible ( false );
@@ -885,24 +884,10 @@ void SomaCreatorWidget::openDir(QLineEdit* dest,QString message) {
 }
 
 void SomaCreatorWidget::onGenerateNeurons() {
-    //TODO
-    /**
-    auto inputDir = ui.inputDirectoryPath->text();
-    auto outputDir = ui.outputDirectoryPath->text();
-    if (inputDir.isEmpty()) {
-        QToolTip::showText(ui.inputDirectoryPath->mapToGlobal(QPoint(0, 0)), "Need a Input Directory");
-        return;
+    NeuronSetDialog dialog(this);
+    if (dialog.exec() == QDialog::Accepted) {
+        emit generateNeurons(dialog.getInputDir(),dialog.getOutputDir(),dialog.getSubdivisions(),dialog.getBaseName());
     }
-
-    if (outputDir.isEmpty()) {
-        QToolTip::showText(ui.outputDirectoryPath->mapToGlobal(QPoint(0, 0)), "Need a Output Directory");
-        return;
-    }
-
-    int subdivisions = ui.subdivisionsSpinBox->value();
-    auto baseName = ui.baseNameLineEdit->text();
-    emit generateNeurons(inputDir,outputDir,subdivisions,baseName);
-     */
 }
 
 SWCImporter *SomaCreatorWidget::getMswcImporter() const {

@@ -396,7 +396,7 @@ bool AddLongsPage::validatePage() {
 
 FinishPage::FinishPage(QString& oututPath_, QWidget *parent) : QWizardPage(parent), outputPath(oututPath_) {
     this->setTitle("The process is over");
-    this->setSubTitle("Now go to the soma stage ");
+    this->setSubTitle("Now select an output directory to store all the generated files and go to the soma deformation stage");
 
     auto button = new QPushButton(tr("&Output Directory"));
     this->outuputLineEdit = new QLineEdit;

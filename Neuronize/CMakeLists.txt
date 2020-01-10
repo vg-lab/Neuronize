@@ -17,6 +17,7 @@ set (NEURONIZE_SOURCES
 		CompareMeshWidgetViewer.cpp
 		ExportDialog.cpp
 		WizzardInputOne.cpp
+		NeuronSetDialog.cpp
 		)
 
 set(NEURONIZE_HEADERS
@@ -39,6 +40,7 @@ set(NEURONIZE_HEADERS
 		ExportDialog.h
 		CompareMeshWidgetViewer.h
 		WizzardInputOne.h
+		NeuronSetDialog.h
 		)
 
 set(NEURONIZE_LINK_LIBRARIES
