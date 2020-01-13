@@ -2945,7 +2945,7 @@ namespace NSSpinesSWC
     }
   }
 
-    void SpinesSWC::distributeSpines(const vector<Spine> &spines,const std::string& neuronName,
+    void SpinesSWC::distributeSpines(const vector<Spine*> &spines,const std::string& neuronName,
             const OpenMesh::Vec3f& diplacement, BBDD::BBDD bbdd, const std::string& tmpPath) {
       mNumVerticesEnSpina = mSpinesModeledContainer->getContainer ( ).at ( 0 )->getNumVertex ( );
 
@@ -3085,9 +3085,9 @@ namespace NSSpinesSWC
           unsigned int lIniOpt;
           unsigned int lFinOpt;
 
-          auxPoint = spines[i].point;
+          auxPoint = spines[i]->point;
           //auxNormal = NeuronMesh->getMesh()->calc_face_normal(fhandle);
-          auxNormal = spines[i].finalPoint.point - spines[i].point;
+          auxNormal = spines[i]->finalPoint.point - spines[i]->point;
 
           lSpineInfo.mSpineId = lSpineModelSelected;
           lSpineInfo.mSpinePosition = auxPoint;

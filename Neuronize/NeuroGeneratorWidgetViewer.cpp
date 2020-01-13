@@ -1903,7 +1903,7 @@ SpinesSWC* NeuroGeneratorWidgetViewer::fusionSpines(SpinesSWC* mesh1, SpinesSWC*
 }
 
 void
-NeuroGeneratorWidgetViewer::generateSpinesASC(std::vector<Spine>& spines,unsigned int pHorResol, unsigned int pVerResol,
+NeuroGeneratorWidgetViewer::generateSpinesASC(std::vector<Spine*>& spines,unsigned int pHorResol, unsigned int pVerResol,
                                               float pMinLongSpine, float pMaxLongSpine, float pMinRadio,
                                               float pMaxRadio) {
     unsigned int lNumMeshes = mSpinesSynthContainers.getContainer ( ).size ( );

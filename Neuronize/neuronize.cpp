@@ -218,6 +218,7 @@ void Neuronize::showSomaCreator ( )
 void Neuronize::showSomaDeformer ( )
 {
     mActiveTab = 1;
+    mSomaDeformerWidget->resetInterface();
   mSomaDeformerWidget->setSomaCreator(mSomaCreatorWidget);
 
   mFullSWCFilePath = mSomaCreatorWidget->getFullPathToSWCFile ( );

@@ -228,7 +228,7 @@ namespace NSSpinesSWC
 
       const std::vector < unsigned int > &getSpineDesp ( ) const { return mSpineDesp; };
 
-      void distributeSpines(const vector<Spine> &spines,const std::string& neuronName,const OpenMesh::Vec3f& diplacement, BBDD::BBDD bbdd, const std::string& tmpPath);
+      void distributeSpines(const vector<Spine*> &spines,const std::string& neuronName,const OpenMesh::Vec3f& diplacement, BBDD::BBDD bbdd, const std::string& tmpPath);
 
       static MeshDef::Color getRandomColor();
 

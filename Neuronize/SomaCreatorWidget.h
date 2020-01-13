@@ -153,12 +153,11 @@ private:
     std::vector < unsigned int > mNearestVertex;
     skelgenerator::Neuron* neuron;
     bool somaContours;
-    std::vector<Spine> spines;
+    std::vector<Spine*> spines;
     std::vector<std::vector<OpenMesh::Vec3d>> contours;
-    QProgressDialog *progresDialog;
     ASC2SWCV2* ASCparser;
 public:
-    const vector<Spine> &getSpines() const;
+    const vector<Spine*> &getSpines() const;
     const vector<vector<OpenMesh::Vec3d>> &getContours() const;
 
     ASC2SWCV2 *getASCparser() const;

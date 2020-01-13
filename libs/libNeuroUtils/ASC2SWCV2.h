@@ -30,8 +30,8 @@ public:
         this->d = -1;
     }
 
-    virtual inline void toASC(std::string tab, std::ofstream& file) const;
-    inline void toSWC(int& counter,int parent,int type,std::ofstream& file) const;
+    virtual void toASC(std::string tab, std::ofstream& file) const;
+    virtual void toSWC(int& counter,int parent,int type,std::ofstream& file) const;
     virtual bool isSpine(){ return false;}
 };
 
@@ -40,14 +40,16 @@ public:
     SimplePoint finalPoint;
     Spine(SimplePoint initPoint, SimplePoint finalPoint) : SimplePoint(initPoint) ,finalPoint(finalPoint){}
 
-    void toASC(std::string tab, std::ofstream &file);
+    void toASC(std::string tab, std::ofstream &file) const override;
+
+    void toSWC(int &counter, int parent, int type, std::ofstream &file) const override {};
 
     bool isSpine() override {return true;}
 };
 
 class NEUROUTILS_API SubDendrite {
 public:
-    std::vector<SimplePoint> section;
+    std::vector<SimplePoint*> section;
     std::vector<SubDendrite> subDendrites;
 
     void toASC(std::string tab, std::ofstream &file) const;
@@ -77,12 +79,12 @@ public:
 
     MeshVCG *getSomaMesh() const;
 
-    const std::vector<Spine> &getSpines() const;
+    const std::vector<Spine*> &getSpines() const;
 
     void toSWC(const std::string &filename);
 private:
     MeshVCG *_somaMesh;
-    std::vector<Spine> spines;
+    std::vector<Spine*> spines;
 
     std::vector<std::vector<OpenMesh::Vec3d>> contours;
     SimplePoint *soma;
@@ -90,7 +92,7 @@ private:
 
     void procesSomaPart(std::ifstream &file, std::vector<std::vector<OpenMesh::Vec3d>> &countours);
 
-    static SubDendrite processDendrite(std::ifstream &inputStream, std::vector<Spine> &spines, Eigen::Vector3d lastPoint);
+    static SubDendrite processDendrite(std::ifstream &inputStream, std::vector<Spine*> &spines, Eigen::Vector3d lastPoint);
 
     SimplePoint *calcSoma(std::vector<Dendrite> &vector1);
 

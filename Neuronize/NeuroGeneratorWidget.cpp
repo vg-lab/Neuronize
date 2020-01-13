@@ -212,6 +212,7 @@ NeuroGeneratorWidget::NeuroGeneratorWidget (const QString &tmpDir, QWidget *pare
   QObject::connect ( ui.pushButton_exportSpinesInfo, SIGNAL( clicked ( )), this, SLOT( exportSpinesInfo ( )) );
   QObject::connect ( ui.pushButton_importSpinesInfo, SIGNAL( clicked ( )), this, SLOT( importSpinesInfo ( )) );
 
+  connect(ui.pushButton_loadImarisSpines,&QPushButton::released,this,&NeuroGeneratorWidget::onLoadImarisSpines);
 }
 
 void NeuroGeneratorWidget::loadMorphologyFile ( )
@@ -589,7 +590,7 @@ void NeuroGeneratorWidget::generateSpines ( )
 
 }
 
-void NeuroGeneratorWidget::batchSpinesGeneration(skelgenerator::Neuron *pNeuron, vector<Spine> spines) {
+void NeuroGeneratorWidget::batchSpinesGeneration(skelgenerator::Neuron *pNeuron, vector<Spine*> spines) {
   unsigned int lNumSpines = ui.spinBox_NumSpines->value();
   unsigned int lHorResol = ui.spinBox_SpinesHorResolution->value();
   unsigned int lVerResol = ui.spinBox_SpinesVerResolution->value();
@@ -1165,7 +1166,18 @@ void NeuroGeneratorWidget::showSpinesTab ( )
   ui.tabWidget_RenderControl->insertTab ( 0, ui.tab_AdvanceSpinesCtrl, "Advanced spines options." );
     //ui.tabWidget_RenderControl->insertTab ( 2, ui.tab_MoreAdvanceSpinesCtrl, "More Advanced spines options." );
     ui.tabWidget_RenderControl->setCurrentIndex(0);
-    generateSpines();
+
+    if (!this->spines.empty()) {
+        ui.radioButton_RealAscPos->setEnabled(true);
+        ui.radioButton_RealAscPos->setChecked(true);
+    }
+
+    if (this->neuron != nullptr && this->neuron->hasFilamentSpines()) {
+        ui.radioButton_VrmlSpines->setEnabled(true);
+        ui.radioButton_VrmlSpines->setChecked(true);
+    }
+    //TODO posible dialogo
+    //generateSpines();
 
 
 }
@@ -1191,14 +1203,6 @@ void NeuroGeneratorWidget::goAdvencedSpinesOptions ( )
   if (this->neuron != nullptr && this->neuron->hasFilamentSpines()) {
     ui.radioButton_VrmlSpines->setEnabled(true);
     ui.radioButton_VrmlSpines->setChecked(true);
-  }
-
-  if (this->neuron != nullptr && this->neuron->hasImarisSpines()) {
-      ui.radioButton_ImarisSpines->setEnabled(true);
-      ui.radioButton_ImarisSpines->setChecked(true);
-      if (Neuronize::hasPython){
-          ui.radioButton_RepairedImarisSpines->setEnabled(true);
-      }
   }
 
   ui.tabWidget_RenderControl->setCurrentIndex(1);
@@ -1250,7 +1254,7 @@ void NeuroGeneratorWidget::setNeuron(skelgenerator::Neuron *neuron) {
   NeuroGeneratorWidget::neuron = neuron;
 }
 
-void NeuroGeneratorWidget::setSpines(const vector<Spine> &spines) {
+void NeuroGeneratorWidget::setSpines(const vector<Spine*> &spines) {
   NeuroGeneratorWidget::spines = spines;
 }
 
@@ -1270,4 +1274,21 @@ void NeuroGeneratorWidget::hideAdvancedOptions() {
     ui.groupBox_NeuronCtrlHide->hide();
     ui.groupBox_SpinesCtrlHide->hide();
     //ui.groupBox_RenderCtrlHide->hide();
+}
+
+void NeuroGeneratorWidget::onLoadImarisSpines() {
+    auto file = QFileDialog::getOpenFileName(this,"Open Imaris Spines",QString(),"Imaris(*.vrml *.VRML *.wrl *.WRL)");
+    if (!file.isEmpty()) {
+        this->neuron->addImarisSpines(file.toStdString());
+        ui.lineEdit_ImarisSpinesPath->setText(file);
+        ui.radioButton_ImarisSpines->setEnabled(true);
+        if (Neuronize::hasPython) {
+            ui.radioButton_RepairedImarisSpines->setEnabled(true);
+        }
+    } else {
+        ui.radioButton_ImarisSpines->setEnabled(false);
+        ui.radioButton_RepairedImarisSpines->setEnabled(false);
+        ui.lineEdit_ImarisSpinesPath->clear();
+    }
+
 }

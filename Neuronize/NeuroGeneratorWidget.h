@@ -43,14 +43,14 @@ class NeuroGeneratorWidget: public QWidget, public Ui::NeuroGeneratorWidget
 
     QString mTempDir;
     skelgenerator::Neuron* neuron;
-    std::vector<Spine> spines;
+    std::vector<Spine*> spines;
     std::vector<std::vector<OpenMesh::Vec3d>> contours;
     static std::vector<QString> spineNames;
 public:
     void setContours(const vector<vector<OpenMesh::Vec3d>> &contours);
 
 public:
-    void setSpines(const vector<Spine> &spines);
+    void setSpines(const vector<Spine*> &spines);
 
 public:
     void setNeuron(skelgenerator::Neuron *neuron);
@@ -85,7 +85,7 @@ public slots:
 
     void showSpinesTab ( );
 
-    void batchSpinesGeneration(skelgenerator::Neuron *pNeuron, vector<Spine> vector1);
+    void batchSpinesGeneration(skelgenerator::Neuron *pNeuron, vector<Spine*> spines);
 
     void exportSpinesInmediatly ( QString fileName );
 
@@ -208,6 +208,8 @@ public slots:
     void exportSpinesInfo ( );
 
     void importSpinesInfo ( );
+
+    void onLoadImarisSpines ( );
 
 };
 

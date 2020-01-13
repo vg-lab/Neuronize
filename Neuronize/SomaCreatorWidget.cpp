@@ -833,7 +833,7 @@ const QString &SomaCreatorWidget::getInputFile() const {
     return mInputFile;
 }
 
-const vector<Spine> &SomaCreatorWidget::getSpines() const {
+const vector<Spine*> &SomaCreatorWidget::getSpines() const {
   return spines;
 }
 

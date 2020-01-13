@@ -360,6 +360,5 @@ int RepairWidget::repairDir(const QString &outputDir, const QString &inputDir, c
     QString command = "\"\"" + QCoreApplication::applicationDirPath() + "/" + RUN + "\" " + Neuronize::envPath + " " + arguments.join(" ") + "\"";
     std::cout << command.toStdString() << std::endl;
     return std::system(command.toStdString().c_str());
-    return 0;
 
 }

@@ -17,7 +17,7 @@ ASC2SWCV2::ASC2SWCV2(const std::string &inputFile, bool useSoma) {
     std::vector<Dendrite> apicals;
 
     if (!inputStream.is_open()) {
-        throw ("Error: Can read the ASC file: " + inputFile);
+        throw std::runtime_error("Error: Can read the ASC file: " + inputFile);
     }
 
     std::string line;
@@ -60,21 +60,21 @@ ASC2SWCV2::ASC2SWCV2(const std::string &inputFile, bool useSoma) {
         for (auto &dendrite: dendrites) {
             std::vector<OpenMesh::Vec3d> intersectionPointLast;
             std::vector<OpenMesh::Vec3d> intersectionPointCur;
-            if (checkPointInsideSoma(somaConvex, dendrite.dendrite.section[0].point, intersectionPointCur)) {
+            if (checkPointInsideSoma(somaConvex, dendrite.dendrite.section[0]->point, intersectionPointCur)) {
                 int firstPoint = 0;
                 bool inside = true;
                 while (inside && firstPoint < dendrite.dendrite.section.size()) {
                     intersectionPointLast = intersectionPointCur;
                     intersectionPointCur.clear();
                     firstPoint++;
-                    inside = checkPointInsideSoma(somaConvex, dendrite.dendrite.section[firstPoint].point,
+                    inside = checkPointInsideSoma(somaConvex, dendrite.dendrite.section[firstPoint]->point,
                                                   intersectionPointCur);
                 }
                 OpenMesh::Vec3d intersectionSoma;
                 auto rayDir =
-                        dendrite.dendrite.section[firstPoint].point - dendrite.dendrite.section[firstPoint - 1].point;
+                        dendrite.dendrite.section[firstPoint]->point - dendrite.dendrite.section[firstPoint - 1]->point;
                 intersectionPointLast.clear();
-                somaConvex.rayIntersects(dendrite.dendrite.section[firstPoint - 1].point, rayDir,
+                somaConvex.rayIntersects(dendrite.dendrite.section[firstPoint - 1]->point, rayDir,
                                          intersectionPointLast);
                 intersectionSoma = intersectionPointLast[0];
 
@@ -82,7 +82,7 @@ ASC2SWCV2::ASC2SWCV2(const std::string &inputFile, bool useSoma) {
                 dendrite.dendrite.section.erase(dendrite.dendrite.section.begin(),
                                                 dendrite.dendrite.section.begin() + firstPoint -
                                                 1); //dejamos un punto para modificarlo.
-                dendrite.dendrite.section[0].point = intersectionSoma;
+                dendrite.dendrite.section[0]->point = intersectionSoma;
 
             }
 
@@ -124,7 +124,7 @@ void ASC2SWCV2::procesSomaPart(std::ifstream &file, std::vector<std::vector<Open
     }
 }
 
-SubDendrite ASC2SWCV2::processDendrite(std::ifstream &inputStream, std::vector<Spine>& spines,Eigen::Vector3d lastPoint) {
+SubDendrite ASC2SWCV2::processDendrite(std::ifstream &inputStream, std::vector<Spine*>& spines,Eigen::Vector3d lastPoint) {
     std::string line;
     double x, y, z, d;
     Eigen::Vector3d actualPoint;
@@ -140,7 +140,7 @@ SubDendrite ASC2SWCV2::processDendrite(std::ifstream &inputStream, std::vector<S
             inputStream >> d;
             inputStream >> line;
             SimplePoint initPoint (lastPoint[0], lastPoint[1], lastPoint[2]);
-            Spine spine (initPoint, SimplePoint(x,y,z,d));
+            auto spine = new Spine (initPoint, SimplePoint(x,y,z,d));
             spines.push_back(spine);
             subDendrite.section.push_back(spine);
         } else if (line.find('(') != std::string::npos) {
@@ -156,7 +156,7 @@ SubDendrite ASC2SWCV2::processDendrite(std::ifstream &inputStream, std::vector<S
                 inputStream >> line;
                 actualPoint = {x,y,z};
                 if ((lastPoint - actualPoint).norm() > threshold) {
-                    subDendrite.section.emplace_back(x, y, z, d);
+                    subDendrite.section.push_back(new SimplePoint(x, y, z, d));
                     lastPoint = actualPoint;
                 }
             }
@@ -174,7 +174,7 @@ SimplePoint* ASC2SWCV2::calcSoma(std::vector<Dendrite> &dentrites) {
     int nPoints = static_cast<int>(dentrites.size());
     OpenMesh::Vec3d center (0,0,0);
     for (const auto &dendrite: dentrites) {
-        center += dendrite.dendrite.section[0].point;
+        center += dendrite.dendrite.section[0]->point;
     }
     center /= nPoints;
     auto radius = calcSommaRadius(center);
@@ -185,8 +185,8 @@ SimplePoint* ASC2SWCV2::calcSoma(std::vector<Dendrite> &dentrites) {
 SimplePoint * ASC2SWCV2::calcSoma2() {
     if (dendrites.size() == 1) { //Special case
         auto dendrite = dendrites[0];
-        OpenMesh::Vec3d firstPoint = dendrite.dendrite.section[0].point;
-        OpenMesh::Vec3d secondPoint = dendrite.dendrite.section[1].point;
+        OpenMesh::Vec3d firstPoint = dendrite.dendrite.section[0]->point;
+        OpenMesh::Vec3d secondPoint = dendrite.dendrite.section[1]->point;
         OpenMesh::Vec3d dir = firstPoint - secondPoint;
         dir.normalize();
 
@@ -197,13 +197,13 @@ SimplePoint * ASC2SWCV2::calcSoma2() {
                                  -std::numeric_limits<double>::max()};
         OpenMesh::Vec3d minPoint = -maxPoint;
         for (const auto &dendrite:dendrites) {
-            maxPoint[0] = std::max(maxPoint[0], dendrite.dendrite.section[0].point[0]);
-            maxPoint[1] = std::max(maxPoint[1], dendrite.dendrite.section[0].point[1]);
-            maxPoint[2] = std::max(maxPoint[2], dendrite.dendrite.section[0].point[2]);
+            maxPoint[0] = std::max(maxPoint[0], dendrite.dendrite.section[0]->point[0]);
+            maxPoint[1] = std::max(maxPoint[1], dendrite.dendrite.section[0]->point[1]);
+            maxPoint[2] = std::max(maxPoint[2], dendrite.dendrite.section[0]->point[2]);
 
-            minPoint[0] = std::min(minPoint[0], dendrite.dendrite.section[0].point[0]);
-            minPoint[1] = std::min(minPoint[1], dendrite.dendrite.section[0].point[1]);
-            minPoint[2] = std::min(minPoint[2], dendrite.dendrite.section[0].point[2]);
+            minPoint[0] = std::min(minPoint[0], dendrite.dendrite.section[0]->point[0]);
+            minPoint[1] = std::min(minPoint[1], dendrite.dendrite.section[0]->point[1]);
+            minPoint[2] = std::min(minPoint[2], dendrite.dendrite.section[0]->point[2]);
         }
 
         OpenMesh::Vec3d center = minPoint + (maxPoint - minPoint) / 2;
@@ -215,9 +215,9 @@ SimplePoint * ASC2SWCV2::calcSoma2() {
 
 double ASC2SWCV2::calcSommaRadius(OpenMesh::Vec3d center) {
 
-    double minDist = (center - dendrites[0].dendrite.section[0].point).norm();
+    double minDist = (center - dendrites[0].dendrite.section[0]->point).norm();
     for (int i = 1 ; i < dendrites.size();i++) {
-        auto dist = (center - dendrites[i].dendrite.section[0].point).norm();
+        auto dist = (center - dendrites[i].dendrite.section[0]->point).norm();
         minDist = minDist > dist ? dist : minDist;
     }
     if (minDist == 0) {
@@ -232,7 +232,7 @@ void ASC2SWCV2::joinApicals(std::vector<Dendrite>& apicals, const OpenMesh::Vec3
         const Dendrite* principalApical = nullptr;
         float minDist = std::numeric_limits<float>::max();
         for (const Dendrite& api: apicals) {
-            float dist = (api.dendrite.section[0].point - somaCenter).norm();
+            float dist = (api.dendrite.section[0]->point - somaCenter).norm();
 
             if (minDist > dist) {
                 principalApical = &api;
@@ -265,7 +265,7 @@ MeshVCG *ASC2SWCV2::getSomaMesh() const {
     return _somaMesh;
 }
 
-const std::vector<Spine> &ASC2SWCV2::getSpines() const {
+const std::vector<Spine*> &ASC2SWCV2::getSpines() const {
     return spines;
 }
 
@@ -301,7 +301,7 @@ void Dendrite::toSWC(int &counter, std::ofstream &file) const {
 void SubDendrite::toSWC(int &counter, int parent, int type, std::ofstream &file) const {
 
     for (const auto& point: this->section) {
-        point.toSWC(counter,parent,type,file);
+        point->toSWC(counter,parent,type,file);
         parent = counter -1;
     }
 
@@ -360,7 +360,7 @@ void Dendrite::toASC(std::string tab, std::ofstream& file) const {
 void SubDendrite::toASC(std::string tab, std::ofstream &file) const {
     tab += "\t";
     for (const auto& point : this->section) {
-        point.toASC(tab,file);
+        point->toASC(tab,file);
 
     }
     if (!this->subDendrites.empty()) {
@@ -381,7 +381,7 @@ void SimplePoint::toASC(std::string tab, std::ofstream &file) const {
 
 
 
-void Spine::toASC(std::string tab, std::ofstream &file) {
+void Spine::toASC(std::string tab, std::ofstream &file) const  {
     file << tab << "<\t(Class 4 \"none\")" << std::endl;
     file << tab << "(Color Red)" << std::endl;
     file << tab << "(Generated 0)" << std::endl;

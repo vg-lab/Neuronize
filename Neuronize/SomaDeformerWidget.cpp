@@ -31,6 +31,7 @@ SomaDeformerWidget::SomaDeformerWidget (const QString &tempDir, QWidget *parent 
   ui.setupUi ( this );
     hideAdvancedOptions();
 
+
   viewer = new SomaDeformerWidgetViewer ( this );
 
   mtmpDir = tempDir;
@@ -226,6 +227,7 @@ void SomaDeformerWidget::generateSoma ( )
   unsigned int lVResol = ui.spinBox_SomaVerResol->value ( );
   float lRadius = ui.doubleSpinBox_ScaleFactor->value ( );
   float lScale = ui.doubleSpinBox_ScaleFactor->value ( );
+
 
   if ( ui.checkBox_useSWCFile->isChecked ( ))
   {
@@ -527,6 +529,14 @@ void SomaDeformerWidget::hideAdvancedOptions() {
     ui.tabWidget_Controls->removeTab(3);
     ui.tabWidget_Controls->removeTab(2);
 
+}
+
+void SomaDeformerWidget::resetInterface() {
+    if (this->somaCreator == nullptr) {
+        ui.pushButton_SphericalSoma->hide();
+    } else {
+        ui.pushButton_SphericalSoma->setVisible(!this->somaCreator->getContours().empty());
+    }
 }
 
 
