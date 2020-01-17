@@ -60,7 +60,6 @@ NeuroGeneratorWidget::NeuroGeneratorWidget (const QString &tmpDir, QWidget *pare
 
   QObject::connect ( ui.pushButton_SmoothDendrites, SIGNAL( clicked ( )), this, SLOT( applySmooth ( )) );
 
-  QObject::connect ( ui.pushButton_generateSpines, SIGNAL( clicked ( )), this, SLOT( generateSpines ( )) );
   QObject::connect ( ui.pushButton_ExportSpines, SIGNAL( clicked ( )), this, SLOT( exportSpines ( )) );
 
   QObject::connect ( ui.checkBox_RenderSolid, SIGNAL( clicked ( )), this, SLOT( ControlStateRender ( )) );
@@ -146,8 +145,6 @@ NeuroGeneratorWidget::NeuroGeneratorWidget (const QString &tmpDir, QWidget *pare
   QObject::connect ( ui.pushButton_Subdivide, SIGNAL( clicked ( )), this, SLOT( applySubdivide ( )) );
   QObject::connect ( ui.pushButton_Decimate, SIGNAL( clicked ( )), this, SLOT( applyDecimate ( )) );
 
-  QObject::connect ( ui.pushButton_GenerateDendrites, SIGNAL( clicked ( )), this, SLOT( generateDendrites ( )) );
-
   QObject::connect ( ui.pushButton_GoToGenerateSpines,
                      SIGNAL( clicked ( )),
                      this,
@@ -162,10 +159,8 @@ NeuroGeneratorWidget::NeuroGeneratorWidget (const QString &tmpDir, QWidget *pare
                      this,
                      SLOT( emitFinishNeuronSurfaceAndRestart ( )) );
 
-  QObject::connect ( ui.pushButton_RebuildWithAdvancedOptions,
-                     SIGNAL( clicked ( )),
-                     this,
-                     SLOT( RebuildWithAdvancedOptions ( )) );
+  QObject::connect ( ui.pushButton_RebuildWithAdvancedOptions,&QPushButton::released,this,[&](){  ui.tabWidget_RenderControl->setCurrentIndex ( 1 );});
+  connect(ui.pushButton_goHome,&QPushButton::released,this,&NeuroGeneratorWidget::finish);
 
 
   //Modificaciones Presentaci�n -> Javier de DeFelipe
@@ -191,7 +186,6 @@ NeuroGeneratorWidget::NeuroGeneratorWidget (const QString &tmpDir, QWidget *pare
 
 
   QObject::connect ( ui.pushButton_SpinesCtrl_Rebuild, SIGNAL( clicked ( )), this, SLOT( destroyAllGroupsSpines ( )) );
-  QObject::connect ( ui.pushButton_SpinesCtrl_Save, SIGNAL( clicked ( )), this, SLOT( exportNeuronAndSpines ( )) );
   QObject::connect ( ui.pushButton_SaveNeuronSurface, SIGNAL( clicked ( )), this, SLOT( exportNeuron ( )) );
   QObject::connect ( ui.pushButton_GoSpinesAdvancedOptions,
                      SIGNAL( clicked ( )),
@@ -212,7 +206,6 @@ NeuroGeneratorWidget::NeuroGeneratorWidget (const QString &tmpDir, QWidget *pare
   QObject::connect ( ui.pushButton_exportSpinesInfo, SIGNAL( clicked ( )), this, SLOT( exportSpinesInfo ( )) );
   QObject::connect ( ui.pushButton_importSpinesInfo, SIGNAL( clicked ( )), this, SLOT( importSpinesInfo ( )) );
 
-  connect(ui.pushButton_loadImarisSpines,&QPushButton::released,this,&NeuroGeneratorWidget::onLoadImarisSpines);
 }
 
 void NeuroGeneratorWidget::loadMorphologyFile ( )
@@ -500,8 +493,9 @@ void NeuroGeneratorWidget::generateSpines ( )
     lGenerateOption = 6;
   else if (ui.radioButton_ImarisSpines->isChecked ( ))
       lGenerateOption = 7;
-  else if (ui.radioButton_RepairedImarisSpines->isChecked())
+  else if (ui.radioButton_RepairedSpines->isChecked())
       lGenerateOption = 8;
+
 
 
 
@@ -588,6 +582,9 @@ void NeuroGeneratorWidget::generateSpines ( )
 
   this->exportSpinesInmediatly(Neuronize::outPath + "/spines" + NeuroGeneratorWidget::spineNames[lGenerateOption - 4]+".obj");
 
+  QMessageBox::information(this, tr("Neuronize"),tr("The process with this neuron is over. You can process a new neuron, repair meshes, or compare exported meshes (Pressing in Go Home button)."));
+
+
 }
 
 void NeuroGeneratorWidget::batchSpinesGeneration(skelgenerator::Neuron *pNeuron, vector<Spine*> spines) {
@@ -604,24 +601,24 @@ void NeuroGeneratorWidget::batchSpinesGeneration(skelgenerator::Neuron *pNeuron,
   unsigned int lNumOfGroups = ui.spinBox_NumOfGroupsModeledSpines->value();
   unsigned int lGenerateOption = 0;
 
-      if (ui.radioButton_ProceduralSpines->isChecked())
-          lGenerateOption = 0;
-      else if (ui.radioButton_ModelSpines->isChecked())
-          lGenerateOption = 1;
-      else if (ui.radioButton_SemiRealSpines->isChecked())
-          lGenerateOption = 2;
-      else if (ui.radioButton_RealSpines->isChecked())
-          lGenerateOption = 3;
-      else if (ui.radioButton_SegmentSpines->isChecked())
-          lGenerateOption = 4;
-      else if (ui.radioButton_VrmlSpines->isChecked ( ))
-          lGenerateOption = 5;
-      else if (ui.radioButton_RealAscPos->isChecked ( ))
-          lGenerateOption = 6;
-      else if (ui.radioButton_ImarisSpines->isChecked ( ))
-          lGenerateOption = 7;
-      else if (ui.radioButton_RepairedImarisSpines->isChecked())
-          lGenerateOption = 8;
+    if ( ui.radioButton_ProceduralSpines->isChecked ( ))
+        lGenerateOption = 0;
+    else if ( ui.radioButton_ModelSpines->isChecked ( ))
+        lGenerateOption = 1;
+    else if ( ui.radioButton_SemiRealSpines->isChecked ( ))
+        lGenerateOption = 2;
+    else if ( ui.radioButton_RealSpines->isChecked ( ))
+        lGenerateOption = 3;
+    else if ( ui.radioButton_SegmentSpines->isChecked ( ))
+        lGenerateOption = 4;
+    else if (ui.radioButton_VrmlSpines->isChecked ( ))
+        lGenerateOption = 5;
+    else if (ui.radioButton_RealAscPos->isChecked ( ))
+        lGenerateOption = 6;
+    else if (ui.radioButton_ImarisSpines->isChecked ( ))
+        lGenerateOption = 7;
+    else if (ui.radioButton_RepairedSpines->isChecked())
+        lGenerateOption = 8;
 
 
       switch (lGenerateOption) {
@@ -1175,9 +1172,31 @@ void NeuroGeneratorWidget::showSpinesTab ( )
     if (this->neuron != nullptr && this->neuron->hasFilamentSpines()) {
         ui.radioButton_VrmlSpines->setEnabled(true);
         ui.radioButton_VrmlSpines->setChecked(true);
+        int ret = QMessageBox::question(this,"Neuronize",
+                "A neuron from filament tracer has been loaded. Do you want to load the surface generated spines (Imaris)?",
+                QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+
+        if (ret == QMessageBox::Yes) {
+            auto file = QFileDialog::getOpenFileName(this,"Open Imaris Spines",QString(),"Imaris(*.vrml *.VRML *.wrl *.WRL)");
+            if (!file.isEmpty()) {
+                this->neuron->addImarisSpines(file.toStdString());
+                ui.radioButton_ImarisSpines->setEnabled(true);
+                ui.radioButton_ImarisSpines->setChecked(true);
+                if (Neuronize::hasPython) {
+                    int ret = QMessageBox::question(this, "Neuronize",
+                                                    "Do you want to repair the selected spines?",
+                                                    QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+                    if (ret == QMessageBox::Yes) {
+                        ui.radioButton_RepairedSpines->setEnabled(true);
+                        ui.radioButton_RepairedSpines->setChecked(true);
+                    }
+
+                }
+            }
+        }
+
     }
-    //TODO posible dialogo
-    //generateSpines();
+    generateSpines();
 
 
 }
@@ -1273,22 +1292,6 @@ void NeuroGeneratorWidget::hideAdvancedOptions() {
     ui.groupBox_ModifiersCtrlHide->hide();
     ui.groupBox_NeuronCtrlHide->hide();
     ui.groupBox_SpinesCtrlHide->hide();
-    //ui.groupBox_RenderCtrlHide->hide();
-}
-
-void NeuroGeneratorWidget::onLoadImarisSpines() {
-    auto file = QFileDialog::getOpenFileName(this,"Open Imaris Spines",QString(),"Imaris(*.vrml *.VRML *.wrl *.WRL)");
-    if (!file.isEmpty()) {
-        this->neuron->addImarisSpines(file.toStdString());
-        ui.lineEdit_ImarisSpinesPath->setText(file);
-        ui.radioButton_ImarisSpines->setEnabled(true);
-        if (Neuronize::hasPython) {
-            ui.radioButton_RepairedImarisSpines->setEnabled(true);
-        }
-    } else {
-        ui.radioButton_ImarisSpines->setEnabled(false);
-        ui.radioButton_RepairedImarisSpines->setEnabled(false);
-        ui.lineEdit_ImarisSpinesPath->clear();
-    }
-
+    ui.groupBox_SpinesOptions->hide();
+    ui.groupBox_RenderCtrlHide->hide();
 }

@@ -469,7 +469,6 @@ namespace BBDD {
         std::string query = "INSERT INTO SPINES (NEURON, SPINE_MODEL, TRANSLATION_X, TRANSLATION_Y, TRANSLATION_Z, QUATERNION_1, QUATERNION_2, QUATERNION_3, QUATERNION_4) VALUES('%s',%i,%f,%f,%f,%f,%f,%f,%f);";
         std::string formatedQuery = str(boost::format(query) % neuronName % spineModel % displacement[0] % displacement[1] % displacement[2] % q[0] % q[1] %q[2] %q[3]);
         sqlite3_exec(_db,formatedQuery.c_str(), nullptr, nullptr,&_err);
-        std::cout << "Spine Added" << std::endl;
         ERRCHECK
     }
 

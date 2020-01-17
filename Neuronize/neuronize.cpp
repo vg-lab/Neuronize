@@ -132,6 +132,8 @@ void Neuronize::resetNeuronnizeInterface ( )
     delete mRepairWidget;
     delete mCompareMeshesWidget;
 
+
+
   mSomaCreatorWidget = new SomaCreatorWidget (tempDir.path(), this );
 
   ui.verticalLayout_SomaCreator->addWidget ( mSomaCreatorWidget );
@@ -206,6 +208,9 @@ void Neuronize::showSomaCreator ( )
     ui.tabWidget_MainContainer->insertTab(1, ui.tab_SomaCreator, "Generate Neuron");
     ui.tabWidget_MainContainer->insertTab(2, ui.tab_RepairMeshes, "Repair Meshes");
     ui.tabWidget_MainContainer->insertTab(3, ui.tab_CompareMeshes, "Compare Meshes");
+
+    ui.tabWidget_MainContainer->setTabEnabled(1, true);
+    ui.tabWidget_MainContainer->setTabEnabled(2, true);
 
     if (mPythonVersion != 3) {
        ui.tabWidget_MainContainer->setTabEnabled(1,false);

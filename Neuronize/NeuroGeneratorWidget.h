@@ -208,9 +208,6 @@ public slots:
     void exportSpinesInfo ( );
 
     void importSpinesInfo ( );
-
-    void onLoadImarisSpines ( );
-
 };
 
 #endif // QTNEUROSYNTH_H

@@ -43,9 +43,9 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <widget class="QPushButton" name="pushButton_GenerateSoma">
+        <widget class="QPushButton" name="pushButton_FinalizeSoma">
          <property name="text">
-          <string>Build soma</string>
+          <string>Go to Neurite Generation</string>
          </property>
         </widget>
        </item>
@@ -57,9 +57,9 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_FinalizeSoma">
+        <widget class="QPushButton" name="pushButton_RebuildSoma">
          <property name="text">
-          <string>Go to Neurite Generation</string>
+          <string>Rebuild (advanced options)</string>
          </property>
         </widget>
        </item>
@@ -75,13 +75,6 @@
           </size>
          </property>
         </spacer>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButton_RebuildSoma">
-         <property name="text">
-          <string>Rebuild (advanced options)</string>
-         </property>
-        </widget>
        </item>
       </layout>
      </widget>
@@ -236,7 +229,7 @@
        <item>
         <widget class="QPushButton" name="pushButton_NextStep">
          <property name="text">
-          <string>Next step</string>
+          <string>Go to Neurite Generation</string>
          </property>
         </widget>
        </item>
@@ -660,7 +653,7 @@
       </size>
      </property>
      <property name="title">
-      <string>RenderArea</string>
+      <string/>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_6">
       <item>

@@ -54,7 +54,7 @@
        <string>Dendrites builder.</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_4">
-       <item row="12" column="0">
+       <item row="13" column="0">
         <widget class="QGroupBox" name="groupBox_NeuronCtrlHide">
          <property name="minimumSize">
           <size>
@@ -258,14 +258,7 @@
          </layout>
         </widget>
        </item>
-       <item row="0" column="0">
-        <widget class="QPushButton" name="pushButton_GenerateDendrites">
-         <property name="text">
-          <string>Build Neurites</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
+       <item row="2" column="0">
         <widget class="QPushButton" name="pushButton_SmoothDendrites">
          <property name="text">
           <string>Smooth</string>
@@ -273,13 +266,6 @@
         </widget>
        </item>
        <item row="10" column="0">
-        <widget class="QPushButton" name="pushButton_RebuildWithAdvancedOptions">
-         <property name="text">
-          <string>Rebuild (advanced options)</string>
-         </property>
-        </widget>
-       </item>
-       <item row="9" column="0">
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -292,10 +278,17 @@
          </property>
         </spacer>
        </item>
-       <item row="2" column="0">
+       <item row="0" column="0">
         <widget class="QPushButton" name="pushButton_GoToGenerateSpines">
          <property name="text">
           <string>Go to Spine Generation</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QPushButton" name="pushButton_RebuildWithAdvancedOptions">
+         <property name="text">
+          <string>Rebuild (advanced options)</string>
          </property>
         </widget>
        </item>
@@ -359,7 +352,7 @@
        <item>
         <widget class="QPushButton" name="pushButton_NextStep">
          <property name="text">
-          <string>Next step</string>
+          <string>Go to Spine Generation</string>
          </property>
         </widget>
        </item>
@@ -463,61 +456,26 @@
            </widget>
           </item>
           <item>
-           <widget class="QGroupBox" name="groupBox_SpinesImaris">
-            <property name="title">
+           <widget class="QRadioButton" name="radioButton_ImarisSpines">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
              <string>Surface Generated Spines</string>
             </property>
-            <layout class="QVBoxLayout" name="verticalLayout_21">
-             <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_2">
-               <property name="topMargin">
-                <number>10</number>
-               </property>
-               <item>
-                <widget class="QPushButton" name="pushButton_loadImarisSpines">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="text">
-                  <string>Load</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLineEdit" name="lineEdit_ImarisSpinesPath"/>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="radioButton_ImarisSpines">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Surface Generated Spines</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">buttonGroup</string>
-               </attribute>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="radioButton_RepairedImarisSpines">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Repaired Spines</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">buttonGroup</string>
-               </attribute>
-              </widget>
-             </item>
-            </layout>
+            <attribute name="buttonGroup">
+             <string notr="true">buttonGroup</string>
+            </attribute>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="radioButton_RepairedSpines">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Repair espines</string>
+            </property>
            </widget>
           </item>
           <item>
@@ -572,9 +530,9 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_generateSpines">
+        <widget class="QPushButton" name="pushButton_goHome">
          <property name="text">
-          <string>Build spines</string>
+          <string>Go Home</string>
          </property>
         </widget>
        </item>
@@ -593,13 +551,6 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="label_ImagePix">
-         <property name="text">
-          <string>Spines image</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <spacer name="verticalSpacer_8">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -611,13 +562,6 @@
           </size>
          </property>
         </spacer>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButton_SpinesCtrl_Save">
-         <property name="text">
-          <string>Export neuron mesh</string>
-         </property>
-        </widget>
        </item>
        <item>
         <widget class="QGroupBox" name="groupBox_SpinesCtrlHide">
@@ -1682,7 +1626,7 @@
    <item>
     <widget class="QGroupBox" name="groupBox_RenderArea">
      <property name="title">
-      <string>Render Area</string>
+      <string/>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
@@ -1695,9 +1639,7 @@
  </widget>
  <tabstops>
   <tabstop>tabWidget_RenderControl</tabstop>
-  <tabstop>pushButton_GenerateDendrites</tabstop>
   <tabstop>pushButton_SmoothDendrites</tabstop>
-  <tabstop>pushButton_RebuildWithAdvancedOptions</tabstop>
   <tabstop>spinBox_TubesVerResolution</tabstop>
   <tabstop>spinBox_TubesHorResolution</tabstop>
   <tabstop>pushButton_GenerateNeuronMesh</tabstop>

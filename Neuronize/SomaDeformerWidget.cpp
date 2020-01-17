@@ -113,12 +113,8 @@ SomaDeformerWidget::SomaDeformerWidget (const QString &tempDir, QWidget *parent 
                      this,
                      SLOT( setDeleteRedundantVertex ( )) );
 
-  QObject::connect ( ui.pushButton_GenerateSoma, SIGNAL( clicked ( )), this, SLOT( startDeformation ( )) );
 
-  QObject::connect ( ui.pushButton_RebuildSoma,
-                     SIGNAL( clicked ( )),
-                     this,
-                     SLOT( loadPredefinedXMLSomaDefAndGOAdvancedOptions ( )) );
+  connect ( ui.pushButton_RebuildSoma,&QPushButton::released,this,[&](){ ui.tabWidget_Controls->setCurrentIndex ( 1 );});
 
   QObject::connect ( ui.pushButton_FinalizeSoma, SIGNAL( clicked ( )), this, SLOT( finalizeSoma ( )) );
   QObject::connect ( ui.pushButton_NextStep, SIGNAL( clicked ( )), this, SLOT( finalizeSoma ( )) );
