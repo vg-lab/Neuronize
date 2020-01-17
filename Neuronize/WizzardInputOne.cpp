@@ -186,7 +186,17 @@ SelectApicalPage::SelectApicalPage(skelgenerator::Neuron*&neuron_, QStringList& 
 
     this->dendriteList = new QListWidget;
     this->neuron = nullptr;
+    this->selectedItem = nullptr;
     dendriteList->setSelectionMode(QAbstractItemView::SingleSelection);
+    connect(dendriteList,&QListWidget::itemClicked,this, [&](QListWidgetItem* item){
+       if ( selectedItem == item) {
+           dendriteList->clearSelection();
+           dendriteList->clearFocus();
+           this->selectedItem = nullptr;
+       } else {
+           this->selectedItem = item;
+       }
+    });
 
     this->setTitle("Please select the apical dendrite if it exists");
     auto layout = new QHBoxLayout;
@@ -196,6 +206,7 @@ SelectApicalPage::SelectApicalPage(skelgenerator::Neuron*&neuron_, QStringList& 
 }
 
 void SelectApicalPage::initializePage() {
+    this->selectedItem = nullptr;
     dendriteList->clear();
     for (const auto& file : filamentFiles) {
         QFileInfo fileInfo (file);
@@ -315,7 +326,7 @@ void SelectApicalPage::processSkel(const std::string &apical,const std::vector<s
 //    auto imarisFile = ui.imarisPath->text().toStdString();
 //    auto longsFile = ui.longsPath->text().toStdString();
 
-    float newThreshold = 0.5f;
+    float newThreshold = 1.1f;
     auto neuron = new skelgenerator::Neuron(apical, basals, imarisVol, imarisLongs, newThreshold);
     bool ignore = false;
     while (neuron->isIncorrectConecctions() || neuron->getReamingSegments() > 0 && !ignore) {

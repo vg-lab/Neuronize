@@ -67,6 +67,7 @@ class SelectApicalPage: public QWizardPage {
     QStringList& filamentFiles;
     QListWidget* dendriteList;
     skelgenerator::Neuron*& neuron;
+    QListWidgetItem* selectedItem;
 public:
     explicit SelectApicalPage(skelgenerator::Neuron*& neuron_, QStringList& filamentfiles_,QWidget *parent);
 

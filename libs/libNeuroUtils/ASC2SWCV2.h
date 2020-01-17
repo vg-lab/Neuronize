@@ -92,7 +92,7 @@ private:
 
     void procesSomaPart(std::ifstream &file, std::vector<std::vector<OpenMesh::Vec3d>> &countours);
 
-    static SubDendrite processDendrite(std::ifstream &inputStream, std::vector<Spine*> &spines, Eigen::Vector3d lastPoint);
+    static SubDendrite processDendrite(std::ifstream &inputStream, std::vector<Spine*> &spines);
 
     SimplePoint *calcSoma(std::vector<Dendrite> &vector1);
 
@@ -104,6 +104,7 @@ private:
 
     static bool
     checkPointInsideSoma(MeshVCG &soma, const OpenMesh::Vec3d &point, std::vector<OpenMesh::Vec3d> &intersectionPoints);
+
 };
 
 

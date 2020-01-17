@@ -30,13 +30,13 @@ ASC2SWCV2::ASC2SWCV2(const std::string &inputFile, bool useSoma) {
         if (line.find("Dendrite") != std::string::npos) {
             Dendrite dendrite;
             dendrite.type = Dendrite::Basal;
-            dendrite.dendrite = processDendrite(inputStream, spines, MAXPOINT);
+            dendrite.dendrite = processDendrite(inputStream, spines);
             dendrites.push_back(dendrite);
         }
         if (line.find("Apical") != std::string::npos) {
             Dendrite dendrite;
             dendrite.type = Dendrite::Apical;
-            dendrite.dendrite = processDendrite(inputStream, spines, MAXPOINT);
+            dendrite.dendrite = processDendrite(inputStream, spines);
             apicals.push_back(dendrite);
         }
     }
@@ -124,12 +124,13 @@ void ASC2SWCV2::procesSomaPart(std::ifstream &file, std::vector<std::vector<Open
     }
 }
 
-SubDendrite ASC2SWCV2::processDendrite(std::ifstream &inputStream, std::vector<Spine*>& spines,Eigen::Vector3d lastPoint) {
+SubDendrite ASC2SWCV2::processDendrite(std::ifstream &inputStream, std::vector<Spine*>& spines) {
     std::string line;
     double x, y, z, d;
     Eigen::Vector3d actualPoint;
     SubDendrite subDendrite;
     float threshold = 0.5f;
+    Eigen::Vector3d lastPoint = MAXPOINT;
 
     while(inputStream >> line) {
         if (line.find('<') != std::string::npos) {
@@ -145,16 +146,21 @@ SubDendrite ASC2SWCV2::processDendrite(std::ifstream &inputStream, std::vector<S
             subDendrite.section.push_back(spine);
         } else if (line.find('(') != std::string::npos) {
             inputStream >> line;
+            if (line.find(';') != std:: string::npos) {
+                inputStream.ignore(1000, '\n');
+                inputStream >> line;
+            }
+
             if (line.find('(') != std::string::npos) {
                 inputStream.putback('('); //Restauramos para que sean todas iguales.
-                subDendrite.subDendrites.push_back(processDendrite(inputStream, spines, lastPoint));
+                subDendrite.subDendrites.push_back(processDendrite(inputStream, spines));
             } else {
                 x = std::stod(line);
                 inputStream >> y;
                 inputStream >> z;
                 inputStream >> d;
                 inputStream >> line;
-                actualPoint = {x,y,z};
+                actualPoint = {x, y, z};
                 if ((lastPoint - actualPoint).norm() > threshold) {
                     subDendrite.section.push_back(new SimplePoint(x, y, z, d));
                     lastPoint = actualPoint;
@@ -386,6 +392,6 @@ void Spine::toASC(std::string tab, std::ofstream &file) const  {
     file << tab << "(Color Red)" << std::endl;
     file << tab << "(Generated 0)" << std::endl;
     file << std::setprecision(10) << std::fixed <<  tab << "( " << this->point[0] << "\t" << this->point[1] << "\t" << this->point[2]
-       << "\t" << this->d << " )>\t";
+       << "\t" << this->d << " )>\t" << std::endl;
 
 }
