@@ -470,10 +470,10 @@ void SomaDeformerWidget::finalizeSoma ( )
 void SomaDeformerWidget::restoreDefaultValues ( )
 {
   ui.doubleSpinBox_ScaleFactor->setValue ( 1.0 );
-  ui.spinBox_UnCollapseSprigns->setValue ( 25 );
+  ui.spinBox_UnCollapseSprigns->setValue ( 7 );
   ui.doubleSpinBox_NodeMass->setValue ( 0.64 );
   ui.doubleSpinBox_MS_Stiffness->setValue ( 20.0 );
-  ui.doubleSpinBox_MS_Dumping->setValue ( 0.05 );
+  ui.doubleSpinBox_MS_Dumping->setValue ( 0.2 );
   ui.doubleSpinBox_MS_Integrator_dt->setValue ( 0.005 );
 
   setMSDt ( );

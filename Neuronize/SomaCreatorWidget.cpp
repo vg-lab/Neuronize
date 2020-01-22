@@ -63,8 +63,8 @@ SomaCreatorWidget::SomaCreatorWidget (const QString &tempDir, QWidget *parent )
   mFullPathSWCFileName = mSWCFileName = "";
 
   //mMehsFileName	= QCoreApplication::applicationDirPath() + "/Content/Meshes/IcoSphera3Subdiv1Radio.off";
-  mMehsFileName =    QCoreApplication::applicationDirPath() + "/Content/Meshes/IcoSphera4Subdiv1Radio.off";
-  //mMehsFileName	= QCoreApplication::applicationDirPath() + "/Content/Meshes/IcoSphera5Subdiv1Radio.off";
+  //mMehsFileName =    QCoreApplication::applicationDirPath() + "/Content/Meshes/IcoSphera4Subdiv1Radio.off";
+  mMehsFileName	= QCoreApplication::applicationDirPath() + "/Content/Meshes/IcoSphera5Subdiv1Radio.off";
   //mMehsFileName	= QCoreApplication::applicationDirPath() + "/Content/Meshes/IcoSphera6Subdiv1Radio.off";
 
   //mMehsFileName	= QCoreApplication::applicationDirPath() + "/Content/Meshes/TETIcoSphera4Subdiv1Radio.off";
@@ -670,7 +670,7 @@ void SomaCreatorWidget::generateXMLSoma ( QString fileName, bool useSoma ) {
         for (int i = 0; i < lNumDendrites; ++i) {
             vertexs.push_back(mNearestVertex.at(i));
         }
-        auto somaPath = somaContours ? mExitDirectory.toStdString() + "/" + "somaConvex.off" : mExitDirectory.toStdString() + "/IcoSphera4Subdiv1Radio_RadioReal.off";
+        auto somaPath = somaContours ? mExitDirectory.toStdString() + "/" + "somaConvex.off" : mExitDirectory.toStdString() + "/" + sourceInfoModel.baseName().toStdString() + "_RadioReal.off";
 
         MeshVCG mesh(somaPath);
         std::string path = mExitDirectory.toStdString() + "/";

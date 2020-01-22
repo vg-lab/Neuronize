@@ -213,7 +213,7 @@ void SelectApicalPage::initializePage() {
         auto item = new QListWidgetItem(fileInfo.baseName(),dendriteList);
         item->setData(Qt::ToolTipRole,file);
     }
-
+    dendriteList->setCurrentIndex(QModelIndex());
     dendriteList->setCurrentRow(-1);
 }
 

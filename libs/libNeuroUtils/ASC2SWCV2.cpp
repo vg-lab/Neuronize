@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <unordered_set>
 #include <clocale>
+#include <stack>
 #include "MeshVCG.h"
 #include "ASC2SWCV2.h"
 
@@ -235,9 +236,9 @@ double ASC2SWCV2::calcSommaRadius(OpenMesh::Vec3d center) {
 void ASC2SWCV2::joinApicals(std::vector<Dendrite>& apicals, const OpenMesh::Vec3d& somaCenter) {
     if (apicals.size() > 1) {
         //Comprobar que dendrita esta mas cerca del soma
-        const Dendrite* principalApical = nullptr;
+        const Dendrite *principalApical = nullptr;
         float minDist = std::numeric_limits<float>::max();
-        for (const Dendrite& api: apicals) {
+        for (const Dendrite &api: apicals) {
             float dist = (api.dendrite.section[0]->point - somaCenter).norm();
 
             if (minDist > dist) {
@@ -246,24 +247,51 @@ void ASC2SWCV2::joinApicals(std::vector<Dendrite>& apicals, const OpenMesh::Vec3
             }
         }
 
-        //TODO unir varias apicales en una sola. Ahora con version anterior
-        /*
-        for (auto &api : apicals) {
+        std::vector<std::pair<int, SubDendrite *>> joinPoints;
+
+        for (auto &api: apicals) {
             if (&api != principalApical) {
                 minDist = std::numeric_limits<float>::max();
                 int mini = -1;
-                for (int i = 0; i < principalApical->size(); i++) {
-                    float dist = (api[0].point - (*principalApical)[i].point).norm();
-                    if (minDist > dist) {
-                        mini = i;
-                        minDist = dist;
+                SubDendrite *minSubdendrite;
+                std::stack<SubDendrite> subdendrites;
+                subdendrites.push(api.dendrite);
+                while (!subdendrites.empty()) {
+                    auto subdendrite = subdendrites.top();
+                    subdendrites.pop();
+                    for (int i = 0; i < subdendrite.section.size(); i++) {
+                        auto point = subdendrite.section[i]->point;
+                        float dist = (point - api.dendrite.section[0]->point).norm();
+                        if (minDist > dist) {
+                            mini = i;
+                            minDist = dist;
+                            minSubdendrite = &subdendrite;
+                        }
                     }
+
+                    for (const auto &child: subdendrite.subDendrites) {
+                        subdendrites.push(child);
+                    }
+
+                    joinPoints.emplace_back(mini, minSubdendrite);
                 }
 
-
-                api[0].parent = (*principalApical)[mini].counter;
             }
-        } */
+        }
+
+        for (int i = 0; i < joinPoints.size(); i++ ) {
+            auto joinPoint = joinPoints[i];
+            auto subdendrite = joinPoint.second;
+            int conectionPoint = joinPoint.first;
+            SubDendrite newSubDendrite;
+            newSubDendrite.section.insert(newSubDendrite.section.begin(),subdendrite->section.begin() + conectionPoint,subdendrite->section.end());
+            newSubDendrite.subDendrites = subdendrite->subDendrites;
+            subdendrite->subDendrites.clear();
+
+            subdendrite->section.erase(subdendrite->section.begin() + conectionPoint,subdendrite->section.end());
+            subdendrite->subDendrites.push_back(apicals[i].dendrite);
+            subdendrite->subDendrites.push_back(newSubDendrite);
+        }
     }
 }
 
