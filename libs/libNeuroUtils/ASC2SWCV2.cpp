@@ -10,7 +10,6 @@
 #include "MeshVCG.h"
 #include "ASC2SWCV2.h"
 
-#define MAXPOINT {std::numeric_limits<double>::max(),std::numeric_limits<double>::max(),std::numeric_limits<double>::max()}
 ASC2SWCV2::ASC2SWCV2(const std::string &inputFile, bool useSoma) {
     std::setlocale(LC_ALL, "en_US.UTF-8");
     std::ifstream inputStream;
@@ -125,13 +124,12 @@ void ASC2SWCV2::procesSomaPart(std::ifstream &file, std::vector<std::vector<Open
     }
 }
 
-SubDendrite ASC2SWCV2::processDendrite(std::ifstream &inputStream, std::vector<Spine*>& spines) {
+SubDendrite ASC2SWCV2::processDendrite(std::ifstream &inputStream, std::vector<Spine*>& spines,Eigen::Vector3d lastPoint) {
     std::string line;
     double x, y, z, d;
     Eigen::Vector3d actualPoint;
     SubDendrite subDendrite;
     float threshold = 0.5f;
-    Eigen::Vector3d lastPoint = MAXPOINT;
 
     while(inputStream >> line) {
         if (line.find('<') != std::string::npos) {
@@ -154,7 +152,7 @@ SubDendrite ASC2SWCV2::processDendrite(std::ifstream &inputStream, std::vector<S
 
             if (line.find('(') != std::string::npos) {
                 inputStream.putback('('); //Restauramos para que sean todas iguales.
-                subDendrite.subDendrites.push_back(processDendrite(inputStream, spines));
+                subDendrite.subDendrites.push_back(processDendrite(inputStream, spines,lastPoint));
             } else {
                 x = std::stod(line);
                 inputStream >> y;

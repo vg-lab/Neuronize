@@ -361,11 +361,11 @@ void SomaDeformerWidget::exportModel (const QString& fileName )
     if (this->somaCreator->getNeuron() != nullptr) {
         std::ofstream ascFile;
         ascFile.open(fileName.toStdString() + "/skel.asc",std::ofstream::out);
-        ascFile << this->somaCreator->getNeuron()->to_asc(meshVcg.sliceContours(0.5f),
+        ascFile << this->somaCreator->getNeuron()->to_asc(meshVcg.sliceContours(0.1f),
                 {displacement[0],displacement[1],displacement[2]});
         ascFile.close();
     } else if (this->somaCreator->getASCparser() != nullptr) {
-        this->somaCreator->getASCparser()->toASC(meshVcg.sliceContours(0.5f),
+        this->somaCreator->getASCparser()->toASC(meshVcg.sliceContours(0.1f),
                 {displacement[0],displacement[1],displacement[2]},
                 fileName.toStdString() + "/skel.asc");
     } else {

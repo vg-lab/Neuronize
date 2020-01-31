@@ -255,7 +255,7 @@ std::vector<MeshVCG*> MeshVCG::slice(float zStep) {
     auto max = mesh.bbox.P(7);
     float maxZ = max[2];
     std::vector<MeshVCG* > contours;
-    for (float currentZ  = minZ + zStep; currentZ <= maxZ ; currentZ+=zStep) {
+    for (float currentZ  = minZ; currentZ < maxZ ; currentZ+=zStep) {
         contours.push_back(sliceAux(currentZ));
     }
 
@@ -267,29 +267,32 @@ std::vector<std::vector<Eigen::Vector3f>> MeshVCG::sliceContours(float zStep) {
     std::vector<std::vector<Eigen::Vector3f>> contoursEigen;
     for (const auto &contour: contours) {
         std::vector<Eigen::Vector3f> contourEigen;
-        MyVertex* initVertex = &(*(contour->mesh.vert.begin()));
-        vcg::tri::UpdateTopology<MyMesh>::VertexEdge(contour->mesh);
-        MyVertex* currentVertex = initVertex;
-        MyEdge* lastEdge = nullptr;
-        do {
-            auto point = currentVertex->P();
-            Eigen::Vector3f auxPoint (point[0], point[1], point[2]);
-            contourEigen.push_back(auxPoint);
+        MyVertex *initVertex = &(*(contour->mesh.vert.begin()));
+        if (initVertex != nullptr) {
+            vcg::tri::UpdateTopology<MyMesh>::VertexEdge(contour->mesh);
+            MyVertex *currentVertex = initVertex;
+            MyEdge *lastEdge = nullptr;
+            do {
+                auto point = currentVertex->P();
+                Eigen::Vector3f auxPoint(point[0], point[1], point[2]);
+                contourEigen.push_back(auxPoint);
 
-            vcg::edge::VEIterator<MyEdge> vei (currentVertex);
-            MyEdge *edge = nullptr;
-            if (vei.e == lastEdge) {
-                ++vei;
-                edge = vei.e;
-            } else {
-                edge = vei.e;
-            }
+                vcg::edge::VEIterator<MyEdge> vei(currentVertex);
+                MyEdge *edge = nullptr;
+                if (vei.e == lastEdge) {
+                    ++vei;
+                    edge = vei.e;
+                } else {
+                    edge = vei.e;
+                }
 
-            lastEdge = edge;
-            currentVertex = currentVertex == edge->V(0) ? edge->V(1) : edge->V(0);
-        } while (initVertex != currentVertex);
+                lastEdge = edge;
+                currentVertex = currentVertex == edge->V(0) ? edge->V(1) : edge->V(0);
+            } while (initVertex != currentVertex);
+            contoursEigen.push_back(contourEigen);
+        }
+
         delete contour;
-        contoursEigen.push_back(contourEigen);
     }
     return contoursEigen;
 }
@@ -417,6 +420,10 @@ HausdorffRet MeshVCG::hausdorffDistance(MeshVCG &otherMesh, const std::string &c
     color.SetColorRamp(0.0f,1.0f,value);
     return QColor::fromRgbF(color[0],color[1],color[2],color[3]);
 
+}
+
+void MeshVCG::removeUnreferenceVertex() {
+    vcg::tri::Clean<MyMesh>::RemoveUnreferencedVertex(this->mesh);
 }
 
 

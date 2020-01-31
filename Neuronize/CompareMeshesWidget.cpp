@@ -123,7 +123,7 @@ void CompareMeshesWidget::initUi() {
     auto checkboxLayout = new QHBoxLayout(this);
     checkboxLayout->setSpacing(6);
     checkboxLayout->addWidget(comparaMeshesCheckbox);
-    checkboxLayout->addWidget(new QLabel("Meshes to be compare",this));
+    checkboxLayout->addWidget(new QLabel("Meshes to be compared",this));
     checkboxLayout->addStretch();
 
     auto gridLayout = new QGridLayout(this);
@@ -183,6 +183,8 @@ void CompareMeshesWidget::initRender() {
     auto mes2text = mesh2Path->text();
     MeshVCG mesh1 (mesh1text.toStdString());
     MeshVCG mesh2 (mes2text.toStdString());
+    mesh1.removeUnreferenceVertex();
+    mesh2.removeUnreferenceVertex();
 
     QFuture<HausdorffRet> future = QtConcurrent::run([&](){return mesh1.hausdorffDistance(mesh2, tmpPath);});
     QFutureWatcher<HausdorffRet> watcher;
@@ -224,6 +226,17 @@ void CompareMeshesWidget::initRender() {
     auto center = viewer1->getSceneCenter();
     viewer1->setDisplacement(center);
     viewer2->setDisplacement(center);
+
+    auto box1 = viewer1->getSceneBoundingBox();
+    auto box2 = viewer2->getSceneBoundingBox();
+
+    if ((box1.first - box1.second).squaredNorm() > (box2.first - box2.second).squaredNorm()) {
+        viewer1->fitBox(box1);
+        viewer2->fitBox(box1);
+    } else {
+        viewer1->fitBox(box2);
+        viewer2->fitBox(box2);
+    }
 
     updateLabels(hausdorffResult);
 }
@@ -327,6 +340,17 @@ void CompareMeshesWidget::addMesh(QListWidget *list,CompareMeshWidgetViewer* vie
         auto center = viewer->getSceneCenter();
         viewer1->setDisplacement(center);
         viewer2->setDisplacement(center);
+
+        auto box1 = viewer1->getSceneBoundingBox();
+        auto box2 = viewer2->getSceneBoundingBox();
+
+        if ((box1.first - box1.second).squaredNorm() > (box2.first - box2.second).squaredNorm()) {
+            viewer1->fitBox(box1);
+            viewer2->fitBox(box1);
+        } else {
+            viewer1->fitBox(box2);
+            viewer2->fitBox(box2);
+        }
 
     }
 

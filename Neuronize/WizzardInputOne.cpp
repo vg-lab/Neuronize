@@ -50,7 +50,7 @@ FilePage::FilePage(QWidget *parent) : QWizardPage(parent) {
 
     radioSWC = new QRadioButton("SWC");
     radioASC = new QRadioButton("ASC");
-    radioFilament = new QRadioButton("Filament");
+    radioFilament = new QRadioButton("VRML (Filament)");
 
     auto layout = new QVBoxLayout;
     layout->addWidget(label);
@@ -135,8 +135,8 @@ FilamentPage::FilamentPage(QStringList& filamentFiles_, QWidget* parent) : QWiza
     this->setSubTitle("Remember that each file must contain at least one complete neurite");
 
     this->dendriteList = new QListWidget();
-    auto addDendrite = new QPushButton("Add Neurite/s");
-    auto removeDendrite = new QPushButton("Remove Neurite/s");
+    auto addDendrite = new QPushButton("Add File/s");
+    auto removeDendrite = new QPushButton("Remove File/s");
 
     connect(addDendrite,&QPushButton::released,this,[&](){
         auto files = QFileDialog::getOpenFileNames(this,"Select VRML Neurites file/s",QString(),"VRML(*.vrml *.VRML *.wrl *.WRL)");
@@ -321,11 +321,20 @@ void SelectApicalPage::showWarningDialogReaminingSegments(int sobrantes, float &
     }
 }
 
-void SelectApicalPage::processSkel(const std::string &apical,const std::vector<std::string>& basals,const std::string &imarisVol,const std::string &imarisLongs) {
-    //TODO
-//    auto imarisFile = ui.imarisPath->text().toStdString();
-//    auto longsFile = ui.longsPath->text().toStdString();
 
+void SelectApicalPage::processSkel(const std::string &apical,const std::vector<std::string>& basals,const std::string &imarisVol,const std::string &imarisLongs) {
+    float newThreshold = 0.5f;
+    auto neuron = new skelgenerator::Neuron(apical, basals, imarisVol, imarisLongs, newThreshold);
+    bool ignore = false;
+    while (neuron->getReamingSegments() > 0) {
+        delete (neuron);
+        neuron = new skelgenerator::Neuron(apical, basals, imarisVol, imarisLongs, newThreshold);
+        newThreshold += 0.1f;
+    }
+    this->neuron = neuron;
+}
+/*
+void SelectApicalPage::processSkel(const std::string &apical,const std::vector<std::string>& basals,const std::string &imarisVol,const std::string &imarisLongs) {
     float newThreshold = 1.1f;
     auto neuron = new skelgenerator::Neuron(apical, basals, imarisVol, imarisLongs, newThreshold);
     bool ignore = false;
@@ -351,7 +360,7 @@ void SelectApicalPage::processSkel(const std::string &apical,const std::vector<s
     }
     this->neuron = neuron;
 
-}
+}*/
 
 int SelectApicalPage::nextId() const {
     if (this->neuron == nullptr)
@@ -409,7 +418,7 @@ bool AddLongsPage::validatePage() {
 
 FinishPage::FinishPage(QString& oututPath_, QWidget *parent) : QWizardPage(parent), outputPath(oututPath_) {
     this->setTitle("The process is over");
-    this->setSubTitle("Now select an output directory to store all the generated files and go to the soma deformation stage");
+    this->setSubTitle("Select output directory to store generated files");
 
     auto button = new QPushButton(tr("&Output Directory"));
     this->outuputLineEdit = new QLineEdit;
@@ -429,7 +438,7 @@ bool FinishPage::validatePage() {
         outputPath = outuputLineEdit->text();
         return true;
     } else {
-        QMessageBox::warning(this,"Miss output directory","Please fill output directory field to continue");
+        QMessageBox::warning(this,"Missing output directory","Please fill output directory field to continue");
         return false;
     }
 }

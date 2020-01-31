@@ -12,6 +12,9 @@
 #include <OpenMesh/Core/Mesh/Traits.hh>
 #include "MeshVCG.h"
 
+
+#define MAXPOINT {std::numeric_limits<double>::max(),std::numeric_limits<double>::max(),std::numeric_limits<double>::max()}
+
 class NEUROUTILS_API SimplePoint {
 public:
     OpenMesh::Vec3d point;
@@ -92,7 +95,7 @@ private:
 
     void procesSomaPart(std::ifstream &file, std::vector<std::vector<OpenMesh::Vec3d>> &countours);
 
-    static SubDendrite processDendrite(std::ifstream &inputStream, std::vector<Spine*> &spines);
+    static SubDendrite processDendrite(std::ifstream &inputStream, std::vector<Spine*> &spines,Eigen::Vector3d lastPoint = MAXPOINT);
 
     SimplePoint *calcSoma(std::vector<Dendrite> &vector1);
 

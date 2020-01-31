@@ -20,6 +20,7 @@
 
 #include "NeuroGeneratorWidget.h"
 #include "neuronize.h"
+#include "SelectSpinesDialog.h"
 
 #include <libs/libQtNeuroUtils/QtThreadsManager.hpp>
 
@@ -1169,32 +1170,28 @@ void NeuroGeneratorWidget::showSpinesTab ( )
         ui.radioButton_RealAscPos->setChecked(true);
     }
 
-    if (this->neuron != nullptr && this->neuron->hasFilamentSpines()) {
-        ui.radioButton_VrmlSpines->setEnabled(true);
-        ui.radioButton_VrmlSpines->setChecked(true);
-        int ret = QMessageBox::question(this,"Neuronize",
-                "A neuron from filament tracer has been loaded. Do you want to load the surface generated spines (Imaris)?",
-                QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+    if (this->neuron != nullptr) {
+        SelectSpinesDialog dialog(this->neuron->hasFilamentSpines(),this);
+        dialog.exec();
+        auto selected = dialog.getOption();
+        if (selected == SelectSpinesDialog::THIS_SPINES) {
+            ui.radioButton_VrmlSpines->setEnabled(true);
+            ui.radioButton_VrmlSpines->setChecked(true);
+        } else if (selected == SelectSpinesDialog::NEW_FILE_SPINES) {
+            ui.radioButton_ImarisSpines->setEnabled(true);
+            ui.radioButton_ImarisSpines->setChecked(true);
+            auto file = dialog.getNewFilePath();
+            this->neuron->addImarisSpines(file.toStdString());
 
-        if (ret == QMessageBox::Yes) {
-            auto file = QFileDialog::getOpenFileName(this,"Open Imaris Spines",QString(),"Imaris(*.vrml *.VRML *.wrl *.WRL)");
-            if (!file.isEmpty()) {
-                this->neuron->addImarisSpines(file.toStdString());
-                ui.radioButton_ImarisSpines->setEnabled(true);
-                ui.radioButton_ImarisSpines->setChecked(true);
-                if (Neuronize::hasPython) {
-                    int ret = QMessageBox::question(this, "Neuronize",
-                                                    "Do you want to repair the selected spines?",
-                                                    QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
-                    if (ret == QMessageBox::Yes) {
-                        ui.radioButton_RepairedSpines->setEnabled(true);
-                        ui.radioButton_RepairedSpines->setChecked(true);
-                    }
+            int ret = QMessageBox::question(this, "Neuronize",
+                                            "Do you want to repair the new selected spines?",
+                                            QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+            if (ret == QMessageBox::Yes) {
+                ui.radioButton_RepairedSpines->setEnabled(true);
+                ui.radioButton_RepairedSpines->setChecked(true);
 
-                }
             }
         }
-
     }
     generateSpines();
 

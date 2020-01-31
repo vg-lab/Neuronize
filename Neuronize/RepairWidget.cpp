@@ -10,6 +10,7 @@
 #include <QSpacerItem>
 #include <QSizePolicy>
 #include <QFormLayout>
+#include <QDesktopServices>
 #include <iostream>
 #include "RepairWidget.h"
 #include "neuronize.h"
@@ -100,9 +101,11 @@ void RepairWidget::setupUi() {
     saveCombo->addItem("None");
     saveCombo->addItem("Obj");
     saveCombo->addItem("Stl");
+    saveCombo->setCurrentIndex(1);
 
     advancedButton = new QPushButton("Advanced Options" );
-    advancedButton->setStyleSheet(tr("border:1px"));
+    advancedButton->setSizePolicy(QSizePolicy::Maximum,QSizePolicy::Minimum);
+    //advancedButton->setStyleSheet(tr("border:1px"));
 
     percentageBox = new QDoubleSpinBox(advancedWidget);
     percentageBox->setValue(30.0f);
@@ -169,10 +172,11 @@ void RepairWidget::setupUi() {
     mainLayout = new QVBoxLayout( );
     mainLayout->addItem(grid);
     mainLayout->addWidget(advancedButton);
+    mainLayout->setAlignment(advancedButton,Qt::AlignHCenter);
     mainLayout->addWidget(line);
     mainLayout->addWidget(advancedWidget);
-    mainLayout->addStretch(1);
     mainLayout->addWidget(repairButton);
+    mainLayout->addStretch(1);
     setLayout(mainLayout);
 
 }
@@ -191,8 +195,8 @@ void RepairWidget::onOk() {
         }
 
         if (csvPath->text().isEmpty()) {
-            QString filename = input.section(".", 0, 0);
-            output = input + ".csv";
+            QToolTip::showText(csvPath->mapToGlobal(QPoint()), tr("Need a output file"));
+            return;
         } else {
             output = csvPath->text();
         }
@@ -281,7 +285,24 @@ void RepairWidget::onProcessFinish() {
     QMessageBox msgBox(this);
     msgBox.setText("Task Finished");
     msgBox.setIcon(QMessageBox::Information);
+    auto openFolderButton = msgBox.addButton(tr("go to output directory"), QMessageBox::ActionRole);
+    auto okButton = msgBox.addButton(QMessageBox::Ok);
     msgBox.exec();
+
+    if (msgBox.clickedButton() == openFolderButton) {
+        QString path;
+
+        if (fileRadio->isChecked()) {
+            QFileInfo fi(csvPath->text());
+            path = fi.absoluteDir().absolutePath();
+        } else {
+            QFileInfo fi(folderOutputEdit->text());
+            path = fi.absoluteDir().absolutePath();
+        }
+
+        QDesktopServices::openUrl(QUrl::fromLocalFile(path));
+    }
+
 }
 
 void RepairWidget::onAdvancedPress() {
@@ -337,7 +358,7 @@ RepairWidget::repairFile(const QString &outputFile, const QString &inputFile, co
         arguments << "-e" << "\"" + exportPath + "\"";
     }
 
-    QString command = "\"\"" + QCoreApplication::applicationDirPath() + "/" + RUN + "\" " + Neuronize::envPath + " " + arguments.join(" ") + "\"";
+    QString command = "\"" + QCoreApplication::applicationDirPath() + "/" + RUN + "\" " + Neuronize::envPath + " " + arguments.join(" ");
     std::cout << command.toStdString() << std::endl;
     return std::system(command.toStdString().c_str());
 

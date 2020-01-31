@@ -96,6 +96,8 @@ class MyFace
 
         HausdorffRet hausdorffDistance(MeshVCG &otherMesh, const std::string &path = "");
 
+        void removeUnreferenceVertex();
+
     private:
          MeshVCG*  sliceAux(float z);
 

@@ -84,6 +84,9 @@ void CompareMeshWidgetViewer::setMesh(const std::string& filename) {
 void CompareMeshWidgetViewer::addVisualizeMesh(const std::string& filename) {
 
     auto mesh = new BaseMesh(filename);
+    mesh->getUnprotectedMesh()->delete_isolated_vertices();
+    mesh->getUnprotectedMesh()->garbage_collection();
+    mesh->updateBaseMesh();
     auto renderer = new NSMeshRenderer::MeshRenderer;
 
     mesh->setVertexColor ( mesh->getMesh ( )->vertices_begin ( ),
@@ -97,6 +100,8 @@ void CompareMeshWidgetViewer::addVisualizeMesh(const std::string& filename) {
     renderer->setMeshToRender(mesh);
     renderer->setRenderOptions(renderMask);
     visualizeMeshRends.push_back(renderer);
+    auto center = getSceneCenter();
+    setDisplacement(center);
     updateGL();
 }
 
@@ -145,14 +150,6 @@ void CompareMeshWidgetViewer::mouseReleaseEvent(QMouseEvent *event) {
     emit viewChanged(nullptr, nullptr, nullptr,event);
 }
 
-double CompareMeshWidgetViewer::getMaxDist() const {
-    return maxDist;
-}
-
-void CompareMeshWidgetViewer::setMaxDist(double maxDist) {
-    CompareMeshWidgetViewer::maxDist = maxDist;
-}
-
 void CompareMeshWidgetViewer::setDisplacement(Eigen::Vector3f displacement_){
     boost::numeric::ublas::matrix<float> inverseTranslationMatrix (4,4);
     generateSquareTraslationMatrix(inverseTranslationMatrix,displacement[0],displacement[1],displacement[2]);
@@ -170,8 +167,10 @@ void CompareMeshWidgetViewer::setDisplacement(Eigen::Vector3f displacement_){
         renderer->getBaseMesh()->applyMatrixTransform(translationMatrix,4);
     }
 
-    this->displacement = displacement_;
-    updateGL();
+
+
+   this->displacement = displacement_;
+   updateGL();
 }
 
 bool CompareMeshWidgetViewer::isRendering() {
@@ -179,6 +178,17 @@ bool CompareMeshWidgetViewer::isRendering() {
 }
 
 Eigen::Vector3f CompareMeshWidgetViewer::getSceneCenter(){
+   auto boundingBox = getSceneBoundingBox();
+   auto min = boundingBox.first;
+   auto max = boundingBox.second;
+   return (max - min) / 2 + min + displacement;
+}
+
+std::pair<Eigen::Vector3f, Eigen::Vector3f > CompareMeshWidgetViewer::getSceneBoundingBox() {
+    if ( (meshRend == nullptr || meshRend->getBaseMesh() == nullptr) && visualizeMeshRends.empty()) {
+        return {{0,0,0},{0,0,0}};
+    }
+
     Eigen::Vector3f min = {std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),std::numeric_limits<float>::max()};
     Eigen::Vector3f max = {-std::numeric_limits<float>::max(),-std::numeric_limits<float>::max(),-std::numeric_limits<float>::max()};
     if (meshRend != nullptr && meshRend->getBaseMesh() != nullptr) {
@@ -192,13 +202,14 @@ Eigen::Vector3f CompareMeshWidgetViewer::getSceneCenter(){
         min = min.cwiseMin(boundingBox.first);
         max = max.cwiseMax(boundingBox.second);
     }
-    std::cout << (max - min) / 2 + min << std::endl;
-    return (max - min) / 2 + min + displacement;
+
+    return {min,max};
 }
 
 std::pair<Eigen::Vector3f, Eigen::Vector3f> CompareMeshWidgetViewer::getBoundingBox(BaseMesh* baseMesh) {
     Eigen::Vector3f min = {std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),std::numeric_limits<float>::max()};
     Eigen::Vector3f max = {-std::numeric_limits<float>::max(),-std::numeric_limits<float>::max(),-std::numeric_limits<float>::max()};
+
     for (const auto& vertex:baseMesh->getMesh()->vertices()) {
         auto p = baseMesh->getMesh()->point(vertex);
         min[0] = std::min(min[0], p[0]);
@@ -208,9 +219,18 @@ std::pair<Eigen::Vector3f, Eigen::Vector3f> CompareMeshWidgetViewer::getBounding
         max[0] = std::max(max[0], p[0]);
         max[1] = std::max(max[1], p[1]);
         max[2] = std::max(max[2], p[2]);
+
     }
     return {min,max};
 }
+
+void CompareMeshWidgetViewer::fitBox(std::pair<Eigen::Vector3f, Eigen::Vector3f> box) {
+    qglviewer::Vec min = {box.first.x(),box.first.y(),box.first.z()};
+    qglviewer::Vec max = {box.second.x(),box.second.y(),box.second.z()};
+    camera()->fitBoundingBox(min,max);
+    updateGL();
+}
+
 
 
 

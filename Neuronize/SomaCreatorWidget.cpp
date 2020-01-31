@@ -566,7 +566,7 @@ void SomaCreatorWidget::generateXMLSoma ( QString fileName, bool useSoma ) {
 
                 if ((ext == "asc") || (ext == "ASC")) {
                   auto ascPath = lLocalFilePath.toStdString() + "/" + info1.fileName().toStdString();
-                  fileName = lLocalFilePath + "/" + info1.fileName() + ".swc";
+                  fileName = Neuronize::tmpPath + "/" + info1.fileName() + ".swc";
                   delete ASCparser;
                     ASCparser = new ASC2SWCV2(ascPath, useSoma);
                   ASCparser->toSWC(fileName.toStdString());
