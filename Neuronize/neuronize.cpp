@@ -453,12 +453,17 @@ void Neuronize::genetareNeuronsInBatch (QString inputFilePath,QString outputFile
               }
             }
           }
-          std::string resultFile = mInputFilePath.toStdString() ;
+          std::string resultFile = Neuronize::tmpPath.toStdString() ;
           std::string name = dir.dirName().toStdString();
           resultFile.append("/").append(name).append(".asc");
 
-
+          float threshold = 0.1f;
           auto neuron = new skelgenerator::Neuron(apiFile, basalFiles);
+          while (neuron->getReamingSegments() > 0) {
+              delete neuron;
+              threshold += 0.1f;
+              neuron = new skelgenerator::Neuron(apiFile, basalFiles,"","",threshold);
+          }
           std::ofstream file;
           file.open(resultFile);
           file << neuron->to_asc();
@@ -475,6 +480,22 @@ void Neuronize::genetareNeuronsInBatch (QString inputFilePath,QString outputFile
     showSomaCreator ( );
     auto filePath = std::get<0>(mFilesContainer[i]);
     auto neuron = std::get<1>(mFilesContainer[i]);
+
+      QFileInfo f ( filePath );
+      QString lFileName = f.fileName ( );
+
+      QString lTmpId = "";
+      if ( i < 10 )
+          lTmpId = "00" + QString::number ( i );
+      else if ( i < 100 )
+          lTmpId = "0" + QString::number ( i );
+      else
+          lTmpId = QString::number ( i );
+
+      QString lTmpPath = mOuputFilePath + "/" + lBaseName + lTmpId;
+      QDir ( ).mkdir ( lTmpPath );
+      Neuronize::outPath = lTmpPath;
+
     mSomaCreatorWidget->generateXMLSoma ( filePath, true );
     auto spines = mSomaCreatorWidget->getSpines();
 
@@ -487,27 +508,16 @@ void Neuronize::genetareNeuronsInBatch (QString inputFilePath,QString outputFile
     std::cout << "Deformer" << std::endl << std::flush;
 
     //Luego pasar al NeuriteGenerator y hacer el build
+    mNeuroGeneratorWidget->setNeuron(mSomaCreatorWidget->getNeuron());
     showDendriteGenerator ( );
-    mNeuroGeneratorWidget->loadNeuronDefinitionAndGenerateMesh ( );
+    mNeuroGeneratorWidget->loadNeuronDefinitionAndGenerateMeshBatch ( );
 
     std::cout << "Dendrites" << std::endl << std::flush;
 
     //Suavizado
     mNeuroGeneratorWidget->applySmooth ( subdivisions, 0, 0, 0 );
 
-    QFileInfo f ( filePath );
-    QString lFileName = f.fileName ( );
 
-    QString lTmpId = "";
-    if ( i < 10 )
-      lTmpId = "00" + QString::number ( i );
-    else if ( i < 100 )
-      lTmpId = "0" + QString::number ( i );
-    else
-      lTmpId = QString::number ( i );
-
-    QString lTmpPath = mOuputFilePath + "/" + lBaseName + lTmpId;
-    QDir ( ).mkdir ( lTmpPath );
 
     mNeuroGeneratorWidget->exportNeuron ( lTmpPath + "/" + lFileName );
 

@@ -62,7 +62,7 @@ namespace  BBDD {
 
         void addDendrite(const std::string& neuronName,int initCounter,int lastCounter,NSSWCImporter::DendriticType type);
 
-        void addSpineFilament(const skelgenerator::Spine* const spine, const std::string& meshPath, const std::string& neuronName, const std::string& tmpDir, const OpenMesh::Vec3f& displacement);
+        void addSpineFilament(const shared_ptr<skelgenerator::Spine>  spine, const std::string& meshPath, const std::string& neuronName, const std::string& tmpDir, const OpenMesh::Vec3f& displacement);
 
         void addSpineImaris(const std::string& originalSpine, const std::string& repairedSpine, const std::string& ext, const std::string& name);
 
@@ -95,7 +95,7 @@ namespace  BBDD {
 
         void addDefaultSpinesModels();
 
-        vcg::Matrix44d orientSpine(MeshVCG& mesh,const skelgenerator::Spine* const spine);
+        vcg::Matrix44d orientSpine(MeshVCG& mesh, const shared_ptr<skelgenerator::Spine>  spine);
 
         static std::vector<char> readBytes(const std::string &filename);
 

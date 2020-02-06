@@ -129,7 +129,7 @@ SubDendrite ASC2SWCV2::processDendrite(std::ifstream &inputStream, std::vector<S
     double x, y, z, d;
     Eigen::Vector3d actualPoint;
     SubDendrite subDendrite;
-    float threshold = 0.5f;
+    float threshold = 0.1f;
 
     while(inputStream >> line) {
         if (line.find('<') != std::string::npos) {

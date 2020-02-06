@@ -6,6 +6,7 @@
 #include "ExportDialog.h"
 #include <QFormLayout>
 #include <QtWidgets/QToolTip>
+#include <QFileDialog>
 
 NeuronSetDialog::NeuronSetDialog(QWidget *parent): QDialog(parent) {
     this->inputDirectoryButton = new QPushButton("Select Input Directory");
@@ -53,6 +54,9 @@ NeuronSetDialog::NeuronSetDialog(QWidget *parent): QDialog(parent) {
     connect(buttons,&QDialogButtonBox::accepted,this,&NeuronSetDialog::onOk);
     connect(buttons,&QDialogButtonBox::rejected,this,&ExportDialog::reject);
 
+    connect(inputDirectoryButton,&QPushButton::released,this,[&](){openFolder(this->inputDirectoryPath,"Select input directory");});
+    connect(outputDirectoryButton,&QPushButton::released,this,[&](){openFolder(this->outputDirectoryPath,"Select Output directory");});
+
 }
 
 void NeuronSetDialog::onOk() {
@@ -93,4 +97,9 @@ const QString &NeuronSetDialog::getBaseName() const {
 
 int NeuronSetDialog::getSubdivisions() const {
     return subdivisions;
+}
+
+void NeuronSetDialog::openFolder(QLineEdit *dest, const QString &message) {
+    auto folder = QFileDialog::getExistingDirectory(this, message, QString());
+    dest->setText(folder);
 }

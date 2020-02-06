@@ -341,7 +341,7 @@ namespace BBDD {
 
     }
 
-    vcg::Matrix44d BBDD::orientSpine(MeshVCG& mesh,const skelgenerator::Spine* const spine) {
+    vcg::Matrix44d BBDD::orientSpine(MeshVCG& mesh, const shared_ptr<skelgenerator::Spine>  spine) {
         std::vector<skelgenerator::SamplePoint> medialAxis = spine->getMedialAxisWithoutBase();
         auto const& firstPoint = medialAxis[0].getPoint();
         
@@ -425,7 +425,7 @@ namespace BBDD {
     }
 
 
-    void BBDD::addSpineFilament(const skelgenerator::Spine* const spine, const std::string& meshPath, const std::string& neuronName, const std::string& tmpDir, const OpenMesh::Vec3f& displacement) {
+    void BBDD::addSpineFilament(const shared_ptr<skelgenerator::Spine>  spine, const std::string& meshPath, const std::string& neuronName, const std::string& tmpDir, const OpenMesh::Vec3f& displacement) {
         std::string query = "INSERT INTO SPINE_MODEL (AREA, VOLUME, ORIGIN, MODEL, File_TYPE, MASS_CENTER_X, MASS_CENTER_Y, MASS_CENTER_Z)"
                             " VALUES (%f,%f,%i,'%x',%i,%f,%f,%f);";
         MeshVCG mesh (meshPath);

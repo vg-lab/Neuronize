@@ -44,6 +44,8 @@ public:
 
 private slots:
     void onOk();
+
+    void openFolder(QLineEdit *dest, const QString &message);
 };
 
 

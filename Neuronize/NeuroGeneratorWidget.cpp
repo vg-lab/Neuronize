@@ -249,44 +249,49 @@ void NeuroGeneratorWidget::generateDendrites ( )
 
 void NeuroGeneratorWidget::loadNeuronDefinitionAndGenerateMesh ( )
 {
-  viewer->loadSWCFile ( mSWCFleName );
-
-  generateNeuron ( );
-
-  viewer->setNeuronColor ( MeshDef::Color ( 0.5, 0.5, 1.0, 0.5 ));
-
-  ui.pushButton_GoToGenerateSpines->setEnabled ( true );
-
-  ui.pushButton_GoToGenerateSpines->setEnabled ( true );
-  ui.pushButton_NextStep->setEnabled ( true );
-  ui.pushButton_SmoothDendrites->setEnabled ( true );
-
-
-  QFileInfo fi (mSWCFleName);
-  bool neuronAdded = Neuronize::bbdd.addNeuron(fi.baseName().toStdString(),mSWCFleName.toStdString());
-
-  if (!neuronAdded) {
-      MeshVCG somaMesh(mTempDir.toStdString() + "/RealSize.obj");
-      Neuronize::bbdd.addSoma(fi.baseName().toStdString(), somaMesh, BBDD::Spring_Mass, this->contours);
-
-      SWCImporter *importer = this->viewer->getNeuroSWC()->getImporter();
-      for (const auto &dendritic : importer->getDendritics()) {
-          Neuronize::bbdd.addDendrite(fi.baseName().toStdString(), dendritic.initialNode, dendritic.finalNode,
-                                      dendritic.type);
-      }
-  }
-
-
-  viewer->updateGL ( );
-
-  if ( mMsgTimer != NULL )
-    mMsgTimer->stop ( );
+    loadNeuronDefinitionAndGenerateMeshBatch();
 
   msgBox->close();
   msgBox->setWindowTitle("Neuronize");
   msgBox->setText("The construction of the neurites is over");
   msgBox->exec();
 }
+
+void NeuroGeneratorWidget::loadNeuronDefinitionAndGenerateMeshBatch ( ) {
+    viewer->loadSWCFile ( mSWCFleName );
+
+    generateNeuron ( );
+
+    viewer->setNeuronColor ( MeshDef::Color ( 0.5, 0.5, 1.0, 0.5 ));
+
+    ui.pushButton_GoToGenerateSpines->setEnabled ( true );
+
+    ui.pushButton_GoToGenerateSpines->setEnabled ( true );
+    ui.pushButton_NextStep->setEnabled ( true );
+    ui.pushButton_SmoothDendrites->setEnabled ( true );
+
+
+    QFileInfo fi (mSWCFleName);
+    bool neuronAdded = Neuronize::bbdd.addNeuron(fi.baseName().toStdString(),mSWCFleName.toStdString());
+
+    if (!neuronAdded) {
+        MeshVCG somaMesh(mTempDir.toStdString() + "/RealSize.obj");
+        Neuronize::bbdd.addSoma(fi.baseName().toStdString(), somaMesh, BBDD::Spring_Mass, this->contours);
+
+        SWCImporter *importer = this->viewer->getNeuroSWC()->getImporter();
+        for (const auto &dendritic : importer->getDendritics()) {
+            Neuronize::bbdd.addDendrite(fi.baseName().toStdString(), dendritic.initialNode, dendritic.finalNode,
+                                        dendritic.type);
+        }
+    }
+
+
+    viewer->updateGL ( );
+
+    if ( mMsgTimer != NULL )
+        mMsgTimer->stop ( );
+}
+
 
 NeuroGeneratorWidget::~NeuroGeneratorWidget ( )
 {

@@ -66,7 +66,9 @@ public slots:
 
     void loadNeuronDefinitionAndGenerateMesh ( );
 
-  public:
+    void loadNeuronDefinitionAndGenerateMeshBatch();
+
+public:
     NeuroGeneratorWidget (const QString &tempDir, QWidget *parent = 0 );
 
     ~NeuroGeneratorWidget ( );
@@ -208,6 +210,7 @@ public slots:
     void exportSpinesInfo ( );
 
     void importSpinesInfo ( );
+
 };
 
 #endif // QTNEUROSYNTH_H
