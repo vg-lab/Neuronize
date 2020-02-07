@@ -594,6 +594,16 @@ void NeuroGeneratorWidget::generateSpines ( )
 }
 
 void NeuroGeneratorWidget::batchSpinesGeneration(skelgenerator::Neuron *pNeuron, vector<Spine*> spines) {
+
+    ui.radioButton_SegmentSpines->setChecked(true);
+
+    if (!spines.empty()) {
+        ui.radioButton_RealAscPos->setChecked(true);
+    }
+
+    if (pNeuron != nullptr && pNeuron->hasFilamentSpines()) {
+        ui.radioButton_VrmlSpines->setChecked(true);
+    }
   unsigned int lNumSpines = ui.spinBox_NumSpines->value();
   unsigned int lHorResol = ui.spinBox_SpinesHorResolution->value();
   unsigned int lVerResol = ui.spinBox_SpinesVerResolution->value();
@@ -687,10 +697,10 @@ void NeuroGeneratorWidget::batchSpinesGeneration(skelgenerator::Neuron *pNeuron,
                                               lMaxRadio);
               break;
           case 5:
-              viewer->generateSpinesVrml(this->neuron, mTempDir.toStdString());
+              viewer->generateSpinesVrml(pNeuron, mTempDir.toStdString());
               break;
           case 6:
-              viewer->generateSpinesASC(this->spines,lHorResol,
+              viewer->generateSpinesASC(spines,lHorResol,
                                         lVerResol,
                                         lMinLongSpine,
                                         lMaxLongSpine,
@@ -698,10 +708,10 @@ void NeuroGeneratorWidget::batchSpinesGeneration(skelgenerator::Neuron *pNeuron,
                                         lMaxRadio );
               break;
           case 7:
-              viewer->generateSpinesImaris(this->neuron, mTempDir.toStdString());
+              viewer->generateSpinesImaris(pNeuron, mTempDir.toStdString());
               break;
           case 8:
-              viewer->generateRepairedImarisSpines(this->neuron, mTempDir.toStdString());
+              viewer->generateRepairedImarisSpines(pNeuron, mTempDir.toStdString());
       }
   }
 
