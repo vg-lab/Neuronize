@@ -435,6 +435,8 @@ void Neuronize::genetareNeuronsInBatch (QString inputFilePath,QString outputFile
           QDir dir (current.absoluteFilePath());
           QDirIterator itFiles(dir.absolutePath(), QDir::AllEntries | QDir::NoDotAndDotDot);
           std::string apiFile;
+          std::string longsFile;
+          std::string volsFile;
           std::vector <std::string> basalFiles;
           while (itFiles.hasNext()) {
             QFileInfo info = itFiles.next();
@@ -445,6 +447,10 @@ void Neuronize::genetareNeuronsInBatch (QString inputFilePath,QString outputFile
                 apiFile = path.toStdString();
               } else if (path.contains("basal", Qt::CaseInsensitive)) {
                 basalFiles.emplace_back(path.toStdString());
+              } else if (path.contains("longs", Qt::CaseInsensitive)) {
+                  longsFile = path.toStdString();
+              } else if (path.contains("vols"), Qt::CaseInsensitive) {
+                  volsFile = path.toStdString();
               }
             } else {
               QDirIterator itBasalFiles(path, QDir::AllEntries | QDir::NoDotAndDotDot);
@@ -458,11 +464,11 @@ void Neuronize::genetareNeuronsInBatch (QString inputFilePath,QString outputFile
           resultFile.append("/").append(name).append(".asc");
 
           float threshold = 0.1f;
-          auto neuron = new skelgenerator::Neuron(apiFile, basalFiles);
+          auto neuron = new skelgenerator::Neuron(apiFile, basalFiles,volsFile,longsFile,threshold);
           while (neuron->getReamingSegments() > 0) {
               delete neuron;
               threshold += 0.1f;
-              neuron = new skelgenerator::Neuron(apiFile, basalFiles,"","",threshold);
+              neuron = new skelgenerator::Neuron(apiFile, basalFiles,volsFile,longsFile,threshold);
           }
           std::ofstream file;
           file.open(resultFile);
