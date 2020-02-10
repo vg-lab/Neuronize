@@ -24,6 +24,9 @@ public:
 
 private:
     int nextId() const override ;
+
+public:
+    bool validatePage() override;
 };
 
 class SWCPage: public QWizardPage {

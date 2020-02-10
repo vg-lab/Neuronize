@@ -71,6 +71,14 @@ int FilePage::nextId() const {
 
 }
 
+bool FilePage::validatePage() {
+    if (!radioSWC->isChecked() && !radioASC->isChecked() && !radioFilament->isChecked()) {
+        QMessageBox::warning(this,"Neuronize","Please select an option to continue");
+        return false;
+    }
+    return true;
+}
+
 SWCPage::SWCPage(QString& traceFile_, QWidget *parent) : QWizardPage(parent), traceFile(traceFile_) {
     this->setTitle("Select input SWC file");
 
