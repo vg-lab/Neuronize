@@ -386,7 +386,7 @@ void ASC2SWCV2::toSWC(const std::string &filename) {
 
 void SimplePoint::toSWC(int counter, int parent, int type, std::ofstream& file) const {
     file << std::setprecision(10) << counter << " " << type << " " << std::fixed << this->point[0] << " "
-         << this->point[1] << " " << this->point[2] << " " << this->d << " " << parent << std::endl;
+         << this->point[1] << " " << this->point[2] << " " << this->r << " " << parent << std::endl;
 }
 
 void Dendrite::toSWC(int &counter, std::ofstream &file) const {
@@ -474,10 +474,11 @@ void SubDendrite::toASC(std::string tab, std::ofstream &file) const {
     if (this->section.empty()) {
         std::cerr << "[ERROR] Found a empty section, this its a error on ASC2SWC converter" << std::endl;
     }
-
+    int n = 1;
     for (const auto &point : this->section) {
         point->toASC(tab, file);
-
+        file << "\t;\t" << n << std::endl;
+        n++;
     }
     if (!this->subDendrites.empty()) {
         file << tab << "(" << std::endl;
@@ -491,17 +492,18 @@ void SubDendrite::toASC(std::string tab, std::ofstream &file) const {
 
 }
 
-void SimplePoint::toASC(std::string tab, std::ofstream &file) const {
-    file << tab << "(\t" << this->point[0] << "\t" << this->point[1] << "\t" << this->point[2] << "\t" << this->d << ")" << std::endl;
+void SimplePoint::toASC(const std::string &tab, std::ofstream &file) const {
+    file << std::setprecision(10) << std::fixed << tab << "( " << this->point[0] << "\t" << this->point[1] << "\t"
+         << this->point[2] << "\t" << this->r << ")";
 }
 
 
 
-void Spine::toASC(std::string tab, std::ofstream &file) const  {
+void Spine::toASC(const std::string &tab, std::ofstream &file) const  {
     file << tab << "<\t(Class 4 \"none\")" << std::endl;
     file << tab << "(Color Red)" << std::endl;
     file << tab << "(Generated 0)" << std::endl;
-    file << std::setprecision(10) << std::fixed <<  tab << "( " << this->point[0] << "\t" << this->point[1] << "\t" << this->point[2]
-       << "\t" << this->d << " )>\t" << std::endl;
+    file << std::setprecision(10) << std::fixed << tab << "( " << this->finalPoint.point[0] << "\t"
+         << this->finalPoint.point[1] << "\t" << this->finalPoint.point[2] << "\t" << this->finalPoint.r << " )>";
 
 }

@@ -18,22 +18,22 @@
 class NEUROUTILS_API SimplePoint {
 public:
     OpenMesh::Vec3d point;
-    double d;
+    double r;
 
-    SimplePoint (double x, double y, double z,double d) {
+    SimplePoint (double x, double y, double z,double r) {
         point[0] = x;
         point[1] = y;
         point[2] = z;
-        this->d = d;
+        this->r = r;
     }
     SimplePoint (double x, double y, double z){
         point[0] = x;
         point[1] = y;
         point[2] = z;
-        this->d = -1;
+        this->r = -1;
     }
 
-    virtual void toASC(std::string tab, std::ofstream& file) const;
+    virtual void toASC(const std::string &tab, std::ofstream &file) const;
     virtual void toSWC(int counter, int parent, int type, std::ofstream& file) const;
     virtual bool isSpine(){ return false;}
 };
@@ -43,7 +43,7 @@ public:
     SimplePoint finalPoint;
     Spine(SimplePoint initPoint, SimplePoint finalPoint) : SimplePoint(initPoint) ,finalPoint(finalPoint){}
 
-    void toASC(std::string tab, std::ofstream &file) const override;
+    void toASC(const std::string &tab, std::ofstream &file) const override;
 
     void toSWC(int counter, int parent, int type, std::ofstream &file) const override {};
 
