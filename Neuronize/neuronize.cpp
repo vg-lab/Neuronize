@@ -466,9 +466,8 @@ void Neuronize::genetareNeuronsInBatch (QString inputFilePath,QString outputFile
           float threshold = 0.1f;
           auto neuron = new skelgenerator::Neuron(apiFile, basalFiles,volsFile,longsFile,threshold);
           while (neuron->getReamingSegments() > 0) {
-              delete neuron;
               threshold += 0.1f;
-              neuron = new skelgenerator::Neuron(apiFile, basalFiles,volsFile,longsFile,threshold);
+              neuron->reComputeSkel(threshold);
           }
           std::ofstream file;
           file.open(resultFile);

@@ -133,7 +133,7 @@ SubDendrite ASC2SWCV2::processDendrite(std::ifstream &inputStream, std::vector<S
     double x, y, z, d;
     Eigen::Vector3d actualPoint;
     SubDendrite subDendrite;
-    float threshold = 1.25f;
+    float threshold = 1.0f;
     while(inputStream >> line) {
         if (line.find('<') != std::string::npos) {
             inputStream >> line >> line >> line >> line >> line >> line >> line >> line;
@@ -306,10 +306,10 @@ const std::vector<Spine*> &ASC2SWCV2::getSpines() const {
 
 
 void Dendrite::removeEmptySections(){
-    this->dendrite.removeEmptySections(nullptr, 0);
+    this->dendrite.removeEmptySections(nullptr);
 }
 
-bool SubDendrite::removeEmptySections(SubDendrite *parent, int pos) {
+bool SubDendrite::removeEmptySections(SubDendrite *parent) {
     while (!this->section.empty() && this->section[0]->isSpine()) {
         parent->section.push_back(this->section[0]);
         this->section.erase(this->section.begin());
@@ -319,7 +319,7 @@ bool SubDendrite::removeEmptySections(SubDendrite *parent, int pos) {
     if (this->section.empty()) {
         std::vector<int> toDel;
         for (size_t i = 0; i < this->subDendrites.size(); i++) {
-            if (this->subDendrites[i].removeEmptySections(this, i)){
+            if (this->subDendrites[i].removeEmptySections(this)){
                 toDel.push_back(i);
             }
         }
@@ -335,7 +335,7 @@ bool SubDendrite::removeEmptySections(SubDendrite *parent, int pos) {
         std::vector<int> toDel;
         int size = this->subDendrites.size(); // OJO: Necesario para que this.subDendrites.size() no cambie de valor en las llamadas posteriores.
         for (size_t i = 0; i < size; i++) {
-            if (this->subDendrites[i].removeEmptySections(this, i)){
+            if (this->subDendrites[i].removeEmptySections(this)){
                 toDel.push_back(i);
             }
         }

@@ -335,9 +335,8 @@ void SelectApicalPage::processSkel(const std::string &apical,const std::vector<s
     auto neuron = new skelgenerator::Neuron(apical, basals, imarisVol, imarisLongs, newThreshold);
     bool ignore = false;
     while (neuron->getReamingSegments() > 0) {
-        delete (neuron);
-        neuron = new skelgenerator::Neuron(apical, basals, imarisVol, imarisLongs, newThreshold);
         newThreshold += 0.1f;
+        neuron->reComputeSkel(newThreshold);
     }
     this->neuron = neuron;
 }
