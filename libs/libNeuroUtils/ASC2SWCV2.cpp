@@ -6,7 +6,6 @@
 #include <iomanip>
 #include <unordered_set>
 #include <clocale>
-#include <stack>
 #include "MeshVCG.h"
 #include "ASC2SWCV2.h"
 
@@ -45,6 +44,11 @@ ASC2SWCV2::ASC2SWCV2(const std::string &inputFile, bool useSoma) {
 
     joinApicals(apicals, soma->point);
     dendrites.insert(dendrites.end(), apicals.begin(),apicals.end());
+
+    for (auto& dendrite:this->dendrites) {
+        dendrite.removeEmptySections();
+        dendrite.removeOnly1SubDend();
+    }
     soma = calcSoma2();
 
     OpenMesh::Vec3d center;
@@ -129,8 +133,7 @@ SubDendrite ASC2SWCV2::processDendrite(std::ifstream &inputStream, std::vector<S
     double x, y, z, d;
     Eigen::Vector3d actualPoint;
     SubDendrite subDendrite;
-    float threshold = 0.1f;
-
+    float threshold = 1.25f;
     while(inputStream >> line) {
         if (line.find('<') != std::string::npos) {
             inputStream >> line >> line >> line >> line >> line >> line >> line >> line;
@@ -301,6 +304,68 @@ const std::vector<Spine*> &ASC2SWCV2::getSpines() const {
     return spines;
 }
 
+
+void Dendrite::removeEmptySections(){
+    this->dendrite.removeEmptySections(nullptr, 0);
+}
+
+bool SubDendrite::removeEmptySections(SubDendrite *parent, int pos) {
+    while (!this->section.empty() && this->section[0]->isSpine()) {
+        parent->section.push_back(this->section[0]);
+        this->section.erase(this->section.begin());
+    }
+
+
+    if (this->section.empty()) {
+        std::vector<int> toDel;
+        for (size_t i = 0; i < this->subDendrites.size(); i++) {
+            if (this->subDendrites[i].removeEmptySections(this, i)){
+                toDel.push_back(i);
+            }
+        }
+
+        parent->subDendrites.insert(parent->subDendrites.end(), this->subDendrites.begin(), this->subDendrites.end());
+
+        for (int i = toDel.size() - 1; i >= 0; i--) {
+            this->subDendrites.erase(this->subDendrites.begin() + toDel[i]);
+        }
+
+        return true;
+    } else {
+        std::vector<int> toDel;
+        int size = this->subDendrites.size(); // OJO: Necesario para que this.subDendrites.size() no cambie de valor en las llamadas posteriores.
+        for (size_t i = 0; i < size; i++) {
+            if (this->subDendrites[i].removeEmptySections(this, i)){
+                toDel.push_back(i);
+            }
+        }
+
+        for (int i = toDel.size() - 1; i >= 0; i--) {
+            this->subDendrites.erase(this->subDendrites.begin() + toDel[i]);
+        }
+        return false;
+    }
+}
+
+void Dendrite::removeOnly1SubDend() {
+    this->dendrite.removeOnly1SubDend(nullptr,0);
+}
+
+void SubDendrite::removeOnly1SubDend(SubDendrite *parent, int pos) {
+    if (this->subDendrites.size() == 1) {
+        auto section = this->subDendrites[0].section;
+        section.insert(section.begin(),this->section.begin(),this->section.end());
+        this->subDendrites[0].removeOnly1SubDend(this,0);
+        parent->subDendrites.push_back(this->subDendrites[0]);
+        parent->subDendrites.erase(parent->subDendrites.begin() + pos);
+    } else {
+        for (size_t i = 0; i < this->subDendrites.size(); i++) {
+            subDendrites[i].removeOnly1SubDend(this,i);
+        }
+    }
+}
+
+
 /** ------------ TOSWC Methods --------------**/
 
 void ASC2SWCV2::toSWC(const std::string &filename) {
@@ -312,16 +377,16 @@ void ASC2SWCV2::toSWC(const std::string &filename) {
     }
 
     this->soma->toSWC(counter, -1, 1,file);
+    counter++;
     for(const auto& dendrite: this->dendrites) {
         dendrite.toSWC(counter,file);
     }
 
 }
 
-void SimplePoint::toSWC(int& counter,int parent,int type,std::ofstream& file) const {
+void SimplePoint::toSWC(int counter, int parent, int type, std::ofstream& file) const {
     file << std::setprecision(10) << counter << " " << type << " " << std::fixed << this->point[0] << " "
          << this->point[1] << " " << this->point[2] << " " << this->d << " " << parent << std::endl;
-    counter++;
 }
 
 void Dendrite::toSWC(int &counter, std::ofstream &file) const {
@@ -332,13 +397,27 @@ void Dendrite::toSWC(int &counter, std::ofstream &file) const {
 
 void SubDendrite::toSWC(int &counter, int parent, int type, std::ofstream &file) const {
 
-    for (const auto& point: this->section) {
-        point->toSWC(counter,parent,type,file);
-        parent = counter -1;
+    if (this->section.empty()) {
+        std::cerr << "[ERROR] Found a empty section, this its a error on ASC2SWC converter" << std::endl;
     }
 
-    for (const auto& subDendrite:this->subDendrites) {
-        subDendrite.toSWC(counter, parent, type,file);
+    for (const auto& point: this->section) {
+        if (!point->isSpine()) {
+            point->toSWC(counter, parent, type, file);
+            parent = counter;
+            counter++;
+        }
+    }
+
+    if (this->subDendrites.size() > 2) {
+        int auxParent = parent;
+        for (size_t i = 2; i < this->subDendrites.size(); i++) {
+            subDendrites[i].toSWC(counter,auxParent - static_cast<int>(i) + 1,type,file);
+        }
+    }
+
+    for (size_t i = 0; i < 2 && i < this->subDendrites.size(); i++ ) {
+        subDendrites[i].toSWC(counter, parent, type,file);
     }
 
 }
@@ -391,16 +470,21 @@ void Dendrite::toASC(std::string tab, std::ofstream& file) const {
 
 void SubDendrite::toASC(std::string tab, std::ofstream &file) const {
     tab += "\t";
-    for (const auto& point : this->section) {
-        point->toASC(tab,file);
+
+    if (this->section.empty()) {
+        std::cerr << "[ERROR] Found a empty section, this its a error on ASC2SWC converter" << std::endl;
+    }
+
+    for (const auto &point : this->section) {
+        point->toASC(tab, file);
 
     }
     if (!this->subDendrites.empty()) {
         file << tab << "(" << std::endl;
-        subDendrites[0].toASC(tab,file);
-        for (int i = 1; i < this->subDendrites.size(); i++ ) {
+        subDendrites[0].toASC(tab, file);
+        for (int i = 1; i < this->subDendrites.size(); i++) {
             file << tab << "|" << std::endl;
-            this->subDendrites[i].toASC(tab,file);
+            this->subDendrites[i].toASC(tab, file);
         }
         file << tab << ")   ; End of Split" << std::endl;
     }

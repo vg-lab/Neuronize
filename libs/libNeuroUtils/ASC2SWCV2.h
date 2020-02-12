@@ -34,7 +34,7 @@ public:
     }
 
     virtual void toASC(std::string tab, std::ofstream& file) const;
-    virtual void toSWC(int& counter,int parent,int type,std::ofstream& file) const;
+    virtual void toSWC(int counter, int parent, int type, std::ofstream& file) const;
     virtual bool isSpine(){ return false;}
 };
 
@@ -45,7 +45,7 @@ public:
 
     void toASC(std::string tab, std::ofstream &file) const override;
 
-    void toSWC(int &counter, int parent, int type, std::ofstream &file) const override {};
+    void toSWC(int counter, int parent, int type, std::ofstream &file) const override {};
 
     bool isSpine() override {return true;}
 };
@@ -58,6 +58,10 @@ public:
     void toASC(std::string tab, std::ofstream &file) const;
 
     void toSWC(int &counter, int parent, int type, std::ofstream &file) const;
+
+    bool removeEmptySections(SubDendrite *parent, int pos);
+
+    void removeOnly1SubDend(SubDendrite *parent, int pos);
 };
 
 class NEUROUTILS_API Dendrite {
@@ -68,6 +72,10 @@ public:
 
     void toASC(std::string tab, std::ofstream& file) const;
     void toSWC(int& counter,std::ofstream& file) const;
+
+    void removeEmptySections();
+
+    void removeOnly1SubDend();
 };
 
 class NEUROUTILS_API ASC2SWCV2 {
