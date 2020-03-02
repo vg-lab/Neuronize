@@ -57,11 +57,11 @@ public:
 
     void toASC(std::string tab, std::ofstream &file) const;
 
-    void toSWC(int &counter, int parent, int type, std::ofstream &file) const;
+    void toSWC(int &counter, int parent, int type, std::set<int> &usedParents, std::ofstream &file) const;
 
     bool removeEmptySections(SubDendrite *parent);
 
-    void removeOnly1SubDend(SubDendrite *parent, int pos);
+    void removeOnly1SubDend();
 };
 
 class NEUROUTILS_API Dendrite {

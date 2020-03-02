@@ -133,7 +133,7 @@ SubDendrite ASC2SWCV2::processDendrite(std::ifstream &inputStream, std::vector<S
     double x, y, z, d;
     Eigen::Vector3d actualPoint;
     SubDendrite subDendrite;
-    float threshold = 1.0f;
+    float threshold = 0.5f;
     while(inputStream >> line) {
         if (line.find('<') != std::string::npos) {
             inputStream >> line >> line >> line >> line >> line >> line >> line >> line;
@@ -348,20 +348,21 @@ bool SubDendrite::removeEmptySections(SubDendrite *parent) {
 }
 
 void Dendrite::removeOnly1SubDend() {
-    this->dendrite.removeOnly1SubDend(nullptr,0);
+    this->dendrite.removeOnly1SubDend();
 }
 
-void SubDendrite::removeOnly1SubDend(SubDendrite *parent, int pos) {
-    if (this->subDendrites.size() == 1) {
-        auto section = this->subDendrites[0].section;
-        section.insert(section.begin(),this->section.begin(),this->section.end());
-        this->subDendrites[0].removeOnly1SubDend(this,0);
-        parent->subDendrites.push_back(this->subDendrites[0]);
-        parent->subDendrites.erase(parent->subDendrites.begin() + pos);
-    } else {
-        for (size_t i = 0; i < this->subDendrites.size(); i++) {
-            subDendrites[i].removeOnly1SubDend(this,i);
-        }
+void SubDendrite::removeOnly1SubDend() {
+    if( this->subDendrites.size() == 1) {
+        auto subDendrite = this->subDendrites[0];
+        this->section.insert(this->section.end(), subDendrite.section.begin(),
+                             subDendrite.section.end());
+        this->subDendrites.insert(this->subDendrites.end(), subDendrite.subDendrites.begin(),
+                                  subDendrite.subDendrites.end());
+        this->subDendrites.erase(this->subDendrites.begin());
+    }
+
+    for (auto & subDendrite : this->subDendrites) {
+        subDendrite.removeOnly1SubDend();
     }
 }
 
@@ -391,14 +392,19 @@ void SimplePoint::toSWC(int counter, int parent, int type, std::ofstream& file) 
 
 void Dendrite::toSWC(int &counter, std::ofstream &file) const {
     int type = this->type == Dendrite::Apical ? 4:3;
-    return this->dendrite.toSWC(counter, 1, type,file);
+    std::set<int> usedParents;
+    return this->dendrite.toSWC(counter, 1, type,usedParents, file);
 }
 
 
-void SubDendrite::toSWC(int &counter, int parent, int type, std::ofstream &file) const {
+void SubDendrite::toSWC(int &counter, int parent, int type, std::set<int> &usedParents, std::ofstream &file) const {
 
     if (this->section.empty()) {
         std::cerr << "[ERROR] Found a empty section, this its a error on ASC2SWC converter" << std::endl;
+    }
+
+    if (this->subDendrites.size() == 1) {
+        std::cerr << "[ERROR] Found only a 1 subdivision, this its a error on ASC2SWC converter" << std::endl;
     }
 
     for (const auto& point: this->section) {
@@ -409,16 +415,20 @@ void SubDendrite::toSWC(int &counter, int parent, int type, std::ofstream &file)
         }
     }
 
-    if (this->subDendrites.size() > 2) {
-        int auxParent = parent;
-        for (size_t i = 2; i < this->subDendrites.size(); i++) {
-            subDendrites[i].toSWC(counter,auxParent - static_cast<int>(i) + 1,type,file);
-        }
+    for (size_t i = 0; i < 2 && i < this->subDendrites.size(); i++ ) {
+        usedParents.emplace(parent);
+        subDendrites[i].toSWC(counter, parent, type,usedParents, file);
     }
 
-    for (size_t i = 0; i < 2 && i < this->subDendrites.size(); i++ ) {
-        subDendrites[i].toSWC(counter, parent, type,file);
+    for (int i = 2; i < this->subDendrites.size(); i++) {
+        int auxParent = parent;
+        while (usedParents.find(auxParent) != usedParents.end()) {
+            auxParent--;
+        }
+        usedParents.emplace(auxParent);
+        subDendrites[i].toSWC(counter,auxParent,type,usedParents,file);
     }
+
 
 }
 
@@ -474,6 +484,11 @@ void SubDendrite::toASC(std::string tab, std::ofstream &file) const {
     if (this->section.empty()) {
         std::cerr << "[ERROR] Found a empty section, this its a error on ASC2SWC converter" << std::endl;
     }
+
+    if (this->subDendrites.size() == 1) {
+        std::cerr << "[ERROR] Found only a 1 subdivision, this its a error on ASC2SWC converter" << std::endl;
+    }
+
     int n = 1;
     for (const auto &point : this->section) {
         point->toASC(tab, file);
