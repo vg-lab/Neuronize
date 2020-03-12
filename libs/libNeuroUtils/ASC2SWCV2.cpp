@@ -46,6 +46,7 @@ ASC2SWCV2::ASC2SWCV2(const std::string &inputFile, bool useSoma) {
     dendrites.insert(dendrites.end(), apicals.begin(),apicals.end());
 
     for (auto& dendrite:this->dendrites) {
+//        dendrite.moveFisrtSpines();
         dendrite.removeEmptySections();
         dendrite.removeOnly1SubDend();
     }
@@ -304,46 +305,50 @@ const std::vector<Spine*> &ASC2SWCV2::getSpines() const {
     return spines;
 }
 
+void Dendrite::moveFisrtSpines() {
+    //Mueve las primeras espinas por si no tienen ningun punto asociado.
+    if (!this->dendrite.section.empty() && this->dendrite.section[0]->isSpine() ) {
+        int i = 1;
+        while (this->dendrite.section[i]->isSpine()) {
+            i++;
+        }
 
-void Dendrite::removeEmptySections(){
-    this->dendrite.removeEmptySections(nullptr);
+        int j = 0;
+        do {
+            auto spine = this->dendrite.section[j];
+            this->dendrite.section.erase(this->dendrite.section.begin());
+            this->dendrite.section.insert(this->dendrite.section.begin() + i, spine);
+        } while (this->dendrite.section[i]->isSpine());
+    }
+
+    this->dendrite.moveFirstSpines(nullptr);
 }
 
-bool SubDendrite::removeEmptySections(SubDendrite *parent) {
+void SubDendrite::moveFirstSpines(SubDendrite* parent) {
+    for (auto& subDendrite: this->subDendrites) {
+        subDendrite.moveFirstSpines(this);
+    }
+
     while (!this->section.empty() && this->section[0]->isSpine()) {
         parent->section.push_back(this->section[0]);
         this->section.erase(this->section.begin());
     }
 
+}
+
+void Dendrite::removeEmptySections(){
+    this->dendrite.removeEmptySections(nullptr, 0);
+}
+
+bool SubDendrite::removeEmptySections(SubDendrite *parent, int index) {
+    int size = subDendrites.size();
+    for (int i = size - 1; i >= 0; i--) {
+        this->subDendrites[i].removeEmptySections(this, i);
+    }
 
     if (this->section.empty()) {
-        std::vector<int> toDel;
-        for (size_t i = 0; i < this->subDendrites.size(); i++) {
-            if (this->subDendrites[i].removeEmptySections(this)){
-                toDel.push_back(i);
-            }
-        }
-
-        parent->subDendrites.insert(parent->subDendrites.end(), this->subDendrites.begin(), this->subDendrites.end());
-
-        for (int i = toDel.size() - 1; i >= 0; i--) {
-            this->subDendrites.erase(this->subDendrites.begin() + toDel[i]);
-        }
-
-        return true;
-    } else {
-        std::vector<int> toDel;
-        int size = this->subDendrites.size(); // OJO: Necesario para que this.subDendrites.size() no cambie de valor en las llamadas posteriores.
-        for (size_t i = 0; i < size; i++) {
-            if (this->subDendrites[i].removeEmptySections(this)){
-                toDel.push_back(i);
-            }
-        }
-
-        for (int i = toDel.size() - 1; i >= 0; i--) {
-            this->subDendrites.erase(this->subDendrites.begin() + toDel[i]);
-        }
-        return false;
+        parent->subDendrites.insert(parent->subDendrites.end(),this->subDendrites.begin(),this->subDendrites.end());
+        parent->subDendrites.erase(parent->subDendrites.begin() + index);
     }
 }
 

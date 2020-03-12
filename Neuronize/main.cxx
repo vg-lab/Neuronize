@@ -24,6 +24,14 @@
 
 int main ( int argc, char *argv[] )
 {
+//    skelgenerator::Neuron neuron ("Rata11secc2-capaVb-cel2_Stitchapi.vrml",{"Rata11secc2-capaVb-cel2_Stitch.vrml"},"","",0.05);
+//    std::cout << neuron.getReamingSegments() << std::endl;
+//    std::ofstream file;
+//    file.open ("sal.asc");
+//    file << neuron.to_asc();
+//    file.close();
+//    ASC2SWCV2 parser ("temp.asc", true);
+//    parser.toSWC("test.swc");
   QApplication a ( argc, argv );
   Neuronize w;
   w.show ( );

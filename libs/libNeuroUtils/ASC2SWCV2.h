@@ -59,9 +59,11 @@ public:
 
     void toSWC(int &counter, int parent, int type, std::set<int> &usedParents, std::ofstream &file) const;
 
-    bool removeEmptySections(SubDendrite *parent);
+    bool removeEmptySections(SubDendrite *parent, int index);
 
     void removeOnly1SubDend();
+
+    void moveFirstSpines(SubDendrite *parent);
 };
 
 class NEUROUTILS_API Dendrite {
@@ -76,6 +78,8 @@ public:
     void removeEmptySections();
 
     void removeOnly1SubDend();
+
+    void moveFisrtSpines();
 };
 
 class NEUROUTILS_API ASC2SWCV2 {
