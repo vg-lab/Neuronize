@@ -59,7 +59,7 @@ public:
 
     void toSWC(int &counter, int parent, int type, std::set<int> &usedParents, std::ofstream &file) const;
 
-    bool removeEmptySections(SubDendrite *parent, int index);
+    bool removeEmptySections();
 
     void removeOnly1SubDend();
 

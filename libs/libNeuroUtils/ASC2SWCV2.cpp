@@ -46,7 +46,7 @@ ASC2SWCV2::ASC2SWCV2(const std::string &inputFile, bool useSoma) {
     dendrites.insert(dendrites.end(), apicals.begin(),apicals.end());
 
     for (auto& dendrite:this->dendrites) {
-//        dendrite.moveFisrtSpines();
+        dendrite.moveFisrtSpines();
         dendrite.removeEmptySections();
         dendrite.removeOnly1SubDend();
     }
@@ -337,19 +337,35 @@ void SubDendrite::moveFirstSpines(SubDendrite* parent) {
 }
 
 void Dendrite::removeEmptySections(){
-    this->dendrite.removeEmptySections(nullptr, 0);
+    bool moved = this->dendrite.removeEmptySections();
+    while (moved) {
+        moved = this->dendrite.removeEmptySections();
+    }
 }
 
-bool SubDendrite::removeEmptySections(SubDendrite *parent, int index) {
-    int size = subDendrites.size();
-    for (int i = size - 1; i >= 0; i--) {
-        this->subDendrites[i].removeEmptySections(this, i);
+bool SubDendrite::removeEmptySections() {
+    bool moved = false;
+
+    for (auto& subDend : this->subDendrites) {
+        if (subDend.section.empty() && !this->section.empty()) {
+            auto p = *(this->section.end() - 1);
+            int i = 1;
+            while (p->isSpine()) {
+                i++;
+                p = *(this->section.end() - i);
+            }
+            subDend.section.insert(subDend.section.begin(),this->section.end() - i, this->section.end());
+            this->section.erase(this->section.end() - i, this->section.end());
+            moved = true;
+        }
     }
 
-    if (this->section.empty()) {
-        parent->subDendrites.insert(parent->subDendrites.end(),this->subDendrites.begin(),this->subDendrites.end());
-        parent->subDendrites.erase(parent->subDendrites.begin() + index);
+    for (auto& subDend: this->subDendrites) {
+        auto haveMove = subDend.removeEmptySections();
+        moved = moved || haveMove;
     }
+
+    return moved;
 }
 
 void Dendrite::removeOnly1SubDend() {
@@ -412,6 +428,10 @@ void SubDendrite::toSWC(int &counter, int parent, int type, std::set<int> &usedP
         std::cerr << "[ERROR] Found only a 1 subdivision, this its a error on ASC2SWC converter" << std::endl;
     }
 
+    if (this->subDendrites.size() > 2) {
+        std::cerr << "[ERROR] Found a branch with more than two bifurcations, this its a error on ASC2SWC converter" << std::endl;
+    }
+
     for (const auto& point: this->section) {
         if (!point->isSpine()) {
             point->toSWC(counter, parent, type, file);
@@ -420,20 +440,10 @@ void SubDendrite::toSWC(int &counter, int parent, int type, std::set<int> &usedP
         }
     }
 
-    for (size_t i = 0; i < 2 && i < this->subDendrites.size(); i++ ) {
-        usedParents.emplace(parent);
-        subDendrites[i].toSWC(counter, parent, type,usedParents, file);
-    }
 
-    for (int i = 2; i < this->subDendrites.size(); i++) {
-        int auxParent = parent;
-        while (usedParents.find(auxParent) != usedParents.end()) {
-            auxParent--;
-        }
-        usedParents.emplace(auxParent);
-        subDendrites[i].toSWC(counter,auxParent,type,usedParents,file);
-    }
-
+   for (const auto & subDendrite : this->subDendrites) {
+       subDendrite.toSWC(counter, parent, type, usedParents, file);
+   }
 
 }
 

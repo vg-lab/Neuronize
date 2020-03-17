@@ -331,7 +331,7 @@ void SelectApicalPage::showWarningDialogReaminingSegments(int sobrantes, float &
 
 
 void SelectApicalPage::processSkel(const std::string &apical,const std::vector<std::string>& basals,const std::string &imarisVol,const std::string &imarisLongs) {
-    float newThreshold = 4.3f;
+    float newThreshold = 0.1f;
     auto neuron = new skelgenerator::Neuron(apical, basals, imarisVol, imarisLongs, newThreshold);
     bool ignore = false;
     while (neuron->getReamingSegments() > 0) {
