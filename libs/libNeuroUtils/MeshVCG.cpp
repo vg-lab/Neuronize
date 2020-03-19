@@ -360,8 +360,8 @@ HausdorffRet MeshVCG::hausdorffDistance(MeshVCG &otherMesh, const std::string &c
             double minDist = 1000.0f;
             for (auto &fp : otherMesh.mesh.face) {
                 vcg::Point3d q(0, 0, 0);
-                MyFace::ScalarType dist = 1000.0f;
-                vcg::face::PointDistanceBase(fp, vp.P(), minDist, q);
+                MyFace::ScalarType dist = minDist;
+                vcg::face::PointDistanceBase(fp, vp.P(), dist, q);
                 minDist = minDist < dist ? minDist : dist;
             }
             vp.Q() = minDist;
@@ -378,8 +378,8 @@ HausdorffRet MeshVCG::hausdorffDistance(MeshVCG &otherMesh, const std::string &c
             double minDist = 1000.0f;
             for (auto &fp : mesh.face) {
                 vcg::Point3d q(0, 0, 0);
-                MyFace::ScalarType dist = 1000.0f;
-                vcg::face::PointDistanceBase(fp, vp.P(), minDist, q);
+                MyFace::ScalarType dist = minDist;
+                vcg::face::PointDistanceBase(fp, vp.P(), dist, q);
                 minDist = minDist < dist ? minDist : dist;
             }
             vp.Q() = minDist;
