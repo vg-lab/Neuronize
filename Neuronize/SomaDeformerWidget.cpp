@@ -249,6 +249,7 @@ void SomaDeformerWidget::generateSoma ( )
     {
       if ( ui.radioButton_XMLSoma->isChecked ( ))
       {
+          somaCreator->generateGeodesicFiles(lScale);
         viewer->generateSomaFromXML ( mXMLFile, lScale );
       }
     }
@@ -524,6 +525,8 @@ void SomaDeformerWidget::setSomaCreator(SomaCreatorWidget *somaCreator) {
 void SomaDeformerWidget::hideAdvancedOptions() {
     ui.tabWidget_Controls->removeTab(3);
     ui.tabWidget_Controls->removeTab(2);
+
+    ui.groupBox_MS_Simulation_Params->hide();
 
 }
 

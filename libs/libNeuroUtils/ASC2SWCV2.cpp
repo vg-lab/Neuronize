@@ -14,6 +14,7 @@ ASC2SWCV2::ASC2SWCV2(const std::string &inputFile, bool useSoma) {
     std::ifstream inputStream;
     inputStream.open(inputFile, std::ios::in);
     std::vector<Dendrite> apicals;
+    this->_inputFile = inputFile;
 
     if (!inputStream.is_open()) {
         throw std::runtime_error("Error: Can read the ASC file: " + inputFile);

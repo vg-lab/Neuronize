@@ -332,26 +332,28 @@ void CompareMeshesWidget::updateLabels(HausdorffRet dists) {
 }
 
 void CompareMeshesWidget::addMesh(QListWidget *list,CompareMeshWidgetViewer* viewer) {
-    auto file = QFileDialog::getOpenFileName(this,"Open mesh",QString(),"Mesh(*.obj *.off *.ply *.stl)");
-    if (!file.isEmpty()) {
-        QFileInfo fileInfo (file);
-        list->addItem(fileInfo.fileName());
-        viewer->addVisualizeMesh(file.toStdString());
-        auto center = viewer->getSceneCenter();
-        viewer1->setDisplacement(center);
-        viewer2->setDisplacement(center);
+    auto files = QFileDialog::getOpenFileNames(this,"Open mesh",QString(),"Mesh(*.obj *.off *.ply *.stl)");
+    for (const auto& file: files) {
+        if (!file.isEmpty()) {
+            QFileInfo fileInfo(file);
+            list->addItem(fileInfo.fileName());
+            viewer->addVisualizeMesh(file.toStdString());
+            auto center = viewer->getSceneCenter();
+            viewer1->setDisplacement(center);
+            viewer2->setDisplacement(center);
 
-        auto box1 = viewer1->getSceneBoundingBox();
-        auto box2 = viewer2->getSceneBoundingBox();
+            auto box1 = viewer1->getSceneBoundingBox();
+            auto box2 = viewer2->getSceneBoundingBox();
 
-        if ((box1.first - box1.second).squaredNorm() > (box2.first - box2.second).squaredNorm()) {
-            viewer1->fitBox(box1);
-            viewer2->fitBox(box1);
-        } else {
-            viewer1->fitBox(box2);
-            viewer2->fitBox(box2);
+            if ((box1.first - box1.second).squaredNorm() > (box2.first - box2.second).squaredNorm()) {
+                viewer1->fitBox(box1);
+                viewer2->fitBox(box1);
+            } else {
+                viewer1->fitBox(box2);
+                viewer2->fitBox(box2);
+            }
+
         }
-
     }
 
 }

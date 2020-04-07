@@ -626,193 +626,121 @@ void SomaCreatorWidget::generateXMLSoma ( QString fileName, bool useSoma ) {
 
         }
 
-        int lNumDendrites = mSWCImporter->getNumDendritics();
-
-
-        QFileInfo lMeshNameWIthoutExtension(mMehsFileName);
-        //lMeshNameWIthoutExtension.baseName();
-
-        //Consstruccion de ficheros de matlab
-        QString lMatLAbScriptFile = "\n name =";
-        lMatLAbScriptFile += "\'" + lMeshNameWIthoutExtension.baseName() + "_RadioReal" + "\'; \n";
-        lMatLAbScriptFile += "idVertex = 1; \n";
-        lMatLAbScriptFile += "nstart = 1; \n";
-
-        mToolBoxDir = QCoreApplication::applicationDirPath() + "/Content/MatLab/Geodesic";
-        //mToolBoxDir = "E:\\Devel\\MatLab\\Geodesic";
-        QString lTmpPath = "\'" + mToolBoxDir + "/toolbox_fast_marching/'";
-        lMatLAbScriptFile += "path(path, " + lTmpPath + ");\n";
-
-        lTmpPath = "\'" + mToolBoxDir + "/toolbox_fast_marching/toolbox/\'";
-        lMatLAbScriptFile += "path(path, " + lTmpPath + ");\n";
-
-        lTmpPath = "\'" + mToolBoxDir + "/toolbox_graph/\'";
-        lMatLAbScriptFile += "path(path, " + lTmpPath + ");\n";
-
-        lTmpPath = "\'" + mToolBoxDir + "/toolbox_graph/off/\'";
-        lMatLAbScriptFile += "path(path, " + lTmpPath + ");\n";
-
-        lTmpPath = "\'" + mToolBoxDir + "/meshes/\'";
-        lMatLAbScriptFile += "path(path, " + lTmpPath + ");\n";
-
-        lMatLAbScriptFile += "path(path, \'" + mExitDirectory + "/\'" + ");\n";
-
-        lMatLAbScriptFile += "[vertex,faces] = read_mesh([name '.off']);\n";
-
-        lMatLAbScriptFile += "nverts = max(size(vertex)); start_points = idVertex; [D,S,Q] = perform_fast_marching_mesh(vertex, faces, start_points); \n";
-
-        lMatLAbScriptFile += "cd(\'" + mExitDirectory + "\\\');\n";
-
-        //Construir cada dendrita
-        calcNearestVertex();
-        std::vector<int> vertexs;
-
-        for (int i = 0; i < lNumDendrites; ++i) {
-            vertexs.push_back(mNearestVertex.at(i));
-        }
-        auto somaPath = somaContours ? mExitDirectory.toStdString() + "/" + "somaConvex.off" : mExitDirectory.toStdString() + "/" + sourceInfoModel.baseName().toStdString() + "_RadioReal.off";
-
-        MeshVCG mesh(somaPath);
-        std::string path = mExitDirectory.toStdString() + "/";
-        path += mDefaultGeoDistFileName.toStdString();
-
-        mesh.calcGeodesicDistance(vertexs, path);
-
-
-
-        //Clean files
-        //Exportaci�n de los vIds
-        calcAndExportNearestVertexToSWCDendritics();
-
-        //Clean files
-        //std::string fileContent = pFileContent.toStdString();
-        std::string matFileTXT = mExitDirectory.toStdString() + "/MatLabScript.m";
-
-        std::ofstream(matFileTXT.c_str());
-
-        //Open files to add data
-        std::ofstream matOutputFileTXT;
-        matOutputFileTXT.open(matFileTXT.c_str(), std::ios::app);
-
-        matOutputFileTXT << lMatLAbScriptFile.toStdString() << endl;
-        matOutputFileTXT.close();
-
-        //Call MatLab to generate the files
-
-        //engClose(m_pEngine);
-
-
-
-        //Exportaci�n de los vIds
-        //---calcAndExportNearestVertexToSWCDendritics ( );
-
-        //Store current dir (Matlab will change this)
-        fileName = QCoreApplication::applicationDirPath();
-
-
-        //GeoCalcInitialize();
-
-
-
-
-
-        //mwArray lPathName("E:\\WorkSpace\\VisualStudio\\CPP\\Produccion\\Puppeteer Engine\\tutorials\\Qt\\XNeuron");
-        QString lPathDoubleBackSlah = QCoreApplication::applicationDirPath();
-        //lPathDoubleBackSlah.replace("/","\\\\");
-
-        //GeoCalcTerminate();
-
-        //Restore current dir, Matlab change this
-        QDir::setCurrent(fileName);
-
-        //Generacion de los ficheros con los identificadores de los vertices que pertenecen a cada dendrita
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        for (int k = 0; k < lNumDendrites; ++k) {
-            //Lectura del fichero
-            //Abrir el fichero
-            std::ifstream vIdsInputFileTXT;
-            QString vIdsFileTXT = mExitDirectory + "/" + mDefaultGeoDistFileName + QString::number(k) + ".dat";
-            vIdsInputFileTXT.open(vIdsFileTXT.toStdString().c_str(), std::ios::in);
-
-            if (!vIdsInputFileTXT) {
-                QMessageBox::critical(this, "�Problem in file!", "Cant open file: "
-                                                                 + vIdsFileTXT, QMessageBox::Ok);
-
-                vIdsInputFileTXT.close();
-                return;
-            }
-
-            //QString fileName = QFileDialog::getSaveFileName(this);
-            QString fileName = mExitDirectory + "/" + mDefaultVidsFileName + QString::number(k) + ".vid";
-            QFile file (fileName);
-            file.remove();
-
-            //if (!fileName.isEmpty())
-            {
-
-                DenModifInfo lDenModifInfo;
-                int t = 0;
-                int lNumNodes = 0;
-
-                std::vector<DenModifInfo> lGeoDistanceContainer;
-                lGeoDistanceContainer.clear();
-
-                //Node readed
-                //Esto ya no esta (el save de matlab no lo saca)
-                int pos = 0;
-                while (vIdsInputFileTXT >> lDenModifInfo.distance) {
-                    lDenModifInfo.id = t;
-                    lGeoDistanceContainer.push_back(lDenModifInfo);
-                    ++t;
-                }
-
-                vIdsInputFileTXT.close();
-
-                //Construcci�n de la string a exportar
-                //float lMinDistance = ui.doubleSpinBox_humbraValue->value();
-
-                //### Esto hay que revisarlo, no se deber�a tener que sumar uno a este indice ...
-                int lNodeSomaId = mSWCImporter->getDendriticSomaConnection().at(k + 1);
-
-                float lMinDistance = mSWCImporter->getElementAt(lNodeSomaId).radius;
-
-                QString lFileExport("");
-                lFileExport += "# Contour distance applied:" + QString::number(lMinDistance);
-
-                for (unsigned int j = 0; j < lGeoDistanceContainer.size(); ++j) {
-                    if (lGeoDistanceContainer.at(j).distance < lMinDistance) {
-                        lFileExport += "\n";
-                        lFileExport += QString::number(lGeoDistanceContainer.at(j).id);
-                    }
-                }
-                lFileExport += "\n";
-
-                stringToFile(lFileExport, fileName);
-            }
-        }
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        //Export XMLFile
-        //control de errores
-        //QString fileName = QFileDialog::getSaveFileName(this);
-        fileName = mExitDirectory + "/Definition";
-        //if (!fileName.isEmpty())
-        {
-            if (mXMLSomaDefManager != NULL) delete mXMLSomaDefManager;
-            mXMLSomaDefManager = new XMLSomaDefManager;
-
-            mXMLSomaDefManager->generateXMLContent(mSWCFileName
-                    //,mMehsFileName
-                    , sourceInfoModel.baseName() + "_RadioReal.off", mDefaultGeoDistFileName, mDefaultVidsFileName, 0,
-                                                   0, lNumDendrites, 1.0, 1.0);
-
-            mXMLSomaDefManager->exportDomToFile(fileName.toStdString());
-        }
-
         //ui.label_SomaGeneratedName->setText("Soma to build = "+ sourceInfo.fileName());
 
         emit somaCreated();
     }
+}
+
+void SomaCreatorWidget::generateGeodesicFiles(float lscale) {
+    QFileInfo sourceInfoModel(mMehsFileName);
+    auto destination = mExitDirectory + "/" + sourceInfoModel.fileName();
+    if (!somaContours) {
+        loadModel(destination);
+        this->somaContours = false;
+        BaseMesh *lBaseMesh = new BaseMesh();
+        lBaseMesh->JoinBaseMesh(mBaseMesh);
+        //Escalamos al radio del soma
+        lBaseMesh->scaleBaseMesh(mSWCImporter->getElementAt(1).radius * lscale);
+        lBaseMesh->exportMesh(
+                mExitDirectory.toStdString() + "/" + sourceInfoModel.baseName().toStdString() + "_RadioReal.off");
+        delete lBaseMesh;
+    }
+
+    int lNumDendrites = mSWCImporter->getNumDendritics();
+
+    //Construir cada dendrita
+    calcNearestVertex();
+    std::vector<int> vertexs;
+
+    for (int i = 0; i < lNumDendrites; ++i) {
+        vertexs.push_back(mNearestVertex.at(i));
+    }
+    auto somaPath = somaContours ? mExitDirectory.toStdString() + "/" + "somaConvex.off" : mExitDirectory.toStdString() + "/" + sourceInfoModel.baseName().toStdString() + "_RadioReal.off";
+
+    MeshVCG mesh(somaPath);
+    std::string path = mExitDirectory.toStdString() + "/";
+    path += mDefaultGeoDistFileName.toStdString();
+
+    mesh.calcGeodesicDistance(vertexs, path);
+
+    //Generacion de los ficheros con los identificadores de los vertices que pertenecen a cada dendrita
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    for (int k = 0; k < lNumDendrites; ++k) {
+        //Lectura del fichero
+        //Abrir el fichero
+        std::ifstream vIdsInputFileTXT;
+        QString vIdsFileTXT = mExitDirectory + "/" + mDefaultGeoDistFileName + QString::number(k) + ".dat";
+        vIdsInputFileTXT.open(vIdsFileTXT.toStdString().c_str(), std::ios::in);
+
+        if (!vIdsInputFileTXT) {
+            QMessageBox::critical(this, "�Problem in file!", "Cant open file: "
+                                                             + vIdsFileTXT, QMessageBox::Ok);
+
+            vIdsInputFileTXT.close();
+            return;
+        }
+
+        //QString fileName = QFileDialog::getSaveFileName(this);
+        QString fileName = mExitDirectory + "/" + mDefaultVidsFileName + QString::number(k) + ".vid";
+        QFile file (fileName);
+        file.remove();
+
+        DenModifInfo lDenModifInfo;
+        int t = 0;
+        int lNumNodes = 0;
+
+        std::vector<DenModifInfo> lGeoDistanceContainer;
+        lGeoDistanceContainer.clear();
+
+        //Node readed
+        //Esto ya no esta (el save de matlab no lo saca)
+        int pos = 0;
+        while (vIdsInputFileTXT >> lDenModifInfo.distance) {
+            lDenModifInfo.id = t;
+            lGeoDistanceContainer.push_back(lDenModifInfo);
+            ++t;
+        }
+
+        vIdsInputFileTXT.close();
+
+        //Construcci�n de la string a exportar
+        //float lMinDistance = ui.doubleSpinBox_humbraValue->value();
+
+        //### Esto hay que revisarlo, no se deber�a tener que sumar uno a este indice ...
+        int lNodeSomaId = mSWCImporter->getDendriticSomaConnection().at(k + 1);
+
+        float lMinDistance = mSWCImporter->getElementAt(lNodeSomaId).radius;
+
+        QString lFileExport("");
+        lFileExport += "# Contour distance applied:" + QString::number(lMinDistance);
+
+        for (unsigned int j = 0; j < lGeoDistanceContainer.size(); ++j) {
+            if (lGeoDistanceContainer.at(j).distance < lMinDistance) {
+                lFileExport += "\n";
+                lFileExport += QString::number(lGeoDistanceContainer.at(j).id);
+            }
+        }
+        lFileExport += "\n";
+
+        stringToFile(lFileExport, fileName);
+
+    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    //Export XMLFile
+    //control de errores
+    //QString fileName = QFileDialog::getSaveFileName(this);
+    QString fileName = mExitDirectory + "/Definition";
+    if (mXMLSomaDefManager != NULL) delete mXMLSomaDefManager;
+    mXMLSomaDefManager = new XMLSomaDefManager;
+
+    mXMLSomaDefManager->generateXMLContent(mSWCFileName
+            //,mMehsFileName
+            , sourceInfoModel.baseName() + "_RadioReal.off", mDefaultGeoDistFileName, mDefaultVidsFileName, 0,
+                                           0, lNumDendrites, 1.0, 1.0);
+
+    mXMLSomaDefManager->exportDomToFile(fileName.toStdString());
 }
 
 

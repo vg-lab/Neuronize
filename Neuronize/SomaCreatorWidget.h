@@ -164,6 +164,8 @@ public:
 
     SWCImporter *getMswcImporter() const;
 
+    void generateGeodesicFiles(float lscale);
+
 private:
 
     bool isIdInContainer ( unsigned int pId, std::vector < unsigned int > pVector );

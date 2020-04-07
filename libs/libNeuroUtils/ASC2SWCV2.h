@@ -104,6 +104,7 @@ private:
     std::vector<std::vector<OpenMesh::Vec3d>> contours;
     SimplePoint *soma;
     std::vector<Dendrite> dendrites;
+    std::string _inputFile;
 
     void procesSomaPart(std::ifstream &file, std::vector<std::vector<OpenMesh::Vec3d>> &countours);
 

@@ -1136,10 +1136,21 @@ void NeuroGeneratorWidgetViewer::update ( )
 
 void NeuroGeneratorWidgetViewer::exportNeuron ( QString pFile )
 {
-  //Export the mesh
-  meshRend->getBaseMesh ( )->exportMesh ( pFile.toStdString ( ));
+  //Export the mesh;
+  auto exporMesh (meshRend->getBaseMesh());
 
-  if ( mXMLProgressiveNeuroVizManager != NULL )
+    boost::numeric::ublas::matrix<float> translationMatrix (4,4);
+    auto displacement = mSWCImporter->getDisplacement();
+  generateSquareTraslationMatrix(translationMatrix,displacement[0],displacement[1],displacement[2]);
+
+  exporMesh->applyMatrixTransform(translationMatrix,4);
+  exporMesh->exportMesh ( pFile.toStdString ( ));
+
+  generateSquareTraslationMatrix(translationMatrix,-displacement[0],-displacement[1],-displacement[2]);
+  exporMesh->applyMatrixTransform(translationMatrix,4);
+
+
+    if ( mXMLProgressiveNeuroVizManager != NULL )
   {
     delete mXMLProgressiveNeuroVizManager;
   }
@@ -1159,7 +1170,19 @@ void NeuroGeneratorWidgetViewer::exportNeuron ( QString pFile )
 
 void NeuroGeneratorWidgetViewer::exportSpines ( QString pFile )
 {
-  spineMeshRend->getBaseMesh ( )->exportMesh ( pFile.toStdString ( ));
+
+    auto exporMesh (spineMeshRend->getBaseMesh());
+
+    boost::numeric::ublas::matrix<float> translationMatrix (4,4);
+    auto displacement = mSWCImporter->getDisplacement();
+    generateSquareTraslationMatrix(translationMatrix,displacement[0],displacement[1],displacement[2]);
+
+    exporMesh->applyMatrixTransform(translationMatrix,4);
+    exporMesh->exportMesh ( pFile.toStdString ( ));
+
+    generateSquareTraslationMatrix(translationMatrix,-displacement[0],-displacement[1],-displacement[2]);
+    exporMesh->applyMatrixTransform(translationMatrix,4);
+
 }
 
 void NeuroGeneratorWidgetViewer::exportGroupOfSpines ( QString pFile )

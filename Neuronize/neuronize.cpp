@@ -132,30 +132,28 @@ void Neuronize::resetNeuronnizeInterface ( )
     delete mRepairWidget;
     delete mCompareMeshesWidget;
 
-
-
-  mSomaCreatorWidget = new SomaCreatorWidget (tempDir.path(), this );
+  mSomaCreatorWidget = new SomaCreatorWidget (tempDir.path());
 
   ui.verticalLayout_SomaCreator->addWidget ( mSomaCreatorWidget );
 
-    mRepairWidget = new RepairWidget(this);
+    mRepairWidget = new RepairWidget();
     ui.verticalLayout_RepairMeshes->addWidget(mRepairWidget);
 
-    mCompareMeshesWidget = new CompareMeshesWidget(tempDir.path().toStdString(), this);
+    mCompareMeshesWidget = new CompareMeshesWidget(tempDir.path().toStdString());
     ui.verticalLayout_CompareMeshes->addWidget(mCompareMeshesWidget);
 
 
     QObject::connect(mSomaCreatorWidget, SIGNAL(somaCreated()), this, SLOT(onSomaBuildFinish()));
     connect(mSomaCreatorWidget,&SomaCreatorWidget::generateNeurons,this,&Neuronize::genetareNeuronsInBatch);
 
-  mSomaDeformerWidget = new SomaDeformerWidget ( tempDir.path(),this );
+  mSomaDeformerWidget = new SomaDeformerWidget ( tempDir.path() );
   ui.verticalLayout_SomaDeformer->addWidget ( mSomaDeformerWidget );
   QObject::connect ( mSomaDeformerWidget, SIGNAL( finishSoma ( )), this, SLOT( showDendriteGenerator ( )) );
 
-  mNeuroGeneratorWidget = new NeuroGeneratorWidget ( tempDir.path(), this );
+  mNeuroGeneratorWidget = new NeuroGeneratorWidget ( tempDir.path() );
   ui.verticalLayout_DendritesGenerator->addWidget ( mNeuroGeneratorWidget );
   mNeuroGeneratorWidget->loadSpinesModelFromPath ( QCoreApplication::applicationDirPath() + "/Content/Spines/Low/" );
-  connect(mNeuroGeneratorWidget,&NeuroGeneratorWidget::finish,this,[=](){
+  connect(mNeuroGeneratorWidget,&NeuroGeneratorWidget::finish,this,[&](){
      resetNeuronnizeInterface();
   });
 
@@ -464,7 +462,9 @@ void Neuronize::genetareNeuronsInBatch (QString inputFilePath,QString outputFile
           resultFile.append("/").append(name).append(".asc");
 
           float threshold = 0.1f;
-          auto neuron = new skelgenerator::Neuron(apiFile, basalFiles,volsFile,longsFile,threshold);
+          auto neuron = new skelgenerator::Neuron( apiFile, basalFiles,
+                                                   "", volsFile,
+                                                   longsFile, threshold ); //TODO
           while (neuron->getReamingSegments() > 0) {
               threshold += 0.1f;
               neuron->reComputeSkel(threshold);

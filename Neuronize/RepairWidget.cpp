@@ -154,8 +154,8 @@ void RepairWidget::setupUi() {
     includeLabel->setToolTip("Mark if you want to repair also the dendritics segments (not only the spines)");
     formLayout2->addRow(includeLabel, segmentsCheckBox);
 
-    auto kernelLabel = new QLabel("Kernel Size");
-    kernelLabel->setToolTip("Controls the aggressiveness of the smoothing and of the union of disconnected parts");
+    auto kernelLabel = new QLabel("Union level");
+    kernelLabel->setToolTip("Modify the size of kernel used by the Dilate&Erode operation. Greater values have more possibilities of unify parts, but values too greats can produce bad results");
     formLayout2->addRow(kernelLabel, kernelSizeBox);
     formLayout2->setSpacing(6);
 

@@ -583,7 +583,6 @@ void SomaDeformerWidgetViewer::generateSomaFromXML ( QString pFileToGenerate, fl
   {
     lModelPath = lpath + "/" + mXMLSomaDefManager->getXMLSomaDef ( )->mModelPathFile;
     mBaseMesh->loadModel ( lModelPath.toStdString ( ));
-    mBaseMesh->scaleBaseMesh ( pSomaScale );
   }
   else
   {
