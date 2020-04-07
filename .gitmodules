@@ -1,10 +1,6 @@
 [submodule "CMake/common"]
-	path = CMake/common
+	path = https://github.com/Eyescale/CMake.git
 	url = https://github.com/Eyescale/CMake.git
 [submodule "VCG"]
 	path = VCG
 	url = https://github.com/cnr-isti-vclab/vcglib.git
-[submodule "MeshReconstruct"]
-	path = MeshReconstruct
-	url = git@gitlab.gmrv.es:cbbsp1/MeshReconstruct.git
-	branch = Python3
