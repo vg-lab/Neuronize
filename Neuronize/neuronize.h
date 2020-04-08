@@ -84,8 +84,6 @@ class Neuronize: public QMainWindow
 
     unsigned int mActiveTab;
 
-    int mPythonVersion;
-
   public slots:
 
     void genetareNeuronsInBatch ( QString inputFilePath,QString outputFilePath,int subdivisions,QString baseName );
@@ -114,8 +112,6 @@ class Neuronize: public QMainWindow
     void actionBack ( );
 
     void NewNeuronQuestionAndRestart ( );
-
-    int checkPython();
 
     void onSomaBuildFinish();
 

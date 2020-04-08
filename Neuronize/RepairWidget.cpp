@@ -14,12 +14,7 @@
 #include <iostream>
 #include "RepairWidget.h"
 #include "neuronize.h"
-
-#ifdef _WIN32
-#define RUN "src/run.bat"
-#else
-#define RUN "src/run.sh"
-#endif
+#include <MeshReconstructWrapper/MeshReconstruct.h>
 
 RepairWidget::RepairWidget(QWidget *parent) : QWidget(parent) {
     setupUi();
@@ -216,7 +211,7 @@ void RepairWidget::onOk() {
                 outputMeshPath = output +"/Meshes";
             }
 
-            repairFile(output,input,saveFormat,precisionBox->text().toInt(),percentageBox->value(),
+            meshreconstruct::MeshReconstruct::getInstance()->repairFile(output,input,saveFormat,precisionBox->text().toInt(),percentageBox->value(),
                     segmentsCheckBox->isChecked(),kernelSizeBox->text().toInt(),cleanCheckBox, tmpPath);
 
             addToBBDD(outputMeshPath, saveFormat);
@@ -252,7 +247,7 @@ void RepairWidget::onOk() {
                 outputMeshPath = output + "/Meshes";
             }
 
-            repairDir(output, input, saveFormat, precisionBox->text().toInt(), percentageBox->value(),
+            meshreconstruct::MeshReconstruct::getInstance()->repairDir(output, input, saveFormat, precisionBox->text().toInt(), percentageBox->value(),
                        segmentsCheckBox->isChecked(), kernelSizeBox->text().toInt(), cleanCheckBox, tmpPath);
 
             addToBBDD(outputMeshPath, saveFormat);
@@ -342,44 +337,4 @@ void RepairWidget::addToBBDD(const QString& path,const QString& extension) {
         Neuronize::bbdd.addSpineImaris(originalFile.toStdString(),repairedFile.toStdString(),extension.toStdString(),spineName.toStdString());
     }
     Neuronize::bbdd.closeTransaction();
-}
-
-int
-RepairWidget::repairFile(const QString &outputFile, const QString &inputFile, const QString &saveFormat,
-                         int precision, float reduction, bool includeSegments, int kernelSize,
-                         bool clean, const QString& exportPath) {
-    QStringList arguments;
-
-    arguments << "-a" << "\"" + outputFile + "\"" << "-v" << "\"" + inputFile + "\"" <<  "-s" << saveFormat << "-p" << QString::number(precision)
-              << "-r" << QString::number(reduction) << "-f" << QString::number(includeSegments) << "-k" << QString::number(kernelSize)
-              << "-c" << QString::number(clean);
-
-    if (!exportPath.isEmpty()) {
-        arguments << "-e" << "\"" + exportPath + "\"";
-    }
-
-    QString command = "\"" + QCoreApplication::applicationDirPath() + "/" + RUN + "\" " + Neuronize::envPath + " " + arguments.join(" ");
-    std::cout << command.toStdString() << std::endl;
-    return std::system(command.toStdString().c_str());
-
-}
-
-int RepairWidget::repairDir(const QString &outputDir, const QString &inputDir, const QString &saveFormat,
-                             int precision, float reduction, bool includeSegments, int kernelSize,
-                             bool clean, const QString& exportPath) {
-
-    QStringList arguments;
-
-    arguments << "-o" << "\"" + outputDir + "\"" << "-w" << "\"" + inputDir + "\"" <<"-s" << saveFormat << "-p" << QString::number(precision)
-              << "-r" << QString::number(reduction) << "-f" << QString::number(includeSegments) << "-k" << QString::number(kernelSize)
-              << "-c" << QString::number(clean);
-
-    if (!exportPath.isEmpty()) {
-       arguments << "-e" << "\"" + exportPath + "\"";
-    }
-
-    QString command = "\"\"" + QCoreApplication::applicationDirPath() + "/" + RUN + "\" " + Neuronize::envPath + " " + arguments.join(" ") + "\"";
-    std::cout << command.toStdString() << std::endl;
-    return std::system(command.toStdString().c_str());
-
 }

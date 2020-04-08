@@ -28,6 +28,7 @@
 #include <queue>
 #include <libs/libGLNeuroUtils/MeshRenderer.h>
 #include <random>
+#include <MeshReconstructWrapper/MeshReconstruct.h>
 //#include <QtGui>
 
 // Constructor must call the base class constructor.
@@ -2073,7 +2074,7 @@ void NeuroGeneratorWidgetViewer::generateSpinesImaris(skelgenerator::Neuron *neu
 void NeuroGeneratorWidgetViewer::generateRepairedImarisSpines(skelgenerator::Neuron *neuron, string tmpDir) {
     QString inputFile = QString::fromStdString(neuron->getImarisFile());
     QString outPath = QString::fromStdString(tmpDir) + "/repairedMeshes";
-    RepairWidget::repairFile(QString::fromStdString(tmpDir) +"/csv.csv",inputFile,"Obj",50,
+    meshreconstruct::MeshReconstruct::getInstance()->repairFile(QString::fromStdString(tmpDir) +"/csv.csv",inputFile,"Obj",50,
             30, false,3,true,outPath);
 
     boost::numeric::ublas::matrix<float> translationMatrix (4,4);

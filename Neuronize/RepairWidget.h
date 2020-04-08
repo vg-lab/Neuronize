@@ -22,26 +22,6 @@ class RepairWidget : public QWidget {
     Q_OBJECT
 public:
     explicit RepairWidget(QWidget *parent = 0);
-    static int repairFile(const QString &outputFile,
-            const QString &inputFile,
-            const QString &saveFormat,
-            int precision,
-            float reduction,
-            bool includeSegments,
-            int kernelSize,
-            bool clean,
-            const QString& exportPath = QString());
-
-    static int repairDir(const QString &outputDir,
-                          const QString &inputDir,
-                          const QString &saveFormat,
-                          int precision,
-                          float reduction,
-                          bool includeSegments,
-                          int kernelSize,
-                          bool clean,
-                         const QString& exportPath = QString());
-
 private:
     QLineEdit* csvPath;
     QLineEdit* inputPath;

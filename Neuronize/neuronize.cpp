@@ -29,15 +29,10 @@
 #include <QtConcurrent/QtConcurrent>
 #include <QFutureWatcher>
 #include <clocale>
+#include <MeshReconstructWrapper/MeshReconstruct.h>
 
 #include <QtWidgets/QDialog>
 
-#define ENV "env"
-#ifdef _WIN32
-#define INSTALL std::string("src/install.bat")
-#else
-#define INSTALL std::string("src/install.sh")
-#endif
 
 QString Neuronize::configPath;
 QString Neuronize::envPath;
@@ -91,7 +86,7 @@ Neuronize::Neuronize ( QWidget *parent )
     mNeuroGeneratorWidget = nullptr;
     mRepairWidget = nullptr;
     mCompareMeshesWidget = nullptr;
-    mPythonVersion = checkPython();
+    hasPython = true; //Se pone a true para que se muestre en la interfaz, e sobrescribira despues con el valor real
 
     resetNeuronnizeInterface();
     mActiveTab = 0;
@@ -113,6 +108,7 @@ Neuronize::Neuronize ( QWidget *parent )
     this->showNormal();
     resize(1200, 800);
     initPythonEnv();
+
 
     initrand();
 }
@@ -210,7 +206,7 @@ void Neuronize::showSomaCreator ( )
     ui.tabWidget_MainContainer->setTabEnabled(1, true);
     ui.tabWidget_MainContainer->setTabEnabled(2, true);
 
-    if (mPythonVersion != 3) {
+    if (!hasPython) {
        ui.tabWidget_MainContainer->setTabEnabled(1,false);
     }
 
@@ -633,38 +629,6 @@ void Neuronize::NewNeuronQuestionAndRestart ( )
   }
 }
 
-int Neuronize::checkPython() {
-#ifdef _WIN32
-    std::string pythonName = "py";
-#else
-    std::string pythonName = "python3";
-#endif
-    std::string version;
-    std::string token;
-    boost::process::ipstream inputStream;
-	try {
-		int result = boost::process::system(pythonName + " --version", boost::process::std_out > inputStream);
-		if (result != 0) {
-			return 0;
-		}
-		while (inputStream >> token) {
-			version += token;
-		}
-		if (version.empty())
-		{
-			return 0;
-		}
-		version = version.substr(6);
-		int versionMajor = version[0] - '0';
-		return versionMajor;
-	} catch (boost::process::process_error er) {
-		return 0;
-	}
-
-
-
-}
-
 void Neuronize::onSomaBuildFinish() {
     this->showMaximized();
     showSomaDeformer();
@@ -700,57 +664,29 @@ void Neuronize::resetPythonEnv() {
 
 
 void Neuronize::initPythonEnv() {
-    mPythonVersion = checkPython();
 
-    if (mPythonVersion == 3) {
-        hasPython = true;
-        envPath = configPath + "/" + ENV;
-
-        if (!QFileInfo(envPath).exists()) {
-            std::string command = "\"" + QCoreApplication::applicationDirPath().toStdString() + "/" + INSTALL + "\" " + envPath.toStdString();
-            boost::process::ipstream errStream;
-            QFuture<int> future = QtConcurrent::run([&]() {
-                return boost::process::system(command, boost::process::std_out > stdout, boost::process::std_err > errStream,boost::process::std_in < stdin);
-            });
-            QFutureWatcher<int> watcher;
-
-            QProgressDialog progress(this);
-            connect(&watcher, SIGNAL(finished()), &progress, SLOT(close()));
-            watcher.setFuture(future);
-            progress.setLabelText("Installing python dependencies");
-            progress.setCancelButton(0);
-            progress.setMaximum(0);
-            progress.setMinimum(0);
-            progress.exec();
-
-            std::string line;
-            std::string error;
-            while (errStream && std::getline(errStream, line) && !line.empty()) {
-                error += line;
-            }
-
-            if (future.result() != 0 || error.find("ERROR") != std::string::npos) {
-                QMessageBox::critical(this,tr("Neuronize"),tr("There was a problem initializing the python environment"));
-                hasPython = false;
-                ui.tabWidget_MainContainer->setTabEnabled(1,false);
-            }
-        }
-    } else {
-        hasPython = false;
-        QString message("Python 3 not found. Mesh repair is disabled");
-        QString informativeText;
-
-
-        QMessageBox msgBox(this);
-        msgBox.setIcon(QMessageBox::Warning);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setDefaultButton(QMessageBox::Ok);
-        msgBox.setText(message);
-        if (mPythonVersion == 2) {
-            msgBox.setInformativeText("Python 2 found, but not compatible. Mesh repair is disabled");
-        }
-        msgBox.exec();
-    }
+  QFuture<int> future = QtConcurrent::run([&]() { return meshreconstruct::MeshReconstruct::getInstance()->getPythonVersion();});
+  QFutureWatcher<int> watcher;
+  QProgressDialog progress(this);
+  connect(&watcher, SIGNAL(finished()), &progress, SLOT(close()));
+  watcher.setFuture(future);
+  progress.setLabelText("Installing python dependencies");
+  progress.setCancelButton(0);
+  progress.setMaximum(0);
+  progress.setMinimum(0);
+  progress.exec();
+  hasPython = meshreconstruct::MeshReconstruct::getInstance()->isInit();
+  if (!hasPython)
+  {
+    QString message("Python 3 not found. Mesh repair is disabled");
+    QMessageBox msgBox(this);
+    msgBox.setIcon(QMessageBox::Warning);
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setDefaultButton(QMessageBox::Ok);
+    msgBox.setText(message);
+    msgBox.setInformativeText("Python 2 found, but not compatible. Mesh repair is disabled");
+    msgBox.exec();
+  }
 
 }
 
