@@ -665,8 +665,8 @@ void Neuronize::resetPythonEnv() {
 
 void Neuronize::initPythonEnv() {
 
-  QFuture<int> future = QtConcurrent::run([&]() { return meshreconstruct::MeshReconstruct::getInstance()->getPythonVersion();});
-  QFutureWatcher<int> watcher;
+  QFuture<void> future = QtConcurrent::run([&]() {meshreconstruct::MeshReconstruct::getInstance();});
+  QFutureWatcher<void> watcher;
   QProgressDialog progress(this);
   connect(&watcher, SIGNAL(finished()), &progress, SLOT(close()));
   watcher.setFuture(future);
