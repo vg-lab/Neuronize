@@ -497,10 +497,11 @@ void NeuroGeneratorWidget::generateSpines ( )
     lGenerateOption = 5;
   else if (ui.radioButton_RealAscPos->isChecked ( ))
     lGenerateOption = 6;
-  else if (ui.radioButton_ImarisSpines->isChecked ( ))
-      lGenerateOption = 7;
-  else if (ui.radioButton_RepairedSpines->isChecked())
+  else if (ui.radioButton_ImarisSpines->isChecked ( )) {
+    lGenerateOption = 7;
+      if(ui.radioButton_RepairedSpines->isChecked())
       lGenerateOption = 8;
+  }
 
 
 
@@ -631,10 +632,12 @@ void NeuroGeneratorWidget::batchSpinesGeneration(skelgenerator::Neuron *pNeuron,
         lGenerateOption = 5;
     else if (ui.radioButton_RealAscPos->isChecked ( ))
         lGenerateOption = 6;
-    else if (ui.radioButton_ImarisSpines->isChecked ( ))
-        lGenerateOption = 7;
-    else if (ui.radioButton_RepairedSpines->isChecked())
+    else if (ui.radioButton_ImarisSpines->isChecked ( )) {
+      lGenerateOption = 7;
+      if(ui.radioButton_RepairedSpines->isChecked())
         lGenerateOption = 8;
+    }
+
 
 
       switch (lGenerateOption) {

@@ -2077,6 +2077,9 @@ void NeuroGeneratorWidgetViewer::generateRepairedImarisSpines(skelgenerator::Neu
     meshreconstruct::MeshReconstruct::getInstance()->repairFile(QString::fromStdString(tmpDir) +"/csv.csv",inputFile,"Obj",50,
             30, false,3,true,outPath);
 
+    QFileInfo outFi (inputFile);
+    outPath += "/" + outFi.baseName();
+
     boost::numeric::ublas::matrix<float> translationMatrix (4,4);
 
     auto displacement = mSWCImporter->getDisplacement();

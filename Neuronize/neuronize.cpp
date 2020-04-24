@@ -415,7 +415,7 @@ void Neuronize::genetareNeuronsInBatch (QString inputFilePath,QString outputFile
     }
   }*/
 
-  if ( mInputFilePath.isNull ( ) == false ) {
+  if ( !mInputFilePath.isNull( ) ) {
     QDirIterator it(mInputFilePath, QDir::AllEntries | QDir::NoDotAndDotDot);
     while (it.hasNext()) {
       QFileInfo current = it.next();
@@ -431,6 +431,7 @@ void Neuronize::genetareNeuronsInBatch (QString inputFilePath,QString outputFile
           std::string apiFile;
           std::string longsFile;
           std::string volsFile;
+          std::string somaFile;
           std::vector <std::string> basalFiles;
           while (itFiles.hasNext()) {
             QFileInfo info = itFiles.next();
@@ -443,8 +444,10 @@ void Neuronize::genetareNeuronsInBatch (QString inputFilePath,QString outputFile
                 basalFiles.emplace_back(path.toStdString());
               } else if (path.contains("longs", Qt::CaseInsensitive)) {
                   longsFile = path.toStdString();
-              } else if (path.contains("vols"), Qt::CaseInsensitive) {
+              } else if (path.contains("vols", Qt::CaseInsensitive)) {
                   volsFile = path.toStdString();
+              } else if (path.contains("soma", Qt::CaseInsensitive)){
+                somaFile = path.toStdString();
               }
             } else {
               QDirIterator itBasalFiles(path, QDir::AllEntries | QDir::NoDotAndDotDot);
@@ -459,8 +462,8 @@ void Neuronize::genetareNeuronsInBatch (QString inputFilePath,QString outputFile
 
           float threshold = 0.1f;
           auto neuron = new skelgenerator::Neuron( apiFile, basalFiles,
-                                                   "", volsFile,
-                                                   longsFile, threshold ); //TODO
+                                                   somaFile, volsFile,
+                                                   longsFile, threshold );
           while (neuron->getReamingSegments() > 0) {
               threshold += 0.1f;
               neuron->reComputeSkel(threshold);
@@ -684,7 +687,6 @@ void Neuronize::initPythonEnv() {
     msgBox.setStandardButtons(QMessageBox::Ok);
     msgBox.setDefaultButton(QMessageBox::Ok);
     msgBox.setText(message);
-    msgBox.setInformativeText("Python 2 found, but not compatible. Mesh repair is disabled");
     msgBox.exec();
   }
 

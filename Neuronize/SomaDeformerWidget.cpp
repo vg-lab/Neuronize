@@ -33,6 +33,7 @@ SomaDeformerWidget::SomaDeformerWidget (const QString &tempDir, QWidget *parent 
 
 
   viewer = new SomaDeformerWidgetViewer ( this );
+  this->somaCreator = nullptr;
 
   mtmpDir = tempDir;
   mXMLFile = tempDir + "/Definition.xml";

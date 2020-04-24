@@ -137,7 +137,7 @@ void RepairWidget::setupUi() {
     kernelSizeBox = new QSpinBox(advancedWidget);
     kernelSizeBox->setValue(3);
     kernelSizeBox->setMinimum(1);
-    kernelSizeBox->setMaximum(8);
+    kernelSizeBox->setMaximum(12);
 
     auto formLayout2 = new QFormLayout(advancedWidget);
 

@@ -79,15 +79,29 @@ private:
 
     bool validatePage() override;
 
-public:
-    int nextId() const override;
-
 private slots:
     void showWarningDialogIncorrectConnections(float &newThreshold);
 
     void showWarningDialogReaminingSegments(int sobrantes, float &newThreshold);
 
     void processSkel(const std::string &apical,const std::vector<std::string>& basals,const std::string &imarisVol,const std::string &imarisLongs);
+};
+
+class AddSomaPage: public QWizardPage
+{
+  Q_OBJECT
+  QPushButton* selectSomaButton;
+  QLineEdit* somaPath;
+  skelgenerator::Neuron*& _neuron;
+  QRadioButton* radioYes;
+  QRadioButton* radioNo;
+public:
+
+  explicit AddSomaPage( skelgenerator::Neuron*& neuron_, QWidget* parent );
+
+  bool validatePage( ) override;
+
+  int nextId( ) const override;
 };
 
 class AddLongsPage: public QWizardPage {
@@ -97,7 +111,6 @@ class AddLongsPage: public QWizardPage {
     skelgenerator::Neuron*& neuron;
 public:
     explicit AddLongsPage(skelgenerator::Neuron*& neuron_,QWidget* parent = 0);
-
     bool validatePage() override;
 
 };
@@ -128,7 +141,7 @@ public:
 
     const QString &getOutputPath() const;
 
-    enum Pages {Page_files,Page_SWC,Page_ASC,Page_Filament,Page_Select_Apical,Page_Add_Longs,Page_Finish};
+    enum Pages {Page_files,Page_SWC,Page_ASC,Page_Filament,Page_Select_Apical,Page_Add_Soma,Page_Add_Longs,Page_Finish};
 };
 
 
