@@ -49,6 +49,7 @@ ASC2SWCV2::ASC2SWCV2(const std::string &inputFile, bool useSoma) {
     for (auto& dendrite:this->dendrites) {
         dendrite.moveFisrtSpines();
         dendrite.removeEmptySections();
+        dendrite.removeEmptyNodes();
         dendrite.removeOnly1SubDend();
     }
     soma = calcSoma2();
@@ -347,18 +348,31 @@ void Dendrite::removeEmptySections(){
 bool SubDendrite::removeEmptySections() {
     bool moved = false;
 
-    for (auto& subDend : this->subDendrites) {
-        if (subDend.section.empty() && !this->section.empty()) {
-            auto p = *(this->section.end() - 1);
-            int i = 1;
-            while (p->isSpine()) {
-                i++;
-                p = *(this->section.end() - i);
+    if (this->section.empty())
+    {
+      for( auto& subDend : this->subDendrites )
+      {
+        if( !subDend.section.empty( ) )
+        {
+          int i = 0;
+          if( subDend.section.size( ) > 1 ) //Nos llevamos tambien las posibles espinas.
+          {
+            i = 1;
+            auto p = *( subDend.section[ i ] );
+            while( p.isSpine( ) && i < subDend.section.size( ) )
+            {
+              ++i;
+              p = *( subDend.section[ i ] );
             }
-            subDend.section.insert(subDend.section.begin(),this->section.end() - i, this->section.end());
-            this->section.erase(this->section.end() - i, this->section.end());
-            moved = true;
+            --i;
+          }
+
+          this->section.insert( this->section.begin( ), subDend.section.begin( ), subDend.section.begin( ) + i + 1 );
+          subDend.section.erase( subDend.section.begin( ), subDend.section.begin( ) + i + 1 );
+          moved = true;
+          break;
         }
+      }
     }
 
     for (auto& subDend: this->subDendrites) {
@@ -369,23 +383,57 @@ bool SubDendrite::removeEmptySections() {
     return moved;
 }
 
-void Dendrite::removeOnly1SubDend() {
-    this->dendrite.removeOnly1SubDend();
+void Dendrite::removeEmptyNodes(){
+  this->dendrite.removeEmptyNodes();
 }
 
-void SubDendrite::removeOnly1SubDend() {
-    if( this->subDendrites.size() == 1) {
-        auto subDendrite = this->subDendrites[0];
-        this->section.insert(this->section.end(), subDendrite.section.begin(),
-                             subDendrite.section.end());
-        this->subDendrites.insert(this->subDendrites.end(), subDendrite.subDendrites.begin(),
-                                  subDendrite.subDendrites.end());
-        this->subDendrites.erase(this->subDendrites.begin());
+void SubDendrite::removeEmptyNodes( )
+{
+  std::vector<size_t> toDel;
+  for (size_t i = 0; i < this->subDendrites.size(); ++i){
+    auto subDend = this->subDendrites[i];
+    if (subDend.section.empty() && subDend.subDendrites.empty()) {
+      toDel.push_back(i);
     }
+  }
 
-    for (auto & subDendrite : this->subDendrites) {
-        subDendrite.removeOnly1SubDend();
+  for (auto it = toDel.rbegin(); it != toDel.rend(); ++it ) {
+    size_t i = *it;
+    this->subDendrites.erase(subDendrites.begin() + i);
+  }
+
+  for (auto& subDend: this->subDendrites) {
+    subDend.removeEmptyNodes();
+  }
+}
+
+void Dendrite::removeOnly1SubDend() {
+    bool moved = this->dendrite.removeOnly1SubDend();
+    while (moved) {
+      moved = this->dendrite.removeOnly1SubDend();
     }
+}
+
+bool SubDendrite::removeOnly1SubDend()
+{
+  bool moved = false;
+  if( this->subDendrites.size( ) == 1 )
+  {
+    auto subDendrite = this->subDendrites[ 0 ];
+    this->section.insert( this->section.end( ), subDendrite.section.begin( ),
+                          subDendrite.section.end( ) );
+    this->subDendrites.insert( this->subDendrites.end( ), subDendrite.subDendrites.begin( ),
+                               subDendrite.subDendrites.end( ) );
+    this->subDendrites.erase( this->subDendrites.begin( ) );
+    moved = true;
+  }
+
+  for( auto& subDendrite : this->subDendrites )
+  {
+    moved = moved || subDendrite.removeOnly1SubDend( );
+  }
+
+  return moved;
 }
 
 
@@ -396,7 +444,7 @@ void ASC2SWCV2::toSWC(const std::string &filename) {
     std::ofstream file;
     file.open(filename,std::ofstream::out);
     if (!file.is_open()) {
-        throw "Error to write a SWC file: Not able to open file";
+        throw std::runtime_error("Error to write a SWC file: Not able to open file");
     }
 
     this->soma->toSWC(counter, -1, 1,file);

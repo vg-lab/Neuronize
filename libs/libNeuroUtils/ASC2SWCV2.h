@@ -61,9 +61,11 @@ public:
 
     bool removeEmptySections();
 
-    void removeOnly1SubDend();
+    bool removeOnly1SubDend();
 
     void moveFirstSpines(SubDendrite *parent);
+
+  void removeEmptyNodes( );
 };
 
 class NEUROUTILS_API Dendrite {
@@ -80,6 +82,8 @@ public:
     void removeOnly1SubDend();
 
     void moveFisrtSpines();
+
+  void removeEmptyNodes( );
 };
 
 class NEUROUTILS_API ASC2SWCV2 {

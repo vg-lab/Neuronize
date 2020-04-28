@@ -437,16 +437,16 @@ void Neuronize::genetareNeuronsInBatch (QString inputFilePath,QString outputFile
             QFileInfo info = itFiles.next();
             QString path = info.absoluteFilePath();
             if (info.isFile()) {
-              std::string test = path.toStdString();
-              if (path.contains("api", Qt::CaseInsensitive)) {
+              auto name = info.baseName();
+              if (name.contains("api", Qt::CaseInsensitive)) {
                 apiFile = path.toStdString();
-              } else if (path.contains("basal", Qt::CaseInsensitive)) {
+              } else if (name.contains("bas", Qt::CaseInsensitive)) {
                 basalFiles.emplace_back(path.toStdString());
-              } else if (path.contains("longs", Qt::CaseInsensitive)) {
+              } else if (name.contains("longs", Qt::CaseInsensitive)) {
                   longsFile = path.toStdString();
-              } else if (path.contains("vols", Qt::CaseInsensitive)) {
+              } else if (name.contains("vols", Qt::CaseInsensitive)) {
                   volsFile = path.toStdString();
-              } else if (path.contains("soma", Qt::CaseInsensitive)){
+              } else if (name.contains("soma", Qt::CaseInsensitive)){
                 somaFile = path.toStdString();
               }
             } else {
@@ -480,10 +480,10 @@ void Neuronize::genetareNeuronsInBatch (QString inputFilePath,QString outputFile
 
   for ( unsigned int i = 0; i < mFilesContainer.size ( ); ++i )
   {
-    std::cout << "Init" << std::endl << std::flush;
     showSomaCreator ( );
     auto filePath = std::get<0>(mFilesContainer[i]);
     auto neuron = std::get<1>(mFilesContainer[i]);
+    std::cout << "Init: " << filePath.toStdString() << std::endl;
 
       QFileInfo f ( filePath );
       QString lFileName = f.fileName ( );
