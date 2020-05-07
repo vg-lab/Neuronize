@@ -14,6 +14,8 @@
 #include <QFuture>
 #include <QtConcurrent/QtConcurrent>
 #include <QProgressDialog>
+#include <MeshReconstructWrapper/MeshReconstruct.h>
+
 
 WizzardInputOne::WizzardInputOne(QWidget* parent): QWizard(parent) {
     this->neuron = nullptr;
@@ -343,6 +345,19 @@ void SelectApicalPage::processSkel(const std::string &apical,const std::vector<s
     }
     this->neuron = neuron;
 }
+
+int SelectApicalPage::nextId() const {
+    if (meshreconstruct::MeshReconstruct::getInstance()->isInit()) {
+        return WizzardInputOne::Page_Add_Soma;
+    } else {
+        if (neuron != nullptr && !neuron->hasFilamentSpines()) {
+            return WizzardInputOne::Page_Add_Longs;
+        }
+        return WizzardInputOne::Page_Finish;
+    }
+    return QWizardPage::nextId();
+}
+
 /*
 void SelectApicalPage::processSkel(const std::string &apical,const std::vector<std::string>& basals,const std::string &imarisVol,const std::string &imarisLongs) {
     float newThreshold = 1.1f;

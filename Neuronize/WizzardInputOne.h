@@ -75,6 +75,12 @@ public:
     explicit SelectApicalPage(skelgenerator::Neuron*& neuron_, QStringList& filamentfiles_,QWidget *parent);
 
 private:
+public:
+    int nextId() const override;
+
+private:
+
+
     void initializePage() override;
 
     bool validatePage() override;

@@ -188,8 +188,11 @@ void Neuronize::resetNeuronnizeInterface ( )
   mNeuroGeneratorWidget->getUI ( ).checkBox_SmoothSpines->setChecked ( false );
 
   //Close all tabs except the loader
-    for (int i = 0; i < 6; ++i)
-    ui.tabWidget_MainContainer->removeTab ( 0 );
+    for (int i = 0; i < 6; ++i) {
+        ui.tabWidget_MainContainer->removeTab(0);
+    }
+    ui.tabWidget_MainContainer->setTabEnabled(1,hasPython);
+
 
   showSomaCreator ( );
 }
@@ -657,11 +660,28 @@ void Neuronize::createDatabase() {
 }
 
 void Neuronize::resetPythonEnv() {
-    QDir dir (Neuronize::envPath);
-    dir.removeRecursively();
+    QFuture<void> future = QtConcurrent::run([&]() {meshreconstruct::MeshReconstruct::getInstance()->resetPythonEnv();});
+    QFutureWatcher<void> watcher;
+    QProgressDialog progress(this);
+    connect(&watcher, SIGNAL(finished()), &progress, SLOT(close()));
+    watcher.setFuture(future);
+    progress.setLabelText("Installing python dependencies");
+    progress.setCancelButton(0);
+    progress.setMaximum(0);
+    progress.setMinimum(0);
+    progress.exec();
 
-    initPythonEnv();
-
+    hasPython = meshreconstruct::MeshReconstruct::getInstance()->isInit();
+    if (!hasPython)
+    {
+        QString message("Python 3 not found. Mesh repair is disabled");
+        QMessageBox msgBox(this);
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setDefaultButton(QMessageBox::Ok);
+        msgBox.setText(message);
+        msgBox.exec();
+    }
     resetNeuronnizeInterface();
 }
 
@@ -688,6 +708,8 @@ void Neuronize::initPythonEnv() {
     msgBox.setDefaultButton(QMessageBox::Ok);
     msgBox.setText(message);
     msgBox.exec();
+
+    ui.tabWidget_MainContainer->setTabEnabled(1,false);
   }
 
 }
