@@ -35,7 +35,7 @@
       <enum>QTabWidget::West</enum>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_SomaDeformer">
       <attribute name="title">
@@ -275,8 +275,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>256</width>
-            <height>1010</height>
+            <width>212</width>
+            <height>849</height>
            </rect>
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_3">
