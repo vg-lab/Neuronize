@@ -571,7 +571,9 @@ void SomaCreatorWidget::generateXMLSoma ( QString fileName, bool useSoma ) {
                     ASCparser = new ASC2SWCV2(ascPath, useSoma);
                   ASCparser->toSWC(fileName.toStdString());
                   somaMesh = ASCparser->getSomaMesh();
-                  this->spines = ASCparser->getSpines();                    // PREVIOUS VERSION
+                  this->spines = ASCparser->getSpines();
+                  this->contours = ASCparser->getContours();
+                  // PREVIOUS VERSION
                   //ASC2SWC::convierteASWC(lLocalFilePath.toStdString(), info1.fileName().toStdString());
                   //fileName = lLocalFilePath + "/" + info1.fileName() + ".swc";
                 }
@@ -825,19 +827,24 @@ SWCImporter *SomaCreatorWidget::getMswcImporter() const {
 void SomaCreatorWidget::onGenerateOneNeuron() {
     WizzardInputOne wizzard(this);
     wizzard.exec();
-    Neuronize::outPath = wizzard.getOutputPath();
-
-    if (wizzard.isFilament()) {
-        this->neuron = wizzard.getNeuron();
+    if (wizzard.result() == QDialog::Accepted)
+    {
+      Neuronize::outPath = wizzard.getOutputPath( );
+      if( wizzard.isFilament( ) )
+      {
+        this->neuron = wizzard.getNeuron( );
         this->mInputFile = this->mExitDirectory + "/temp.asc";
         std::ofstream file;
-        file.open(this->mInputFile.toStdString());
-        file << this->neuron->to_asc();
-        file.close();
+        file.open( this->mInputFile.toStdString( ) );
+        file << this->neuron->to_asc( );
+        file.close( );
 
-        generateXMLSoma(this->mInputFile, true);
-    } else {
-        generateXMLSoma(wizzard.getTraceFile(),true);
+        generateXMLSoma( this->mInputFile, true );
+      }
+      else
+      {
+        generateXMLSoma( wizzard.getTraceFile( ), true );
+      }
     }
 
 }

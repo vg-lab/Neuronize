@@ -203,7 +203,7 @@ void Neuronize::showSomaCreator ( )
 
     ui.tabWidget_MainContainer->removeTab(0);
     ui.tabWidget_MainContainer->insertTab(1, ui.tab_SomaCreator, "Generate Neuron");
-    ui.tabWidget_MainContainer->insertTab(2, ui.tab_RepairMeshes, "Repair Meshes");
+    ui.tabWidget_MainContainer->insertTab(2, ui.tab_RepairMeshes, "Repair and/or Correct Meshes");
     ui.tabWidget_MainContainer->insertTab(3, ui.tab_CompareMeshes, "Compare Meshes");
 
     ui.tabWidget_MainContainer->setTabEnabled(1, true);
@@ -220,7 +220,6 @@ void Neuronize::showSomaCreator ( )
 void Neuronize::showSomaDeformer ( )
 {
     mActiveTab = 1;
-    mSomaDeformerWidget->resetInterface();
   mSomaDeformerWidget->setSomaCreator(mSomaCreatorWidget);
 
   mFullSWCFilePath = mSomaCreatorWidget->getFullPathToSWCFile ( );

@@ -50,7 +50,6 @@ class SomaDeformerWidget: public QWidget, public Ui::SomaDeformerWidget
     void stopDeformation ( );
     void setModeledSoma(std::string path);
     void setSWCFile (std::string path);
-    void resetInterface();
 
 
     //const

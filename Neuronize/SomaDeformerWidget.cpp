@@ -200,6 +200,7 @@ void SomaDeformerWidget::loadXMLSomaDef ( )
 
 void SomaDeformerWidget::loadPredefinedXMLSomaDef ( )
 {
+  ui.pushButton_SphericalSoma->setVisible(this->somaCreator->isSomaContours());
   generateSoma ( );
 
   ui.pushButton_FinalizeSoma->setEnabled ( false );
@@ -529,14 +530,6 @@ void SomaDeformerWidget::hideAdvancedOptions() {
 
     ui.groupBox_MS_Simulation_Params->hide();
 
-}
-
-void SomaDeformerWidget::resetInterface() {
-    if (this->somaCreator == nullptr) {
-        ui.pushButton_SphericalSoma->hide();
-    } else {
-        ui.pushButton_SphericalSoma->setVisible(!this->somaCreator->getContours().empty());
-    }
 }
 
 

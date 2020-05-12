@@ -531,6 +531,11 @@ void ASC2SWCV2::toASC(const std::vector<std::vector<Eigen::Vector3f>> &contours,
     file.close();
 }
 
+const std::vector<std::vector<OpenMesh::Vec3d>>& ASC2SWCV2::getContours( ) const
+{
+  return contours;
+}
+
 void Dendrite::toASC(std::string tab, std::ofstream& file) const {
     std::string color = this->type== Dendrite::Apical ? "Green": "Blue";
     std::string type = this->type == Dendrite::Apical ? "Apical" : "Dendrite";

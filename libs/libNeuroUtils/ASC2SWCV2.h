@@ -98,7 +98,9 @@ public:
 
     MeshVCG *getSomaMesh() const;
 
-    const std::vector<Spine*> &getSpines() const;
+  const std::vector<std::vector<OpenMesh::Vec3d>>& getContours( ) const;
+
+  const std::vector<Spine*> &getSpines() const;
 
     void toSWC(const std::string &filename);
 private:
