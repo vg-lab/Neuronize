@@ -32,7 +32,7 @@ OSX-subproject-master:
   script:
   - export DMGAPP_REPO="gitlabci@gmrv.es:apps.private"
   - export BUILD_GENERATOR="Ninja"
-  - module load OpenMesh-6.3 Qt-5.9.1 libQGLViewer-2.6.3 soil
+  - module load OpenMesh-6.3 Qt-5.10 libQGLViewer-2.6.3 soil
   - export CMAKE_EXTRA_ARGS="-DCLONE_SUBPROJECTS=ON -DCMAKE_FRAMEWORK_PATH=$QGLVIEWER_ROOT/usr/local/lib -DSOIL_ROOT_DIR=$SOIL_ROOT_DIR"
   - bash .gitlab-ci.sh
   tags:
@@ -44,7 +44,7 @@ OSX-subproject:
   stage: build
   script:
   - export BUILD_GENERATOR="Ninja"
-  - module load OpenMesh-6.3 Qt-5.9.1 libQGLViewer-2.6.3 soil
+  - module load OpenMesh-6.3 Qt-5.10 libQGLViewer-2.6.3 soil
   - export CMAKE_EXTRA_ARGS="-DCLONE_SUBPROJECTS=ON -DCMAKE_FRAMEWORK_PATH=$QGLVIEWER_ROOT/usr/local/lib -DSOIL_ROOT_DIR=$SOIL_ROOT_DIR"
   - bash .gitlab-ci.sh
   tags:
@@ -64,11 +64,11 @@ Win7-VS14-x64-subproject:
   - call %ENVFILESDIR%\soil-vs14-x64.bat
   - call %ENVFILESDIR%\glm.bat
   - call %ENVFILESDIR%\glew-1.11.0.bat
-  - call %ENVFILESDIR%\glut.bat
+  - call %ENVFILESDIR%\glut-2.8.1.bat
   - set PATH=%PATH%;"c:\Program Files\Git\bin"
   - set BUILD_GENERATOR=Visual Studio 14 Win64
   - set GLEW_ROOT=c:\libs\glew-1.11.0
-  - set CMAKE_EXTRA_ARGS=-DCLONE_SUBPROJECTS=ON -DGLEW_INCLUDE_DIR=%GLEW_INCLUDE_DIR% -DOPENGL_LIBRARY_DIR=c:\libs\freeglut\lib\x64 -DGLUT_INCLUDE_DIR=%GLUT_INCLUDE_DIR% -DGLM_ROOT_DIR=%GLM_ROOT_DIR%
+  - set CMAKE_EXTRA_ARGS=-DCLONE_SUBPROJECTS=ON -DGLEW_INCLUDE_DIR=%GLEW_INCLUDE_DIR% -DOPENGL_LIBRARY_DIR=%OPENGL_LIBRARY_DIR% -DGLUT_INCLUDE_DIR=%GLUT_INCLUDE_DIR% -DGLM_ROOT_DIR=%GLM_ROOT_DIR%
   - bash --login .gitlab-ci.sh
   tags:
   - win7

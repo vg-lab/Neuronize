@@ -14,7 +14,7 @@ CompareMeshWidgetViewer::CompareMeshWidgetViewer(int number,QWidget *parent): QG
 }
 
 void CompareMeshWidgetViewer::setupViewer() {
-    camera()->setZClippingCoefficient(50.0);
+    camera()->setZClippingCoefficient(50.0f);
     initLight();
     updateGL();
 }
@@ -227,6 +227,7 @@ std::pair<Eigen::Vector3f, Eigen::Vector3f> CompareMeshWidgetViewer::getBounding
 void CompareMeshWidgetViewer::fitBox(std::pair<Eigen::Vector3f, Eigen::Vector3f> box) {
     qglviewer::Vec min = {box.first.x(),box.first.y(),box.first.z()};
     qglviewer::Vec max = {box.second.x(),box.second.y(),box.second.z()};
+    camera()->setSceneBoundingBox(min,max);
     camera()->fitBoundingBox(min,max);
     updateGL();
 }

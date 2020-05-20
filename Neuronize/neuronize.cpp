@@ -525,7 +525,7 @@ void Neuronize::genetareNeuronsInBatch (QString inputFilePath,QString outputFile
 
 
 
-    mNeuroGeneratorWidget->exportNeuron ( lTmpPath + "/" + lFileName );
+    mNeuroGeneratorWidget->exportNeuron ( lTmpPath + "/" + f.baseName() );
 
     //Copiar el .SWC
     QFile::copy ( filePath, lTmpPath + "/" + lFileName );
@@ -543,7 +543,7 @@ void Neuronize::genetareNeuronsInBatch (QString inputFilePath,QString outputFile
     else
       lTmpId = QString::number ( i );
 
-    mNeuroGeneratorWidget->exportSpinesInmediatly ( lTmpPath + "/" + lFileName.replace ( ".", "" ) + "_Spines.obj" );
+    mNeuroGeneratorWidget->exportSpinesInmediatly ( lTmpPath + "/" + f.baseName() + "_Spines.obj" );
 
     //Luego volver al inicio
   }
