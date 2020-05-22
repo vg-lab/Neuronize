@@ -3,3 +3,4 @@ ${QGLVIEWER_BIN_DIR}/QGLViewer2.dll
 ${OPENMESH_ROOT}/OpenMeshCore.dll
 ${BOOST_LIBRARYDIR}/boost_filesystem-vc140-mt-x64-1_71.dll
 ${GLEW_BIN_DIR}/glew32.dll
+${QTDIR}/bin/Qt5Xml.dll

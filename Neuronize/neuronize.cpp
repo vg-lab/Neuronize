@@ -25,7 +25,6 @@
 
 #include "neuronize.h"
 #include "ExportDialog.h"
-#include <boost/process.hpp>
 #include <QtConcurrent/QtConcurrent>
 #include <QFutureWatcher>
 #include <clocale>
