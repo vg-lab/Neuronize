@@ -18,6 +18,8 @@ Ubuntu-subproject-master:
 Ubuntu-subproject:
   stage: build
   script:
+  - export APPIMAGE_ICON="Neuronize/icons/neuronize.png"
+  - export APPIMAGE_REPO="gitlabci@gmrv.es:apps.private"
   - export BUILD_GENERATOR="Ninja"
   - export BOOST_ROOT="/home/ivelascog/boost_1_73"
   - module load OpenMesh-6.3 libQGLViewer-2.6.3 Qt-5.10.0
