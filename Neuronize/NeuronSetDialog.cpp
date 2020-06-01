@@ -22,7 +22,7 @@ NeuronSetDialog::NeuronSetDialog(QWidget *parent): QDialog(parent) {
     inputLayout->addWidget(outputDirectoryButton,1,0);
     inputLayout->addWidget(outputDirectoryPath,1,1);
 
-    this->baseNameLineEdit = new QLineEdit("Piram_");
+    this->baseNameLineEdit = new QLineEdit("Pyram_");
     this->subdivisionSpinbox = new QSpinBox();
     this->subdivisionSpinbox->setValue(2);
     this->subdivisionSpinbox->setMinimum(0);

@@ -57,6 +57,7 @@ set(NEURONIZE_LINK_LIBRARIES
 		Qt5::Widgets
 		Qt5::Xml
 		Qt5::OpenGL
+		${CMAKE_DL_LIBS}
 		${Boost_LIBRARIES}
 		skelgeneratorutil
 		)

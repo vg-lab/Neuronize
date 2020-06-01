@@ -31,6 +31,7 @@
 #include <MeshReconstructWrapper/MeshReconstruct.h>
 
 #include <QtWidgets/QDialog>
+#include <boost/dll.hpp>
 
 
 QString Neuronize::configPath;
@@ -55,6 +56,8 @@ Neuronize::Neuronize ( QWidget *parent )
         throw "Cant create temporary dir";
     }
     std::cout << "TmpDir: " << tempDir.path().toStdString() << std::endl;
+    std::cout << "ExePath: " << QCoreApplication::applicationDirPath().toStdString() << std::endl;
+    std::cout << "ExePath2: " << boost::dll::program_location( ).parent_path( ).string( ) << std::endl;
     Neuronize::tmpPath = tempDir.path();;
 
     //QObject::connect(ui.actionGenerateNewNeuron	,SIGNAL(triggered())	,this,SLOT(generateNewNeuron()));

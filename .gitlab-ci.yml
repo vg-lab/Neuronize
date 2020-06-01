@@ -7,7 +7,7 @@ Ubuntu-subproject-master:
   - export APPIMAGE_ICON="Neuronize/icons/neuronize.png"
   - export APPIMAGE_REPO="gitlabci@gmrv.es:apps.private"
   - export BUILD_GENERATOR="Ninja"
-  - module load OpenMesh-6.3 libQGLViewer-2.6.3 Qt-5.10.0
+  - module load OpenMesh-6.3 libQGLViewer-2.6.3 Qt-5.10.0 boost-1.73.0
   - export CMAKE_EXTRA_ARGS="-DCLONE_SUBPROJECTS=ON"
   - bash .gitlab-ci.sh
   tags:
@@ -21,8 +21,7 @@ Ubuntu-subproject:
   - export APPIMAGE_ICON="Neuronize/icons/neuronize.png"
   - export APPIMAGE_REPO="gitlabci@gmrv.es:apps.private"
   - export BUILD_GENERATOR="Ninja"
-  - export BOOST_ROOT="/home/ivelascog/boost_1_73"
-  - module load OpenMesh-6.3 libQGLViewer-2.6.3 Qt-5.10.0
+  - module load OpenMesh-6.3 libQGLViewer-2.6.3 Qt-5.10.0 boost-1.73.0
   - export CMAKE_EXTRA_ARGS="-DCLONE_SUBPROJECTS=ON"
   - bash .gitlab-ci.sh
   tags:

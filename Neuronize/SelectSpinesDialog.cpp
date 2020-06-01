@@ -9,9 +9,9 @@
 #include <QMessageBox>
 
 SelectSpinesDialog::SelectSpinesDialog(bool hasSpines,QWidget *parent): QDialog(parent) {
-    this->thisSpinesRadio = new QRadioButton("Spines from this file");
+    this->thisSpinesRadio = new QRadioButton("Spines included in this file");
     this->defaultSpinesRadio = new QRadioButton("Spines from a default dataset");
-    this->otherSpinesRadio = new QRadioButton ("Spines from a new file (The spines must be at the same spatial coordinates as the loaded dendrite)");
+    this->otherSpinesRadio = new QRadioButton ("Spines from a new file (the spines must be at the same spatial coordinates as the loaded dendrite)");
 
     this->buttons = new QDialogButtonBox(QDialogButtonBox::Ok);
 

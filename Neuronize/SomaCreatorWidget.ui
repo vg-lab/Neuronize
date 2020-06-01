@@ -29,7 +29,7 @@
      <item>
       <widget class="QPushButton" name="generateSetPushButton">
        <property name="text">
-        <string>Generate set of Neurons</string>
+        <string>Generate a set of Neurons</string>
        </property>
       </widget>
      </item>

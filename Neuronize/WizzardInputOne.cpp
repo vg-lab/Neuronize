@@ -210,6 +210,7 @@ SelectApicalPage::SelectApicalPage(skelgenerator::Neuron*&neuron_, QStringList& 
     });
 
     this->setTitle("Please select the apical dendrite if it exists");
+    this->setSubTitle("Please, select the apical dendrite if it exists or press next if there is no apical");
     auto layout = new QHBoxLayout;
     layout->addWidget(dendriteList);
 
