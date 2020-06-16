@@ -197,7 +197,13 @@ SimplePoint * ASC2SWCV2::calcSoma2() {
     if (dendrites.size() == 1) { //Special case
         auto dendrite = dendrites[0];
         OpenMesh::Vec3d firstPoint = dendrite.dendrite.section[0]->point;
-        OpenMesh::Vec3d secondPoint = dendrite.dendrite.section[1]->point;
+        int i = 1;
+        auto point = dendrite.dendrite.section[i];
+        while (point->isSpine()) {
+          ++i;
+          point = dendrite.dendrite.section[i];
+        }
+        OpenMesh::Vec3d secondPoint = point->point;
         OpenMesh::Vec3d dir = firstPoint - secondPoint;
         dir.normalize();
 
