@@ -58,7 +58,6 @@ Win7-VS14-x64-subproject:
   stage: build
   script:
   - set WINAPP_REPO=gitlabci@gmrv.es:apps.private
-  - call whoami
   - call %ENVFILESDIR%\Qt-5.12-vs14.bat
   - call %ENVFILESDIR%\eigen-3.1.2-vs12-x64.bat
   - call %ENVFILESDIR%\OpenMesh-6.3-vs14-x64.bat

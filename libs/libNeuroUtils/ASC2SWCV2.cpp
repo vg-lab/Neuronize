@@ -197,13 +197,18 @@ SimplePoint * ASC2SWCV2::calcSoma2() {
     if (dendrites.size() == 1) { //Special case
         auto dendrite = dendrites[0];
         OpenMesh::Vec3d firstPoint = dendrite.dendrite.section[0]->point;
-        int i = 1;
-        auto point = dendrite.dendrite.section[i];
-        while (point->isSpine()) {
-          ++i;
-          point = dendrite.dendrite.section[i];
+        OpenMesh::Vec3d secondPoint;
+        if (dendrite.dendrite.section.size() < 2) {
+          secondPoint = dendrite.dendrite.subDendrites[0].section[0]->point;
+        } else {
+          int i = 1;
+          auto point = dendrite.dendrite.section[i];
+          while (point->isSpine()) {
+            ++i;
+            point = dendrite.dendrite.section[i];
+          }
+          secondPoint = point->point;
         }
-        OpenMesh::Vec3d secondPoint = point->point;
         OpenMesh::Vec3d dir = firstPoint - secondPoint;
         dir.normalize();
 
@@ -586,7 +591,6 @@ void SimplePoint::toASC(const std::string &tab, std::ofstream &file) const {
     file << std::setprecision(10) << std::fixed << tab << "( " << this->point[0] << "\t" << this->point[1] << "\t"
          << this->point[2] << "\t" << this->r << ")";
 }
-
 
 
 void Spine::toASC(const std::string &tab, std::ofstream &file) const  {
