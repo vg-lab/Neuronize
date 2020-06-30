@@ -86,10 +86,10 @@
        <item>
         <widget class="QLabel" name="label_SomaScaleFactor">
          <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This parameter allows to control the size of the initial soma mesh. Ex a value of 1,1 indicate the soma are 10% bigger than initial soma.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This parameter allows to control the size of the initial soma mesh. Ex a value of 1,1 indicate the soma are 10% bigger than initial soma. Recommended range 0,8-1,4&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="text">
-          <string>Soma scale factor (Recomended range 0,8-1,4)</string>
+          <string>Soma scale factor</string>
          </property>
         </widget>
        </item>
@@ -115,10 +115,10 @@
        <item>
         <widget class="QLabel" name="label_UnCollapseSprings">
          <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This parameter allow to control the influence of neurites in the hole mesh. Lower values cause that deformations for the dendrites are less sharpy and the initial spherical shape remain less. Moreover, higher values cause more sharpy deformations from dendrites, and maintains the initial shape more&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This parameter allow to control the influence of neurites in the hole mesh. Lower values cause that deformations for the dendrites are less sharpy and the initial spherical shape remain less. Moreover, higher values cause more sharpy deformations from dendrites, and maintains the initial shape more. Recommended range 3-20&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="text">
-          <string>Uncollapse springs % (Recomended range 10-40)</string>
+          <string>Uncollapse springs %</string>
          </property>
         </widget>
        </item>
