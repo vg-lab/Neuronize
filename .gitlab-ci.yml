@@ -4,6 +4,7 @@ stages:
 Ubuntu-subproject-master:
   stage: build
   script:
+  - export GITHUB_MIRROR_URL="git@github.com:vg-lab/Neuronize"
   - export APPIMAGE_ICON="Neuronize/icons/neuronize.png"
   - export APPIMAGE_REPO="gitlabci@gmrv.es:apps.private"
   - export BUILD_GENERATOR="Ninja"
