@@ -13,9 +13,11 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <libs/libNeuroUtils/MeshVCG.h>
+#include <QListWidget>
+#include <QCheckBox>
 #include "CompareMeshWidgetViewer.h"
 
-class CompareMeshesWidget: public QDialog {
+class CompareMeshesWidget : public QWidget {
     Q_OBJECT
     static int const NUMBER_OF_COLORS = 100;
     static int const NUMBER_OF_TEXT = 10;
@@ -25,12 +27,19 @@ public:
 private:
     QPushButton* selectMesh1Button;
     QPushButton* selectMesh2Button;
+    QPushButton* addMeshVisualize1;
+    QPushButton* removeMeshVisualize1;
+    QPushButton* addMeshVisualize2;
+    QPushButton* removeMeshVisualize2;
+    QListWidget* listMeshes1;
+    QListWidget* listMeshes2;
     QLineEdit* mesh1Path;
     QLineEdit* mesh2Path;
+    QCheckBox* comparaMeshesCheckbox;
     QHBoxLayout* render1;
     QHBoxLayout* render2;
-    QHBoxLayout* transferGrid1;
-    QHBoxLayout* transferGrid2;
+    QWidget* transfer1;
+    QWidget* transfer2;
     CompareMeshWidgetViewer* viewer1;
     CompareMeshWidgetViewer* viewer2;
     std::string tmpPath;
@@ -52,6 +61,9 @@ private:
 private slots:
     void loadFileDialog(QLineEdit* target,const QString& title,const QString& types);
     void initRender();
+    void addMesh(QListWidget *list,CompareMeshWidgetViewer* viewer);
+    void removeMesh(QListWidget *list,CompareMeshWidgetViewer* viewer);
+    void onColorsChange(int state);
 };
 
 

@@ -24,112 +24,136 @@
 #include <QSettings>
 
 #include "neuronize.h"
+#include "ExportDialog.h"
+#include <QtConcurrent/QtConcurrent>
+#include <QFutureWatcher>
+#include <clocale>
+#include <MeshReconstructWrapper/MeshReconstruct.h>
 
-#include <QSettings>
-#define ENV "env"
-#ifdef _WIN32
-#define INSTALL std::string("src\\install.bat")
-#else
-#define INSTALL std::string("src/install.sh")
-#endif
+#include <QtWidgets/QDialog>
+#include <boost/dll.hpp>
+
 
 QString Neuronize::configPath;
-BBDD::BBDD Neuronize::bbdd = BBDD::BBDD();
+QString Neuronize::envPath;
+QString Neuronize::outPath;
+BBDD::BBDD Neuronize::bbdd;
 QString Neuronize::tmpPath;
+bool Neuronize::hasPython;
 
 Neuronize::Neuronize ( QWidget *parent )
-  : QMainWindow ( parent )
-{
-  ui.setupUi ( this );
+        : QMainWindow(parent) {
+    ui.setupUi(this);
+    // Para evitar problemas con las tildes en español.
+    std::setlocale(LC_ALL, "es_ES.UTF-8");
 
-  //Init glut
-  int argc = 0;
-  char **argv = NULL;
-  glutInit ( &argc, argv );
-  if (!tempDir.isValid()) {
-      throw "Cant create temporary dir";
-  }
-  std::cout << "TmpDir: " << tempDir.path().toStdString() << std::endl ;
-  Neuronize::tmpPath = tempDir.path();
-  //QObject::connect(ui.actionGenerateNewNeuron	,SIGNAL(triggered())	,this,SLOT(generateNewNeuron()));
-  QObject::connect ( ui.actionGenerateNewNeuron, SIGNAL( triggered ( )), this, SLOT( actionNewNeuron ( )) );
-  QObject::connect ( ui.actionTake_a_snapshot, SIGNAL( triggered ( )), this, SLOT( takeASnapshot ( )) );
-  QObject::connect ( ui.actionHelp, SIGNAL( triggered ( )), this, SLOT( showHelp ( )) );
-  QObject::connect ( ui.actionQuit, SIGNAL( triggered ( )), this, SLOT( actionQuit ( )) );
-  QObject::connect ( ui.actionAbout_Neuronize, SIGNAL( triggered ( )), this, SLOT( actionAbout ( )) );
-  QObject::connect ( ui.actionUndo, SIGNAL( triggered ( )), this, SLOT( actionBack ( )) );
 
-  QObject::connect ( ui.actionBatchBuilder, SIGNAL( triggered ( )), this, SLOT( showBatchBuilder ( )) );
+    //Init glut
+    int argc = 0;
+    char **argv = NULL;
+    glutInit(&argc, argv);
+    if (!tempDir.isValid()) {
+        throw "Cant create temporary dir";
+    }
+    std::cout << "TmpDir: " << tempDir.path().toStdString() << std::endl;
+    std::cout << "ExePath: " << QCoreApplication::applicationDirPath().toStdString() << std::endl;
+    std::cout << "ExePath2: " << boost::dll::program_location( ).parent_path( ).string( ) << std::endl;
+    Neuronize::tmpPath = tempDir.path();;
 
-  mSomaCreatorWidget = NULL;
-  mSomaDeformerWidget = NULL;
-  mNeuroGeneratorWidget = NULL;
-  mBatchBuilder = NULL;
+    //QObject::connect(ui.actionGenerateNewNeuron	,SIGNAL(triggered())	,this,SLOT(generateNewNeuron()));
+    QObject::connect(ui.actionGenerateNewNeuron, SIGNAL(triggered()), this, SLOT(actionNewNeuron()));
+    connect(ui.actionRepair_Meshes, &QAction::triggered, [&]() {
+        resetNeuronnizeInterface();
+        ui.tabWidget_MainContainer->setCurrentIndex(1);
+    });
+    connect(ui.actionCompare_Meshes, &QAction::triggered, [&]() {
+        resetNeuronnizeInterface();
+        ui.tabWidget_MainContainer->setCurrentIndex(2);
+    });
+    connect(ui.actionExport_Neuron_info,&QAction::triggered,this,&Neuronize::showExportDialog);
+    connect(ui.actionReset_Python_Enviorement,&QAction::triggered,this,&Neuronize::resetPythonEnv);
+    connect(ui.actionDelete_Local_Database,&QAction::triggered,this,&Neuronize::deleteDatabase);
+    connect(ui.actionExport_Database_File,&QAction::triggered,this,&Neuronize::exportDatabase);
+    QObject::connect(ui.actionTake_a_snapshot, SIGNAL(triggered()), this, SLOT(takeASnapshot()));
+    QObject::connect(ui.actionHelp, SIGNAL(triggered()), this, SLOT(showHelp()));
+    QObject::connect(ui.actionQuit, SIGNAL(triggered()), this, SLOT(actionQuit()));
+    QObject::connect(ui.actionAbout_Neuronize, SIGNAL(triggered()), this, SLOT(actionAbout()));
+    QObject::connect(ui.actionUndo, SIGNAL(triggered()), this, SLOT(actionBack()));
 
-  resetNeuronnizeInterface ( );
 
-  mActiveTab = 0;
+    //QObject::connect(ui.actionBatchBuilder, SIGNAL(triggered()), this, SLOT(showBatchBuilder()));
+
+    mSomaCreatorWidget = nullptr;
+    mSomaDeformerWidget = nullptr;
+    mNeuroGeneratorWidget = nullptr;
+    mRepairWidget = nullptr;
+    mCompareMeshesWidget = nullptr;
+    hasPython = true; //Se pone a true para que se muestre en la interfaz, e sobrescribira despues con el valor real
+
+    resetNeuronnizeInterface();
+    mActiveTab = 0;
 
 #ifdef _WIN32
     QSettings settings(QSettings::IniFormat,QSettings::SystemScope,"Neuronize","preferences");
 #else
-    QSettings settings("Neuronize","preferences");
+    QSettings settings("Neuronize", "preferences");
 #endif
 
     configPath = QFileInfo(settings.fileName()).absoluteDir().absolutePath();
-    QDir dir (configPath);
-    if (!dir.exists() ) {
+    QDir dir(configPath);
+    if (!dir.exists()) {
         dir.mkpath(configPath);
     }
-    QString envPath = configPath + "/" + ENV;
+    std::cout << configPath.toStdString() << std::endl;
 
-    if (!QFileInfo(envPath).exists()) {
-        std::string command = INSTALL + " " + envPath.toStdString();
-        std::system(command.c_str());
-    }
+    createDatabase();
+    this->showNormal();
+    resize(1200, 800);
+    initPythonEnv();
 
-  QString path = QFileInfo(settings.fileName()).absoluteDir().absolutePath() + "/neuronize.sqlite";
-  std::cout << path.toStdString() << std::endl;
-  Neuronize::bbdd = BBDD::BBDD(path.toStdString());
-  this->showMaximized ( );
 
-  initrand ( );
+    initrand();
 }
 
 Neuronize::~Neuronize ( )
 {
-  if ( mSomaCreatorWidget != NULL )
     delete mSomaCreatorWidget;
-  if ( mSomaDeformerWidget != NULL )
     delete mSomaDeformerWidget;
-  if ( mNeuroGeneratorWidget != NULL )
     delete mNeuroGeneratorWidget;
-  if ( mBatchBuilder != NULL )
-    delete mBatchBuilder;
 }
 
 void Neuronize::resetNeuronnizeInterface ( )
 {
-  if ( mSomaCreatorWidget != NULL )
     delete mSomaCreatorWidget;
-  if ( mSomaDeformerWidget != NULL )
     delete mSomaDeformerWidget;
-  if ( mNeuroGeneratorWidget != NULL )
     delete mNeuroGeneratorWidget;
-  if ( mBatchBuilder != NULL )
-    delete mBatchBuilder;
+    delete mRepairWidget;
+    delete mCompareMeshesWidget;
 
-  mSomaCreatorWidget = new SomaCreatorWidget (tempDir.path(), this );
+  mSomaCreatorWidget = new SomaCreatorWidget (tempDir.path());
+
   ui.verticalLayout_SomaCreator->addWidget ( mSomaCreatorWidget );
-  QObject::connect ( mSomaCreatorWidget, SIGNAL( somaCreated ( )), this, SLOT( showSomaDeformer ( )) );
 
-  mSomaDeformerWidget = new SomaDeformerWidget ( tempDir.path(),this );
+    mRepairWidget = new RepairWidget();
+    ui.verticalLayout_RepairMeshes->addWidget(mRepairWidget);
+
+    mCompareMeshesWidget = new CompareMeshesWidget(tempDir.path().toStdString());
+    ui.verticalLayout_CompareMeshes->addWidget(mCompareMeshesWidget);
+
+
+    QObject::connect(mSomaCreatorWidget, SIGNAL(somaCreated()), this, SLOT(onSomaBuildFinish()));
+    connect(mSomaCreatorWidget,&SomaCreatorWidget::generateNeurons,this,&Neuronize::genetareNeuronsInBatch);
+
+  mSomaDeformerWidget = new SomaDeformerWidget ( tempDir.path() );
   ui.verticalLayout_SomaDeformer->addWidget ( mSomaDeformerWidget );
   QObject::connect ( mSomaDeformerWidget, SIGNAL( finishSoma ( )), this, SLOT( showDendriteGenerator ( )) );
 
-  mNeuroGeneratorWidget = new NeuroGeneratorWidget ( tempDir.path(), this );
+  mNeuroGeneratorWidget = new NeuroGeneratorWidget ( tempDir.path() );
   ui.verticalLayout_DendritesGenerator->addWidget ( mNeuroGeneratorWidget );
   mNeuroGeneratorWidget->loadSpinesModelFromPath ( QCoreApplication::applicationDirPath() + "/Content/Spines/Low/" );
+  connect(mNeuroGeneratorWidget,&NeuroGeneratorWidget::finish,this,[&](){
+     resetNeuronnizeInterface();
+  });
 
   //mNeuroGeneratorWidget ->getUI().tabWidget_RenderControl->removeTab(1);
 
@@ -166,8 +190,11 @@ void Neuronize::resetNeuronnizeInterface ( )
   mNeuroGeneratorWidget->getUI ( ).checkBox_SmoothSpines->setChecked ( false );
 
   //Close all tabs except the loader
-  for ( int i = 0; i < 4; ++i )
-    ui.tabWidget_MainContainer->removeTab ( 0 );
+    for (int i = 0; i < 6; ++i) {
+        ui.tabWidget_MainContainer->removeTab(0);
+    }
+    ui.tabWidget_MainContainer->setTabEnabled(1,hasPython);
+
 
   showSomaCreator ( );
 }
@@ -176,8 +203,17 @@ void Neuronize::showSomaCreator ( )
 {
   mActiveTab = 0;
 
-  ui.tabWidget_MainContainer->removeTab ( 0 );
-  ui.tabWidget_MainContainer->insertTab ( 1, ui.tab_SomaCreator, "Load File" );
+    ui.tabWidget_MainContainer->removeTab(0);
+    ui.tabWidget_MainContainer->insertTab(1, ui.tab_SomaCreator, "Generate Neuron");
+    ui.tabWidget_MainContainer->insertTab(2, ui.tab_RepairMeshes, "Repair and/or Correct Meshes");
+    ui.tabWidget_MainContainer->insertTab(3, ui.tab_CompareMeshes, "Compare Meshes");
+
+    ui.tabWidget_MainContainer->setTabEnabled(1, true);
+    ui.tabWidget_MainContainer->setTabEnabled(2, true);
+
+    if (!hasPython) {
+       ui.tabWidget_MainContainer->setTabEnabled(1,false);
+    }
 
   mSomaCreatorWidget->deleteTreeViewer ( );
   mSomaCreatorWidget->resetInterface ( );
@@ -185,14 +221,15 @@ void Neuronize::showSomaCreator ( )
 
 void Neuronize::showSomaDeformer ( )
 {
-  mActiveTab = 1;
+    mActiveTab = 1;
   mSomaDeformerWidget->setSomaCreator(mSomaCreatorWidget);
 
   mFullSWCFilePath = mSomaCreatorWidget->getFullPathToSWCFile ( );
 
   ui.tabWidget_MainContainer->removeTab ( 0 );
   ui.tabWidget_MainContainer->insertTab ( 0, ui.tab_SomaGenerator, "Soma builder" );
-
+  ui.tabWidget_MainContainer->setTabEnabled(1,false);
+  ui.tabWidget_MainContainer->setTabEnabled(2,false);
 
   mSomaDeformerWidget->loadPredefinedXMLSomaDef();
   //mSomaDeformerWidget->startDeformation();
@@ -209,7 +246,8 @@ void Neuronize::showDendriteGenerator ( )
   mSomaDeformerWidget->stopDeformation();
 
   ui.tabWidget_MainContainer->removeTab ( 0 );
-  ui.tabWidget_MainContainer->insertTab ( 0, ui.tab_DendritesGenerator, "Dendrites/Spines builder" );
+  ui.tabWidget_MainContainer->insertTab ( 0, ui.tab_DendritesGenerator, "Neurites/Spines builder" );
+  ui.tabWidget_MainContainer->setCurrentIndex(0);
 
   mNeuroGeneratorWidget->setSpines(mSomaCreatorWidget->getSpines());
   mNeuroGeneratorWidget->setContours(mSomaCreatorWidget->getContours());
@@ -262,6 +300,7 @@ void Neuronize::showDendriteGenerator ( )
                        ->setPosition ( mSomaDeformerWidget->getViewer ( )->camera ( )->position ( ));
   mNeuroGeneratorWidget->getViewer ( )->camera ( )
                        ->setOrientation ( mSomaDeformerWidget->getViewer ( )->camera ( )->orientation ( ));
+  mNeuroGeneratorWidget->generateDendrites();
 }
 
 void Neuronize::showSpinesGenerator ( )
@@ -346,24 +385,19 @@ void Neuronize::showHelp ( )
   mNeuroGeneratorWidget->getViewer ( )->help ( );
 }
 
-void Neuronize::showBatchBuilder ( )
+void Neuronize::genetareNeuronsInBatch (QString inputFilePath,QString outputFilePath,int subdivisions,QString baseName)
 {
-  if ( mBatchBuilder == NULL )
-  {
-    mBatchBuilder = new BatchBuilder ( );
-    QObject::connect ( mBatchBuilder, SIGNAL( directoriesReadies ( )), this, SLOT( genetareNeuronsInBatch ( )) );
-  }
 
-  mBatchBuilder->show ( );
-  //QObject::connect(mBatchBuilder, SIGNAL(fileReady(QString pFile)), this, SLOT(mSomaCreatorWidget->loadSWCFile(pFile)));
-}
+    int ret = QMessageBox::warning(this,"Neuronize","The process will take some time, please, do not close the interface (which could turn black). A notification will indicate the ending of the process.",QMessageBox::Ok | QMessageBox::Cancel);
 
-void Neuronize::genetareNeuronsInBatch ( )
-{
-  mInputFilePath = mBatchBuilder->getInputDir ( );
-  mOuputFilePath = mBatchBuilder->getOutputDir ( );
+    if (ret == QMessageBox::Cancel) {
+        return;
+    }
 
-  QString lBaseName = mBatchBuilder->getBaseName ( );
+  mInputFilePath = inputFilePath;
+  mOuputFilePath = outputFilePath;
+
+  QString lBaseName = baseName;
 
   //Cargar todos los ficheros del directorio de entrada
   /*QDir directory;
@@ -385,31 +419,39 @@ void Neuronize::genetareNeuronsInBatch ( )
     }
   }*/
 
-   QDir directory;
-  if ( mInputFilePath.isNull ( ) == false ) {
-    directory.setPath(mInputFilePath);
-    QDirIterator it(directory.absolutePath(), QDir::AllEntries | QDir::NoDotAndDotDot);
+  if ( !mInputFilePath.isNull( ) ) {
+    QDirIterator it(mInputFilePath, QDir::AllEntries | QDir::NoDotAndDotDot);
     while (it.hasNext()) {
       QFileInfo current = it.next();
       if (current.isFile()) {
         auto ext = current.suffix();
         if (ext == "asc" || ext == "ASC" || ext == "swc" || ext == "SWC") {
-          mFilesContainer.emplace_back(it.next(), nullptr);
+          mFilesContainer.emplace_back(current.absoluteFilePath(), nullptr);
         }
+
       } else if (current.isDir()) {
           QDir dir (current.absoluteFilePath());
           QDirIterator itFiles(dir.absolutePath(), QDir::AllEntries | QDir::NoDotAndDotDot);
           std::string apiFile;
+          std::string longsFile;
+          std::string volsFile;
+          std::string somaFile;
           std::vector <std::string> basalFiles;
           while (itFiles.hasNext()) {
             QFileInfo info = itFiles.next();
             QString path = info.absoluteFilePath();
             if (info.isFile()) {
-              std::string test = path.toStdString();
-              if (path.contains("api", Qt::CaseInsensitive)) {
+              auto name = info.baseName();
+              if (name.contains("api", Qt::CaseInsensitive)) {
                 apiFile = path.toStdString();
-              } else if (path.contains("basal", Qt::CaseInsensitive)) {
+              } else if (name.contains("bas", Qt::CaseInsensitive)) {
                 basalFiles.emplace_back(path.toStdString());
+              } else if (name.contains("longs", Qt::CaseInsensitive)) {
+                  longsFile = path.toStdString();
+              } else if (name.contains("vols", Qt::CaseInsensitive)) {
+                  volsFile = path.toStdString();
+              } else if (name.contains("soma", Qt::CaseInsensitive)){
+                somaFile = path.toStdString();
               }
             } else {
               QDirIterator itBasalFiles(path, QDir::AllEntries | QDir::NoDotAndDotDot);
@@ -418,12 +460,18 @@ void Neuronize::genetareNeuronsInBatch ( )
               }
             }
           }
-          std::string resultFile = mInputFilePath.toStdString() ;
+          std::string resultFile = Neuronize::tmpPath.toStdString() ;
           std::string name = dir.dirName().toStdString();
           resultFile.append("/").append(name).append(".asc");
 
-
-          auto neuron = new skelgenerator::Neuron(apiFile, basalFiles);
+          float threshold = 0.1f;
+          auto neuron = new skelgenerator::Neuron( apiFile, basalFiles,
+                                                   somaFile, volsFile,
+                                                   longsFile, threshold );
+          while (neuron->getReamingSegments() > 0) {
+              threshold += 0.1f;
+              neuron->reComputeSkel(threshold);
+          }
           std::ofstream file;
           file.open(resultFile);
           file << neuron->to_asc();
@@ -436,10 +484,26 @@ void Neuronize::genetareNeuronsInBatch ( )
 
   for ( unsigned int i = 0; i < mFilesContainer.size ( ); ++i )
   {
-    std::cout << "Init" << std::endl << std::flush;
     showSomaCreator ( );
     auto filePath = std::get<0>(mFilesContainer[i]);
     auto neuron = std::get<1>(mFilesContainer[i]);
+    std::cout << "Init: " << filePath.toStdString() << std::endl;
+
+      QFileInfo f ( filePath );
+      QString lFileName = f.fileName ( );
+
+      QString lTmpId = "";
+      if ( i < 10 )
+          lTmpId = "00" + QString::number ( i );
+      else if ( i < 100 )
+          lTmpId = "0" + QString::number ( i );
+      else
+          lTmpId = QString::number ( i );
+
+      QString lTmpPath = mOuputFilePath + "/" + lBaseName + lTmpId;
+      QDir ( ).mkdir ( lTmpPath );
+      Neuronize::outPath = lTmpPath;
+
     mSomaCreatorWidget->generateXMLSoma ( filePath, true );
     auto spines = mSomaCreatorWidget->getSpines();
 
@@ -452,29 +516,18 @@ void Neuronize::genetareNeuronsInBatch ( )
     std::cout << "Deformer" << std::endl << std::flush;
 
     //Luego pasar al NeuriteGenerator y hacer el build
+    mNeuroGeneratorWidget->setNeuron(mSomaCreatorWidget->getNeuron());
     showDendriteGenerator ( );
-    mNeuroGeneratorWidget->loadNeuronDefinitionAndGenerateMesh ( );
+    mNeuroGeneratorWidget->loadNeuronDefinitionAndGenerateMeshBatch ( );
 
     std::cout << "Dendrites" << std::endl << std::flush;
 
     //Suavizado
-    mNeuroGeneratorWidget->applySmooth ( 2, 0, 0, 0 );
+    mNeuroGeneratorWidget->applySmooth ( subdivisions, 0, 0, 0 );
 
-    QFileInfo f ( filePath );
-    QString lFileName = f.fileName ( );
 
-    QString lTmpId = "";
-    if ( i < 10 )
-      lTmpId = "00" + QString::number ( i );
-    else if ( i < 100 )
-      lTmpId = "0" + QString::number ( i );
-    else
-      lTmpId = QString::number ( i );
 
-    QString lTmpPath = mOuputFilePath + "/" + lBaseName + lTmpId;
-    QDir ( ).mkdir ( lTmpPath );
-
-    mNeuroGeneratorWidget->exportNeuron ( lTmpPath + "/" + lFileName );
+    mNeuroGeneratorWidget->exportNeuron ( lTmpPath + "/" + f.baseName() );
 
     //Copiar el .SWC
     QFile::copy ( filePath, lTmpPath + "/" + lFileName );
@@ -492,10 +545,11 @@ void Neuronize::genetareNeuronsInBatch ( )
     else
       lTmpId = QString::number ( i );
 
-    mNeuroGeneratorWidget->exportSpinesInmediatly ( lTmpPath + "/" + lFileName.replace ( ".", "" ) + "_Spines.obj" );
+    mNeuroGeneratorWidget->exportSpinesInmediatly ( lTmpPath + "/" + f.baseName() + "_Spines.obj" );
 
     //Luego volver al inicio
   }
+  QMessageBox::information(this,"Neuronize","Task Finished",QMessageBox::Ok);
 }
 
 void Neuronize::actionNewNeuron ( )
@@ -512,6 +566,7 @@ void Neuronize::actionNewNeuron ( )
     resetNeuronnizeInterface ( );
   }
 }
+
 
 void Neuronize::actionQuit ( )
 {
@@ -545,11 +600,7 @@ void Neuronize::actionAbout ( )
   lMsge += "	CSIC:Centro Superior de Investigaciones Cient�ficas.\n";
   lMsge += "	Cajal Blue Brain Project, Spanish partner of the Blue Brain Project initiative from EPFL\n\n";
 
-  lMsge += "Neuronize requires Matlab Runtime Compiler (MCR) 2012b .\n\n";
-  //lMsge += "You can use MATLAB Compiler Runtime (MCR) for this version.\n";
-
   lMsge += "Neuronize uses Qt, libQGLViwer, Boost, OpenMesh\n";
-  lMsge += "and Peyre Geodesic toolbox for Matlab.\n\n";
 
   Msgbox.setWindowTitle ( "Neuronize" );
   Msgbox.setText ( lMsge );
@@ -583,4 +634,92 @@ void Neuronize::NewNeuronQuestionAndRestart ( )
   {
     showSomaCreator ( );
   }
+}
+
+void Neuronize::onSomaBuildFinish() {
+    this->showMaximized();
+    showSomaDeformer();
+}
+
+void Neuronize::showExportDialog(){
+    ExportDialog dialog;
+    dialog.exec();
+}
+
+void Neuronize::deleteDatabase() {
+    int ret = QMessageBox::question(this,tr("Neuronize"),tr("Are you sure you want to delete the database?"));
+
+    if (ret == QMessageBox::Yes) {
+        QFile::remove(QString::fromStdString(Neuronize::bbdd.getFile()));
+        createDatabase();
+    }
+}
+
+void Neuronize::createDatabase() {
+    QString path = Neuronize::configPath + "/neuronize.sqlite";
+    Neuronize::bbdd = BBDD::BBDD(path.toStdString());
+}
+
+void Neuronize::resetPythonEnv() {
+    QFuture<void> future = QtConcurrent::run([&]() {meshreconstruct::MeshReconstruct::getInstance()->resetPythonEnv();});
+    QFutureWatcher<void> watcher;
+    QProgressDialog progress(this);
+    connect(&watcher, SIGNAL(finished()), &progress, SLOT(close()));
+    watcher.setFuture(future);
+    progress.setLabelText("Installing python dependencies");
+    progress.setCancelButton(0);
+    progress.setMaximum(0);
+    progress.setMinimum(0);
+    progress.exec();
+
+    hasPython = meshreconstruct::MeshReconstruct::getInstance()->isInit();
+    if (!hasPython)
+    {
+        QString message("Python 3 not found. Mesh repair is disabled");
+        QMessageBox msgBox(this);
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setDefaultButton(QMessageBox::Ok);
+        msgBox.setText(message);
+        msgBox.exec();
+    }
+    resetNeuronnizeInterface();
+}
+
+
+void Neuronize::initPythonEnv() {
+
+  QFuture<void> future = QtConcurrent::run([&]() {meshreconstruct::MeshReconstruct::getInstance();});
+  QFutureWatcher<void> watcher;
+  QProgressDialog progress(this);
+  connect(&watcher, SIGNAL(finished()), &progress, SLOT(close()));
+  watcher.setFuture(future);
+  progress.setLabelText("Installing python dependencies");
+  progress.setCancelButton(0);
+  progress.setMaximum(0);
+  progress.setMinimum(0);
+  progress.exec();
+  hasPython = meshreconstruct::MeshReconstruct::getInstance()->isInit();
+  if (!hasPython)
+  {
+    QString message("Python 3 not found. Mesh repair is disabled");
+    QMessageBox msgBox(this);
+    msgBox.setIcon(QMessageBox::Warning);
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setDefaultButton(QMessageBox::Ok);
+    msgBox.setText(message);
+    msgBox.exec();
+
+    ui.tabWidget_MainContainer->setTabEnabled(1,false);
+  }
+
+}
+
+void Neuronize::exportDatabase() {
+    QString fileName = QFileDialog::getSaveFileName ( this, tr ( "Save Database" ), "./");
+    if (!fileName.isEmpty()) {
+        QFile::copy(QString::fromStdString(Neuronize::bbdd.getFile()),fileName);
+    }
+
+
 }

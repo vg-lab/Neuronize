@@ -27,6 +27,8 @@
 
 #include "BSphere.h"
 #include "AABB.h"
+#include <fstream>
+#include <boost/algorithm/string.hpp>
 
 namespace NSBaseMesh
 {
@@ -385,6 +387,7 @@ namespace NSBaseMesh
   void BaseMesh::JoinBaseMesh ( const BaseMesh *pBaseMesh )
   {
     MeshDef::Point lAuxVec ( 0, 0, 0 );
+    MeshDef::Color lAuxColor (0,0,0,0);
 
     //Capturar los vhandler a medida que se crean para ir controlandolos luego
 
@@ -395,9 +398,11 @@ namespace NSBaseMesh
           ++v_it )
     {
       lAuxVec = pBaseMesh->getMesh ( )->point ( *v_it );
-      Mesh->add_vertex ( MeshDef::Point ( lAuxVec[0], lAuxVec[1], lAuxVec[2]
+      lAuxColor =pBaseMesh->getMesh()->color(v_it);
+      auto newVertex =Mesh->add_vertex ( MeshDef::Point ( lAuxVec[0], lAuxVec[1], lAuxVec[2]
                          )
       );
+      Mesh->set_color(newVertex,{lAuxColor[0],lAuxColor[1],lAuxColor[2],lAuxColor[3]});
     }
 
     //Anyadir las facetas al final contemplando el desplazamiento del numero de vertices inicial
@@ -771,10 +776,56 @@ namespace NSBaseMesh
 
   void BaseMesh::exportMesh ( string name )
   {
-    if ( !OpenMesh::IO::write_mesh ( *Mesh, name ))
+    std::string ext = name.substr( name.rfind( '.' )  + 1);
+    if( boost::iequals( ext, "obj" ) )
     {
-      std::cerr << "Error Writing File\n";
-      throw;
+      Vec3 v, n;
+      MeshDef::Color c;
+      OpenMesh::VertexHandle vh;
+      std::ofstream file( name, std::ios::out );
+      if( !file.is_open( ) )
+      {
+        throw "Cant open file" + name + "for export Mesh";
+      }
+
+      //Header
+      file << "# " << Mesh->n_vertices( ) << " vertices, ";
+      file << Mesh->n_faces( ) << " faces" << '\n';
+
+      //Vertex data (point, color, normals, textcoords)
+      for( int i = 0, nV = Mesh->n_vertices( ); i < nV; ++i )
+      {
+        vh = Mesh->vertex_handle( i );
+        v = Mesh->point( vh );
+        n = Mesh->normal( vh );
+        c = Mesh->color( vh );
+
+        file << "v " << v[ 0 ] << " " << v[ 1 ] << " " << v[ 2 ] << " " <<
+             c[ 0 ] << " " << c[ 1 ] << " " << c[ 2 ] << '\n';
+      }
+
+
+      std::vector<OpenMesh::VertexHandle> vhandles;
+      for( int i = 0, nF = Mesh->n_faces( ); i < nF; ++i )
+      {
+        file << "f";
+        auto f = Mesh->face_handle( i );
+        for( auto v_it = Mesh->cfv_iter( f ); v_it.is_valid( ); ++v_it )
+        {
+          file << " " << ( *v_it ).idx( ) + 1;
+        }
+        file << "\n";
+      }
+
+      file.close();
+    }
+    else
+    {
+      if( !OpenMesh::IO::write_mesh( *Mesh, name ) )
+      {
+        std::cerr << "Error Writing File\n";
+        throw "Error Writing " + name + " Mesh";
+      }
     }
   }
 

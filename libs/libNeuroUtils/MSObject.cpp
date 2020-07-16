@@ -33,14 +33,14 @@ namespace NSMSObject
     mUseConstraits = true;
 
     mStiffness = 20.0;
-    mDumping = 0.05f;
+    mDumping = 0.2f;
 
     mSystemMass = 0.64f;
     mNodeMass = 0;
     mGravity = OpenMesh::Vec3f ( 0, -9.8, 0 );
 
     //mUnCollapseSpringsPercent	= 0;
-    mUnCollapseSpringsPercent = 25;
+    mUnCollapseSpringsPercent = 7;
   }
 
   MSObject::~MSObject ( void )

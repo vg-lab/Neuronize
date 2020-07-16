@@ -37,6 +37,7 @@ class SomaDeformerWidget: public QWidget, public Ui::SomaDeformerWidget
 {
   Q_OBJECT
 
+
     QTimer *mMsgTimer;
     unsigned int mMiSecsSimulation;
 
@@ -49,6 +50,7 @@ class SomaDeformerWidget: public QWidget, public Ui::SomaDeformerWidget
     void stopDeformation ( );
     void setModeledSoma(std::string path);
     void setSWCFile (std::string path);
+
 
     //const
     SomaDeformerWidgetViewer *getViewer ( ) { return viewer; }
@@ -104,7 +106,7 @@ private:
     void setMSNodeParams ( );
     void setUnCollapseSprings ( );
 
-    void exportModel ( );
+    void exportModel ( const QString& fileName );
 
     void setNormalizeExport ( );
 
@@ -123,6 +125,8 @@ private:
     void restoreDefaultValues ( );
 
     void showContinueMsg ( );
+
+    void hideAdvancedOptions();
 
 };
 

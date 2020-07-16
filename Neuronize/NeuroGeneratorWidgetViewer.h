@@ -25,6 +25,7 @@
 
 #include <QDir>
 #include <QGLViewer/qglviewer.h>
+#include <QRandomGenerator>
 
 #include <libs/libNeuroUtils/BaseMesh.h>
 #include <libs/libNeuroUtils/BaseMeshContainer.h>
@@ -49,7 +50,7 @@ using namespace NSLightManager;
 using namespace NSSWCImporter;
 
 #include "ui_NeuroGeneratorWidget.h"
-#include <libs/libNeuroUtils/AS2SWCV2.h>
+#include <libs/libNeuroUtils/ASC2SWCV2.h>
 
 class NeuroGeneratorWidgetViewer: public QGLViewer
 {
@@ -265,9 +266,13 @@ class NeuroGeneratorWidgetViewer: public QGLViewer
 
     void generateSpinesVrml(skelgenerator::Neuron *neuron,const std::string& tempPath);
 
+    void generateSpinesImaris(skelgenerator::Neuron *neuron,const std::string& tempPath);
 
-    void generateSpinesASC(std::vector<Spine>& spines,unsigned int pHorResol, unsigned int pVerResol, float pMinLongSpine,
+
+    void generateSpinesASC(std::vector<Spine*>& spines,unsigned int pHorResol, unsigned int pVerResol, float pMinLongSpine,
                            float pMaxLongDistance, float pMinRadio, float pMaxRadio);
+
+    void generateRepairedImarisSpines(skelgenerator::Neuron *Neuron, string tmpDir);
 
 protected:
 
@@ -291,6 +296,9 @@ protected:
     XMLProgressiveNeuroVizManager *mXMLProgressiveNeuroVizManager;
 
     std::vector < SpineInfo > mLastSpinesInfo;
+
+    //Spine info
+    std::vector<int> spinesIndex;
 
     unsigned int renderMask;
 

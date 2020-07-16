@@ -34,7 +34,14 @@
 
 namespace NSSpinesSWC
 {
-  SpinesSWC::SpinesSWC ( ): BaseMesh ( )
+
+    const std::vector<Qt::GlobalColor > SpinesSWC::spineColors={
+            Qt::cyan, Qt::darkCyan, Qt::red,Qt::darkRed,Qt::magenta, Qt::darkMagenta,
+            Qt::green,Qt::darkGreen,Qt::yellow,Qt::darkYellow,Qt::blue,Qt::darkBlue
+    };
+    QRandomGenerator SpinesSWC::random;
+
+    SpinesSWC::SpinesSWC ( ): BaseMesh ( )
   //SpinesSWC::SpinesSWC()
   {
     HorResol = VerResol = totalNumSpines = 0;
@@ -1892,7 +1899,7 @@ namespace NSSpinesSWC
 
     lNumSegmentsWithSpines = lAuxSpinesDistrib.size ( );
     int total_spines = 0;
-    for (int i = 0; i < lNumSegmentsWithSpines; i++) {
+    for (int k = 0; k < lNumSegmentsWithSpines; k++) {
         total_spines += lAuxSpinesDistrib.at ( k ).mSpinesSegmentContainer.size ( );
     }
 
@@ -1900,7 +1907,7 @@ namespace NSSpinesSWC
     int numSpines = spines.size();
     int counter = 0;
     bool haveSpinesNeuron = bbdd.haveSpinesNeuron(neuronName);
-
+    bbdd.openTransaction();
     //Auxiliar vectors
     for ( int k = 0; k < lNumSegmentsWithSpines; ++k )
     {
@@ -1918,6 +1925,8 @@ namespace NSSpinesSWC
         //////!!!!!!
         tmpMesh = new BaseMesh ( );
         tmpMesh->loadModel(std::get<1>(spine));
+        MeshDef::Color color = getRandomColor();
+        tmpMesh->setVertexColor(tmpMesh->getMesh()->vertices_begin(),tmpMesh->getMesh()->vertices_end(),color);
         //tmpMesh->JoinBaseMesh ( mSpinesModeledContainer->getElementAt ( lSpineModelSelected ));
         //tmpMesh->scaleBaseMesh(lSpineScale);
 
@@ -1929,6 +1938,7 @@ namespace NSSpinesSWC
         OpenMesh::Vec3f lVecAB;
         float lSegPercetn;
         unsigned int lNumVertexToChoose = 0;
+
 
         //Colocaci�n de las espinas en los centros de las facetas
         //From vertex candidate, we choose his incident face
@@ -2050,7 +2060,7 @@ namespace NSSpinesSWC
                                        YVector
         );
         if (!haveSpinesNeuron) {
-            bbdd.addSpine(neuronName, lSpineModelSelected, {0, 0, 0}, glb_mat);
+            bbdd.addSpine(neuronName, lSpineModelSelected, auxPoint, glb_mat);
         }
 
         //Unimos la malla y calculamos los vertices antes y despues
@@ -2096,6 +2106,7 @@ namespace NSSpinesSWC
 
       }
     }
+    bbdd.closeTransaction();
     updateBaseMesh ( );
 
     ///####
@@ -2885,6 +2896,7 @@ namespace NSSpinesSWC
 
           //Explicit translate
           //Muchmore faster than apply the translate matrix
+          //Muchmore faster than appaly the translate matrix
           glb_AuxVec[0] += auxPoint[0];
           glb_AuxVec[1] += auxPoint[1];
           glb_AuxVec[2] += auxPoint[2];
@@ -2933,7 +2945,8 @@ namespace NSSpinesSWC
     }
   }
 
-    void SpinesSWC::distributeSpines(const vector<Spine> &spines,const std::string& neuronName,const OpenMesh::Vec3f& diplacement, BBDD::BBDD bbdd, const std::string& tmpPath) {
+    void SpinesSWC::distributeSpines(const vector<Spine*> &spines,const std::string& neuronName,
+            const OpenMesh::Vec3f& diplacement, BBDD::BBDD bbdd, const std::string& tmpPath) {
       mNumVerticesEnSpina = mSpinesModeledContainer->getContainer ( ).at ( 0 )->getNumVertex ( );
 
       SpineInfo lSpineInfo;
@@ -3037,7 +3050,6 @@ namespace NSSpinesSWC
       //Auxiliar vectors
         for ( i = 0; i < spines.size(); ++i ) {
 
-            std::cout << i << std::endl;
             auto spine = spinesModels[i % numModels];
 
           //Select the spine modelled
@@ -3047,6 +3059,8 @@ namespace NSSpinesSWC
           //////!!!!!!
           tmpMesh = new BaseMesh();
           tmpMesh->loadModel(std::get<1>(spine));
+          MeshDef::Color color = getRandomColor();
+          tmpMesh->setVertexColor(tmpMesh->getMesh()->vertices_begin(),tmpMesh->getMesh()->vertices_end(),color);
           //tmpMesh->scaleBaseMesh(lSpineScale);
 
           MeshDef::ConstVertexFaceIter CVFIter;
@@ -3071,9 +3085,9 @@ namespace NSSpinesSWC
           unsigned int lIniOpt;
           unsigned int lFinOpt;
 
-          auxPoint = spines[i].initPoint.point;
+          auxPoint = spines[i]->point;
           //auxNormal = NeuronMesh->getMesh()->calc_face_normal(fhandle);
-          auxNormal = spines[i].finalPoint.point - spines[i].initPoint.point;
+          auxNormal = spines[i]->finalPoint.point - spines[i]->point;
 
           lSpineInfo.mSpineId = lSpineModelSelected;
           lSpineInfo.mSpinePosition = auxPoint;
@@ -3227,6 +3241,11 @@ namespace NSSpinesSWC
       ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+    }
+
+    MeshDef::Color SpinesSWC::getRandomColor() {
+        auto qtColor = QColor(SpinesSWC::spineColors[SpinesSWC::random.bounded(0,SpinesSWC::spineColors.size())]);
+        return {qtColor.redF(),qtColor.greenF(),qtColor.blueF(),1.0f};
     }
 }
 

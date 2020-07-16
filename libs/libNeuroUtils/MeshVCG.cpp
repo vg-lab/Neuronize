@@ -255,12 +255,48 @@ std::vector<MeshVCG*> MeshVCG::slice(float zStep) {
     auto max = mesh.bbox.P(7);
     float maxZ = max[2];
     std::vector<MeshVCG* > contours;
-    for (float currentZ  = minZ + zStep; currentZ <= maxZ ; currentZ+=zStep) {
+    for (float currentZ  = minZ; currentZ < maxZ ; currentZ+=zStep) {
         contours.push_back(sliceAux(currentZ));
     }
 
     return contours;
 }
+
+std::vector<std::vector<Eigen::Vector3f>> MeshVCG::sliceContours(float zStep) {
+    auto contours = slice(zStep);
+    std::vector<std::vector<Eigen::Vector3f>> contoursEigen;
+    for (const auto &contour: contours) {
+        std::vector<Eigen::Vector3f> contourEigen;
+        MyVertex *initVertex = &(*(contour->mesh.vert.begin()));
+        if (initVertex != nullptr) {
+            vcg::tri::UpdateTopology<MyMesh>::VertexEdge(contour->mesh);
+            MyVertex *currentVertex = initVertex;
+            MyEdge *lastEdge = nullptr;
+            do {
+                auto point = currentVertex->P();
+                Eigen::Vector3f auxPoint(point[0], point[1], point[2]);
+                contourEigen.push_back(auxPoint);
+
+                vcg::edge::VEIterator<MyEdge> vei(currentVertex);
+                MyEdge *edge = nullptr;
+                if (vei.e == lastEdge) {
+                    ++vei;
+                    edge = vei.e;
+                } else {
+                    edge = vei.e;
+                }
+
+                lastEdge = edge;
+                currentVertex = currentVertex == edge->V(0) ? edge->V(1) : edge->V(0);
+            } while (initVertex != currentVertex);
+            contoursEigen.push_back(contourEigen);
+        }
+
+        delete contour;
+    }
+    return contoursEigen;
+}
+
 
 static int cont =0;
 float MeshVCG::getMax2DArea(float zStep) {
@@ -324,8 +360,8 @@ HausdorffRet MeshVCG::hausdorffDistance(MeshVCG &otherMesh, const std::string &c
             double minDist = 1000.0f;
             for (auto &fp : otherMesh.mesh.face) {
                 vcg::Point3d q(0, 0, 0);
-                MyFace::ScalarType dist = 1000.0f;
-                vcg::face::PointDistanceBase(fp, vp.P(), minDist, q);
+                MyFace::ScalarType dist = minDist;
+                vcg::face::PointDistanceBase(fp, vp.P(), dist, q);
                 minDist = minDist < dist ? minDist : dist;
             }
             vp.Q() = minDist;
@@ -342,8 +378,8 @@ HausdorffRet MeshVCG::hausdorffDistance(MeshVCG &otherMesh, const std::string &c
             double minDist = 1000.0f;
             for (auto &fp : mesh.face) {
                 vcg::Point3d q(0, 0, 0);
-                MyFace::ScalarType dist = 1000.0f;
-                vcg::face::PointDistanceBase(fp, vp.P(), minDist, q);
+                MyFace::ScalarType dist = minDist;
+                vcg::face::PointDistanceBase(fp, vp.P(), dist, q);
                 minDist = minDist < dist ? minDist : dist;
             }
             vp.Q() = minDist;
@@ -367,13 +403,6 @@ HausdorffRet MeshVCG::hausdorffDistance(MeshVCG &otherMesh, const std::string &c
     vcg::tri::UpdateColor<MyMesh>::PerVertexQualityRamp(mesh, minmaxS1.second, minmaxS1.first);
     vcg::tri::UpdateColor<MyMesh>::PerVertexQualityRamp(otherMesh.mesh, minmaxS2.second, minmaxS2.first);
     if (!colorMeshPath.empty()) {
-        vcg::tri::Inertia<MyMesh> Ib(mesh);
-        auto cc = Ib.CenterOfMass();
-        vcg::Matrix44d trans;
-        trans.SetTranslate(-cc[0], -cc[1], -cc[2]);
-        vcg::tri::UpdatePosition<MyMesh>::Matrix(mesh, trans);
-        vcg::tri::UpdatePosition<MyMesh>::Matrix(otherMesh.mesh, trans);
-
         std::string s1Name = colorMeshPath + "/" + this->name + ".obj";
         std::string s2Name = colorMeshPath + "/" + otherMesh.name + ".obj";
 
@@ -391,6 +420,10 @@ HausdorffRet MeshVCG::hausdorffDistance(MeshVCG &otherMesh, const std::string &c
     color.SetColorRamp(0.0f,1.0f,value);
     return QColor::fromRgbF(color[0],color[1],color[2],color[3]);
 
+}
+
+void MeshVCG::removeUnreferenceVertex() {
+    vcg::tri::Clean<MyMesh>::RemoveUnreferencedVertex(this->mesh);
 }
 
 

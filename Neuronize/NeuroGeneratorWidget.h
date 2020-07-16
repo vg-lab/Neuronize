@@ -30,7 +30,7 @@
 
 #include "ui_NeuroGeneratorWidget.h"
 #include "NeuroGeneratorWidgetViewer.h"
-#include <libs/libNeuroUtils/AS2SWCV2.h>
+#include <libs/libNeuroUtils/ASC2SWCV2.h>
 
 class NeuroGeneratorWidget: public QWidget, public Ui::NeuroGeneratorWidget
 {
@@ -43,13 +43,14 @@ class NeuroGeneratorWidget: public QWidget, public Ui::NeuroGeneratorWidget
 
     QString mTempDir;
     skelgenerator::Neuron* neuron;
-    std::vector<Spine> spines;
+    std::vector<Spine*> spines;
     std::vector<std::vector<OpenMesh::Vec3d>> contours;
+    static std::vector<QString> spineNames;
 public:
     void setContours(const vector<vector<OpenMesh::Vec3d>> &contours);
 
 public:
-    void setSpines(const vector<Spine> &spines);
+    void setSpines(const vector<Spine*> &spines);
 
 public:
     void setNeuron(skelgenerator::Neuron *neuron);
@@ -65,7 +66,9 @@ public slots:
 
     void loadNeuronDefinitionAndGenerateMesh ( );
 
-  public:
+    void loadNeuronDefinitionAndGenerateMeshBatch();
+
+public:
     NeuroGeneratorWidget (const QString &tempDir, QWidget *parent = 0 );
 
     ~NeuroGeneratorWidget ( );
@@ -84,7 +87,7 @@ public slots:
 
     void showSpinesTab ( );
 
-    void batchSpinesGeneration(skelgenerator::Neuron *pNeuron, vector<Spine> vector1);
+    void batchSpinesGeneration(skelgenerator::Neuron *pNeuron, vector<Spine*> spines);
 
     void exportSpinesInmediatly ( QString fileName );
 
@@ -106,6 +109,8 @@ public slots:
     void finishSpinesAndRestart ( );
 
     void resetToSomaState ( );
+
+    void finish();
 
   private:
     Ui::NeuroGeneratorWidget ui;
@@ -199,6 +204,8 @@ public slots:
     void goAdvencedSpinesOptions ( );
 
     void showMsjDendritesGeneration ( );
+
+    void hideAdvancedOptions();
 
     void exportSpinesInfo ( );
 

@@ -1,10 +1,8 @@
 source_group(\\ FILES CMakeLists.txt)
 
 set (NEURONIZE_SOURCES
-		batchbuilder.cpp
 		FrameConstrictor.cpp
-		LoadFileDialog.cpp
-		main.cxx
+        main.cxx
 		manipulatedFrameSetConstraint.cpp
 		NeuroGeneratorWidget.cpp
 		NeuroGeneratorWidget.cpp
@@ -14,17 +12,18 @@ set (NEURONIZE_SOURCES
 		SomaCreatorWidget.cpp
 		SomaDeformerWidget.cpp
 		SomaDeformerWidgetViewer.cpp
-		RepairDialog.cpp
+        RepairWidget.cpp
 		CompareMeshesWidget.cpp
 		CompareMeshWidgetViewer.cpp
+		ExportDialog.cpp
+		WizzardInputOne.cpp
+		NeuronSetDialog.cpp
+		SelectSpinesDialog.cpp
 		)
 
 set(NEURONIZE_HEADERS
-		batchbuilder.h
-		batchbuilder.ui
 		FrameConstrictor.h
-		LoadFileDialog.h
-		manipulatedFrameSetConstraint.h
+        manipulatedFrameSetConstraint.h
 		NeuroGeneratorWidget.h
 		NeuroGeneratorWidget.ui
 		NeuroGeneratorWidgetViewer.h
@@ -37,9 +36,13 @@ set(NEURONIZE_HEADERS
 		SomaDeformerWidgetViewer.h
 		xneuron.qrc
 		xneuron.ui
-		RepairDialog.h
+        RepairWidget.h
 		CompareMeshesWidget.h
+		ExportDialog.h
 		CompareMeshWidgetViewer.h
+		WizzardInputOne.h
+		NeuronSetDialog.h
+		SelectSpinesDialog.h
 		)
 
 set(NEURONIZE_LINK_LIBRARIES
@@ -54,9 +57,9 @@ set(NEURONIZE_LINK_LIBRARIES
 		Qt5::Widgets
 		Qt5::Xml
 		Qt5::OpenGL
+		${CMAKE_DL_LIBS}
 		${Boost_LIBRARIES}
 		skelgeneratorutil
-		${SQLite3_LIBRARIES}
 		)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})

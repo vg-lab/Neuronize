@@ -20,11 +20,12 @@
 
 #include "NeuroGeneratorWidget.h"
 #include "neuronize.h"
+#include "SelectSpinesDialog.h"
 
 #include <libs/libQtNeuroUtils/QtThreadsManager.hpp>
 
 //#include <QtGui>
-
+std::vector<QString> NeuroGeneratorWidget::spineNames = {"Distribution","RealPos","Filament","Imaris","Repaired"};
 NeuroGeneratorWidget::NeuroGeneratorWidget (const QString &tmpDir, QWidget *parent )
   : QWidget ( parent )
 {
@@ -40,6 +41,8 @@ NeuroGeneratorWidget::NeuroGeneratorWidget (const QString &tmpDir, QWidget *pare
 
   mTempDir = tmpDir;
   mSWCFleName = "";
+
+    hideAdvancedOptions();
 
   setSpinesDistributionParams ( );
 
@@ -58,7 +61,6 @@ NeuroGeneratorWidget::NeuroGeneratorWidget (const QString &tmpDir, QWidget *pare
 
   QObject::connect ( ui.pushButton_SmoothDendrites, SIGNAL( clicked ( )), this, SLOT( applySmooth ( )) );
 
-  QObject::connect ( ui.pushButton_generateSpines, SIGNAL( clicked ( )), this, SLOT( generateSpines ( )) );
   QObject::connect ( ui.pushButton_ExportSpines, SIGNAL( clicked ( )), this, SLOT( exportSpines ( )) );
 
   QObject::connect ( ui.checkBox_RenderSolid, SIGNAL( clicked ( )), this, SLOT( ControlStateRender ( )) );
@@ -144,8 +146,6 @@ NeuroGeneratorWidget::NeuroGeneratorWidget (const QString &tmpDir, QWidget *pare
   QObject::connect ( ui.pushButton_Subdivide, SIGNAL( clicked ( )), this, SLOT( applySubdivide ( )) );
   QObject::connect ( ui.pushButton_Decimate, SIGNAL( clicked ( )), this, SLOT( applyDecimate ( )) );
 
-  QObject::connect ( ui.pushButton_GenerateDendrites, SIGNAL( clicked ( )), this, SLOT( generateDendrites ( )) );
-
   QObject::connect ( ui.pushButton_GoToGenerateSpines,
                      SIGNAL( clicked ( )),
                      this,
@@ -160,12 +160,9 @@ NeuroGeneratorWidget::NeuroGeneratorWidget (const QString &tmpDir, QWidget *pare
                      this,
                      SLOT( emitFinishNeuronSurfaceAndRestart ( )) );
 
-  QObject::connect ( ui.pushButton_RebuildWithAdvancedOptions,
-                     SIGNAL( clicked ( )),
-                     this,
-                     SLOT( RebuildWithAdvancedOptions ( )) );
+  QObject::connect ( ui.pushButton_RebuildWithAdvancedOptions,&QPushButton::released,this,[&](){  ui.tabWidget_RenderControl->setCurrentIndex ( 1 );});
+  connect(ui.pushButton_goHome,&QPushButton::released,this,&NeuroGeneratorWidget::finish);
 
-  QObject::connect ( ui.pushButton_FinishNeuron, SIGNAL( clicked ( )), this, SLOT( emitFinishSpinesAndRestart ( )) );
 
   //Modificaciones Presentaci�n -> Javier de DeFelipe
   ui.checkBox_piramidalSoma->setCheckState (( Qt::Checked ));
@@ -185,11 +182,11 @@ NeuroGeneratorWidget::NeuroGeneratorWidget (const QString &tmpDir, QWidget *pare
   ui.comboBox_SubdividerType->addItem ( "U. I. Sqrt3" );
   ui.comboBox_SubdividerType->addItem ( "M. Butterfly" );
 
-  for ( int i = 0; i < 5; ++i )
+    for (int i = 0; i < 6; ++i)
     ui.tabWidget_RenderControl->removeTab ( 0 );
 
+
   QObject::connect ( ui.pushButton_SpinesCtrl_Rebuild, SIGNAL( clicked ( )), this, SLOT( destroyAllGroupsSpines ( )) );
-  QObject::connect ( ui.pushButton_SpinesCtrl_Save, SIGNAL( clicked ( )), this, SLOT( exportNeuronAndSpines ( )) );
   QObject::connect ( ui.pushButton_SaveNeuronSurface, SIGNAL( clicked ( )), this, SLOT( exportNeuron ( )) );
   QObject::connect ( ui.pushButton_GoSpinesAdvancedOptions,
                      SIGNAL( clicked ( )),
@@ -235,7 +232,7 @@ void NeuroGeneratorWidget::generateDendrites ( )
     delete msgBox;
   msgBox = new QMessageBox ( NULL );
 
-  QString lMsge = "The dendrites will be build now,\n";
+  QString lMsge = "The neurites will be build now,\n";
   lMsge += "please wait until finish.";// in a few secods.";
 
   msgBox->setWindowTitle ( "Neuronize" );
@@ -252,39 +249,49 @@ void NeuroGeneratorWidget::generateDendrites ( )
 
 void NeuroGeneratorWidget::loadNeuronDefinitionAndGenerateMesh ( )
 {
-  viewer->loadSWCFile ( mSWCFleName );
+    loadNeuronDefinitionAndGenerateMeshBatch();
 
-  generateNeuron ( );
-
-  viewer->setNeuronColor ( MeshDef::Color ( 0.5, 0.5, 1.0, 0.5 ));
-
-  ui.pushButton_GoToGenerateSpines->setEnabled ( true );
-
-  ui.pushButton_GoToGenerateSpines->setEnabled ( true );
-  ui.pushButton_NextStep->setEnabled ( true );
-  ui.pushButton_SmoothDendrites->setEnabled ( true );
-
-
-  QFileInfo fi (mSWCFleName);
-  bool neuronAdded = Neuronize::bbdd.addNeuron(fi.baseName().toStdString(),mSWCFleName.toStdString());
-
-  if (!neuronAdded) {
-      MeshVCG somaMesh(mTempDir.toStdString() + "/RealSize.obj");
-      Neuronize::bbdd.addSoma(fi.baseName().toStdString(), somaMesh, BBDD::Spring_Mass, this->contours);
-
-      SWCImporter *importer = this->viewer->getNeuroSWC()->getImporter();
-      for (const auto &dendritic : importer->getDendritics()) {
-          Neuronize::bbdd.addDendrite(fi.baseName().toStdString(), dendritic.initialNode, dendritic.finalNode,
-                                      dendritic.type);
-      }
-  }
-
-
-  viewer->updateGL ( );
-
-  if ( mMsgTimer != NULL )
-    mMsgTimer->stop ( );
+  msgBox->close();
+  msgBox->setWindowTitle("Neuronize");
+  msgBox->setText("The construction of the neurites is over");
+  msgBox->exec();
 }
+
+void NeuroGeneratorWidget::loadNeuronDefinitionAndGenerateMeshBatch ( ) {
+    viewer->loadSWCFile ( mSWCFleName );
+
+    generateNeuron ( );
+
+    viewer->setNeuronColor ( MeshDef::Color ( 0.5, 0.5, 1.0, 0.5 ));
+
+    ui.pushButton_GoToGenerateSpines->setEnabled ( true );
+
+    ui.pushButton_GoToGenerateSpines->setEnabled ( true );
+    ui.pushButton_NextStep->setEnabled ( true );
+    ui.pushButton_SmoothDendrites->setEnabled ( true );
+
+
+    QFileInfo fi (mSWCFleName);
+    bool neuronAdded = Neuronize::bbdd.addNeuron(fi.baseName().toStdString(),mSWCFleName.toStdString());
+
+    if (!neuronAdded) {
+        MeshVCG somaMesh(mTempDir.toStdString() + "/RealSize.obj");
+        Neuronize::bbdd.addSoma(fi.baseName().toStdString(), somaMesh, BBDD::Spring_Mass, this->contours);
+
+        SWCImporter *importer = this->viewer->getNeuroSWC()->getImporter();
+        for (const auto &dendritic : importer->getDendritics()) {
+            Neuronize::bbdd.addDendrite(fi.baseName().toStdString(), dendritic.initialNode, dendritic.finalNode,
+                                        dendritic.type);
+        }
+    }
+
+
+    viewer->updateGL ( );
+
+    if ( mMsgTimer != NULL )
+        mMsgTimer->stop ( );
+}
+
 
 NeuroGeneratorWidget::~NeuroGeneratorWidget ( )
 {
@@ -450,7 +457,7 @@ void NeuroGeneratorWidget::generateNeuronSphereNodes ( )
 void NeuroGeneratorWidget::generateSpines ( )
 {
   QString text = QObject::tr (
-    "This proces can take several minutes.\n The result will be similar to the image.\n Do you still want to continue?" );
+    "This proces can take several minutes.\n Do you still want to continue?" );
   QMessageBox msgBox ( QObject::tr ( "Build spines" ),
                        text,
                        QMessageBox::Warning,
@@ -485,12 +492,18 @@ void NeuroGeneratorWidget::generateSpines ( )
   else if ( ui.radioButton_RealSpines->isChecked ( ))
     lGenerateOption = 3;
   else if ( ui.radioButton_SegmentSpines->isChecked ( ))
-    lGenerateOption = 4;
+      lGenerateOption = 4;
   else if (ui.radioButton_VrmlSpines->isChecked ( ))
     lGenerateOption = 5;
-  else if (ui.radioButton_RealAscPos->isChecked ( )){
+  else if (ui.radioButton_RealAscPos->isChecked ( ))
     lGenerateOption = 6;
+  else if (ui.radioButton_ImarisSpines->isChecked ( )) {
+    lGenerateOption = 7;
+      if(ui.radioButton_RepairedSpines->isChecked())
+      lGenerateOption = 8;
   }
+
+
 
 
 //  lGenerateOption = 0;
@@ -560,10 +573,38 @@ void NeuroGeneratorWidget::generateSpines ( )
                                 lMaxLongSpine,
                                 lMinRadio,
                                 lMaxRadio );
+      break;
+      case 7:
+          viewer->generateSpinesImaris(this->neuron, mTempDir.toStdString());
+          break;
+      case 8:
+          viewer->generateRepairedImarisSpines(this->neuron, mTempDir.toStdString());
   }
+
+  delete this->msgBox;
+  this->msgBox = new QMessageBox(this);
+  this->msgBox->setText("The construction of the spines is over");
+  this->msgBox->setWindowTitle("Build Spines");
+  this->msgBox->exec();
+
+  this->exportSpinesInmediatly(Neuronize::outPath + "/spines" + NeuroGeneratorWidget::spineNames[lGenerateOption - 4]+".obj");
+
+  QMessageBox::information(this, tr("Neuronize"),tr("The process with this neuron is over. You can process a new neuron, repair meshes, or compare exported meshes (Pressing in Go Home button)."));
+
+
 }
 
-void NeuroGeneratorWidget::batchSpinesGeneration(skelgenerator::Neuron *pNeuron, vector<Spine> spines) {
+void NeuroGeneratorWidget::batchSpinesGeneration(skelgenerator::Neuron *pNeuron, vector<Spine*> spines) {
+
+    ui.radioButton_SegmentSpines->setChecked(true);
+
+    if (!spines.empty()) {
+        ui.radioButton_RealAscPos->setChecked(true);
+    }
+
+    if (pNeuron != nullptr && pNeuron->hasFilamentSpines()) {
+        ui.radioButton_VrmlSpines->setChecked(true);
+    }
   unsigned int lNumSpines = ui.spinBox_NumSpines->value();
   unsigned int lHorResol = ui.spinBox_SpinesHorResolution->value();
   unsigned int lVerResol = ui.spinBox_SpinesVerResolution->value();
@@ -577,33 +618,27 @@ void NeuroGeneratorWidget::batchSpinesGeneration(skelgenerator::Neuron *pNeuron,
   unsigned int lNumOfGroups = ui.spinBox_NumOfGroupsModeledSpines->value();
   unsigned int lGenerateOption = 0;
 
-  if (pNeuron != nullptr) {
-    std::cout<<"---------------------------------------------->> Opcion elegida: 5"<<"----------------------------------" <<std::endl << std::flush;
-      viewer->generateSpinesVrml(pNeuron,mTempDir.toStdString());
-  } else if (!spines.empty()) {
-    std::cout<<"---------------------------------------------->> Opcion elegida: 6"<<"----------------------------------" <<std::endl << std::flush;
-    viewer->generateSpinesASC(spines, lHorResol,
-                              lVerResol,
-                              lMinLongSpine,
-                              lMaxLongSpine,
-                              lMinRadio,
-                              lMaxRadio);
-  } else {
-
-      if (ui.radioButton_ProceduralSpines->isChecked())
-          lGenerateOption = 0;
-      else if (ui.radioButton_ModelSpines->isChecked())
-          lGenerateOption = 1;
-      else if (ui.radioButton_SemiRealSpines->isChecked())
-          lGenerateOption = 2;
-      else if (ui.radioButton_RealSpines->isChecked())
-          lGenerateOption = 3;
-      else if (ui.radioButton_SegmentSpines->isChecked())
-          lGenerateOption = 4;
+    if ( ui.radioButton_ProceduralSpines->isChecked ( ))
+        lGenerateOption = 0;
+    else if ( ui.radioButton_ModelSpines->isChecked ( ))
+        lGenerateOption = 1;
+    else if ( ui.radioButton_SemiRealSpines->isChecked ( ))
+        lGenerateOption = 2;
+    else if ( ui.radioButton_RealSpines->isChecked ( ))
+        lGenerateOption = 3;
+    else if ( ui.radioButton_SegmentSpines->isChecked ( ))
+        lGenerateOption = 4;
+    else if (ui.radioButton_VrmlSpines->isChecked ( ))
+        lGenerateOption = 5;
+    else if (ui.radioButton_RealAscPos->isChecked ( ))
+        lGenerateOption = 6;
+    else if (ui.radioButton_ImarisSpines->isChecked ( )) {
+      lGenerateOption = 7;
+      if(ui.radioButton_RepairedSpines->isChecked())
+        lGenerateOption = 8;
+    }
 
 
-      std::cout << "---------------------------------------------->> Opcion elegida:" << lGenerateOption
-                << "<<----------------------------------" << std::endl << std::flush;
 
       switch (lGenerateOption) {
           //Rand Procedurales
@@ -664,11 +699,24 @@ void NeuroGeneratorWidget::batchSpinesGeneration(skelgenerator::Neuron *pNeuron,
                                               lMinRadio,
                                               lMaxRadio);
               break;
-
-
+          case 5:
+              viewer->generateSpinesVrml(pNeuron, mTempDir.toStdString());
+              break;
+          case 6:
+              viewer->generateSpinesASC(spines,lHorResol,
+                                        lVerResol,
+                                        lMinLongSpine,
+                                        lMaxLongSpine,
+                                        lMinRadio,
+                                        lMaxRadio );
+              break;
+          case 7:
+              viewer->generateSpinesImaris(pNeuron, mTempDir.toStdString());
+              break;
+          case 8:
+              viewer->generateRepairedImarisSpines(pNeuron, mTempDir.toStdString());
       }
   }
-}
 
 void NeuroGeneratorWidget::attachNewSpinesGroup ( )
 {
@@ -827,12 +875,17 @@ void NeuroGeneratorWidget::exportSpinesInmediatly ( QString fileName )
 
 void NeuroGeneratorWidget::exportNeuronAndSpines ( )
 {
+    QMessageBox::information(this,tr("Neuronize"),tr("Please select a file to save the neuron mesh"));
   exportNeuron ( );
 
   if ( viewer->hasSpines ( ))
   {
-    exportSpines ( );
+      QMessageBox::information(this,tr("Neuronize"),tr("Please select a file to save the spines mesh"));
+      exportSpines ( );
   }
+
+  QMessageBox::information(this, tr("Neuronize"),tr("The process with this neuron is over. You can process a new neuron, repair meshes, or compare exported meshes."));
+  emit finish();
 }
 
 void NeuroGeneratorWidget::joinSpines ( )
@@ -1089,6 +1142,7 @@ void NeuroGeneratorWidget::emitFinishNeuronSurfaceAndRestart ( )
 
 void NeuroGeneratorWidget::emitFinishNeuronSurfaceAndGoToSpines ( )
 {
+  viewer->exportNeuron(Neuronize::outPath + "/Neuron.obj");
   emit finishNeuronSurfaceAndGoToSpines ( );
 }
 
@@ -1104,7 +1158,7 @@ void NeuroGeneratorWidget::emitFinishSpinesAndRestart ( )
 
 void NeuroGeneratorWidget::showDendirtesTab ( )
 {
-  if ( ui.tabWidget_RenderControl->count ( ) > 2 )
+    if (ui.tabWidget_RenderControl->count() >= 2)
   {
     ui.tabWidget_RenderControl->removeTab ( 0 );
     ui.tabWidget_RenderControl->removeTab ( 0 );
@@ -1112,21 +1166,54 @@ void NeuroGeneratorWidget::showDendirtesTab ( )
 
   ui.tabWidget_RenderControl->insertTab ( 0, ui.tab_DendritesCtrl, "Dendrites builder." );
   ui.tabWidget_RenderControl->insertTab ( 1, ui.tab_AdvanceDendritesCtrl, "Advanced dendrites options." );
-  ui.tabWidget_RenderControl->insertTab ( 2, ui.tab_ModifiersCtrl, "Modifiers Ctrl." );
+    //ui.tabWidget_RenderControl->insertTab ( 2, ui.tab_ModifiersCtrl, "Modifiers Ctrl." );
 }
 
 void NeuroGeneratorWidget::showSpinesTab ( )
 {
 
-  if ( ui.tabWidget_RenderControl->count ( ) > 2 )
+    if (ui.tabWidget_RenderControl->count() >= 2)
   {
     ui.tabWidget_RenderControl->removeTab ( 0 );
     ui.tabWidget_RenderControl->removeTab ( 0 );
   }
 
-  ui.tabWidget_RenderControl->insertTab ( 0, ui.tab_SpinesCtrl, "Spines builder." );
-  ui.tabWidget_RenderControl->insertTab ( 1, ui.tab_AdvanceSpinesCtrl, "Advanced spines options." );
-  ui.tabWidget_RenderControl->insertTab ( 2, ui.tab_MoreAdvanceSpinesCtrl, "More Advanced spines options." );
+  //ui.tabWidget_RenderControl->insertTab ( 0, ui.tab_SpinesCtrl, "Spines builder." );
+  ui.tabWidget_RenderControl->insertTab ( 0, ui.tab_AdvanceSpinesCtrl, "Advanced spines options." );
+    //ui.tabWidget_RenderControl->insertTab ( 2, ui.tab_MoreAdvanceSpinesCtrl, "More Advanced spines options." );
+    ui.tabWidget_RenderControl->setCurrentIndex(0);
+
+    if (!this->spines.empty()) {
+        ui.radioButton_RealAscPos->setEnabled(true);
+        ui.radioButton_RealAscPos->setChecked(true);
+    }
+
+    if (this->neuron != nullptr) {
+        SelectSpinesDialog dialog(this->neuron->hasFilamentSpines(),this);
+        dialog.exec();
+        auto selected = dialog.getOption();
+        if (selected == SelectSpinesDialog::THIS_SPINES) {
+            ui.radioButton_VrmlSpines->setEnabled(true);
+            ui.radioButton_VrmlSpines->setChecked(true);
+        } else if (selected == SelectSpinesDialog::NEW_FILE_SPINES) {
+            ui.radioButton_ImarisSpines->setEnabled(true);
+            ui.radioButton_ImarisSpines->setChecked(true);
+            auto file = dialog.getNewFilePath();
+            this->neuron->addImarisSpines(file.toStdString());
+
+            int ret = QMessageBox::question(this, "Neuronize",
+                                            "Do you want to repair the new selected spines?",
+                                            QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+            if (ret == QMessageBox::Yes) {
+                ui.radioButton_RepairedSpines->setEnabled(true);
+                ui.radioButton_RepairedSpines->setChecked(true);
+
+            }
+        }
+    }
+    generateSpines();
+
+
 }
 
 void NeuroGeneratorWidget::RebuildWithAdvancedOptions ( )
@@ -1147,7 +1234,7 @@ void NeuroGeneratorWidget::goAdvencedSpinesOptions ( )
     ui.radioButton_RealAscPos->setChecked(true);
   }
 
-  if (this->neuron != nullptr) {
+  if (this->neuron != nullptr && this->neuron->hasFilamentSpines()) {
     ui.radioButton_VrmlSpines->setEnabled(true);
     ui.radioButton_VrmlSpines->setChecked(true);
   }
@@ -1201,7 +1288,7 @@ void NeuroGeneratorWidget::setNeuron(skelgenerator::Neuron *neuron) {
   NeuroGeneratorWidget::neuron = neuron;
 }
 
-void NeuroGeneratorWidget::setSpines(const vector<Spine> &spines) {
+void NeuroGeneratorWidget::setSpines(const vector<Spine*> &spines) {
   NeuroGeneratorWidget::spines = spines;
 }
 
@@ -1209,3 +1296,17 @@ void NeuroGeneratorWidget::setContours(const vector<vector<OpenMesh::Vec3d>> &co
     NeuroGeneratorWidget::contours = contours;
 }
 
+void NeuroGeneratorWidget::hideAdvancedOptions() {
+    //Spine Section
+    ui.pushButton_exportSpinesInfo->hide();
+    ui.pushButton_importSpinesInfo->hide();
+    ui.groupBox_SpinesCtrlHide->hide();
+    ui.groupBox_AdvanceSpinesCtrl_Shape->hide();
+    ui.radioButton_AdvanceSpinesCtrl_LoadPositionsFromFile->hide();
+    // Dendrite section
+    ui.groupBox_ModifiersCtrlHide->hide();
+    ui.groupBox_NeuronCtrlHide->hide();
+    ui.groupBox_SpinesCtrlHide->hide();
+    ui.groupBox_SpinesOptions->hide();
+    ui.groupBox_RenderCtrlHide->hide();
+}

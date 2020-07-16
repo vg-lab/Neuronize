@@ -26,13 +26,15 @@
 
 #include <QMainWindow>
 #include <QTemporaryDir>
+#include <QtWidgets/QProgressDialog>
 
 #include "ui_neuronize.h"
 
 #include "SomaCreatorWidget.h"
 #include "SomaDeformerWidget.h"
 #include "NeuroGeneratorWidget.h"
-#include "batchbuilder.h"
+#include "RepairWidget.h"
+#include "CompareMeshesWidget.h"
 #include <libs/libNeuroUtils/BBDD.h>
 
 
@@ -57,6 +59,9 @@ class Neuronize: public QMainWindow
     static BBDD::BBDD bbdd;
     static QString tmpPath;
     static QString configPath;
+    static QString envPath;
+    static QString outPath;
+    static bool hasPython;
 
   private:
 
@@ -69,14 +74,19 @@ class Neuronize: public QMainWindow
 
     NeuroGeneratorWidget *mNeuroGeneratorWidget;
 
-    BatchBuilder *mBatchBuilder;
+    RepairWidget *mRepairWidget;
+
+    CompareMeshesWidget *mCompareMeshesWidget;
+
+
+
     //NeuroGeneratorWidget	* mSpinesGeneratorWidget;
 
     unsigned int mActiveTab;
 
   public slots:
 
-    void genetareNeuronsInBatch ( );
+    void genetareNeuronsInBatch ( QString inputFilePath,QString outputFilePath,int subdivisions,QString baseName );
 
   private slots:
     void resetNeuronnizeInterface ( );
@@ -88,8 +98,6 @@ class Neuronize: public QMainWindow
     void showDendriteGenerator ( );
 
     void showSpinesGenerator ( );
-
-    void showBatchBuilder ( );
 
     void takeASnapshot ( );
 
@@ -105,6 +113,19 @@ class Neuronize: public QMainWindow
 
     void NewNeuronQuestionAndRestart ( );
 
+    void onSomaBuildFinish();
+
+    void showExportDialog();
+
+    void deleteDatabase();
+
+    void createDatabase();
+
+    void exportDatabase();
+
+    void resetPythonEnv();
+
+    void initPythonEnv();
 };
 
 #endif // XNEURON_H

@@ -4,10 +4,11 @@ stages:
 Ubuntu-subproject-master:
   stage: build
   script:
+  - export GITHUB_MIRROR_URL="git@github.com:vg-lab/Neuronize"
   - export APPIMAGE_ICON="Neuronize/icons/neuronize.png"
   - export APPIMAGE_REPO="gitlabci@gmrv.es:apps.private"
   - export BUILD_GENERATOR="Ninja"
-  - module load OpenMesh-6.3 libQGLViewer-2.6.3
+  - module load OpenMesh-6.3 libQGLViewer-2.6.3 Qt-5.10.0 boost-1.73.0
   - export CMAKE_EXTRA_ARGS="-DCLONE_SUBPROJECTS=ON"
   - bash .gitlab-ci.sh
   tags:
@@ -18,8 +19,10 @@ Ubuntu-subproject-master:
 Ubuntu-subproject:
   stage: build
   script:
+  - export APPIMAGE_ICON="Neuronize/icons/neuronize.png"
+  - export APPIMAGE_REPO="gitlabci@gmrv.es:apps.private"
   - export BUILD_GENERATOR="Ninja"
-  - module load OpenMesh-6.3 libQGLViewer-2.6.3
+  - module load OpenMesh-6.3 libQGLViewer-2.6.3 Qt-5.10.0 boost-1.73.0
   - export CMAKE_EXTRA_ARGS="-DCLONE_SUBPROJECTS=ON"
   - bash .gitlab-ci.sh
   tags:
@@ -56,19 +59,19 @@ Win7-VS14-x64-subproject:
   stage: build
   script:
   - set WINAPP_REPO=gitlabci@gmrv.es:apps.private
-  - call %ENVFILESDIR%\Qt-5.9-vs14.bat
+  - call %ENVFILESDIR%\Qt-5.12-vs14.bat
   - call %ENVFILESDIR%\eigen-3.1.2-vs12-x64.bat
   - call %ENVFILESDIR%\OpenMesh-6.3-vs14-x64.bat
   - call %ENVFILESDIR%\QGLViewer-2.6.3-vs14-x64.bat
-  - call %ENVFILESDIR%\Boost-1.64-vs14-x64.bat
+  - call %ENVFILESDIR%\Boost-1.71-vs14-x64.bat
   - call %ENVFILESDIR%\soil-vs14-x64.bat
   - call %ENVFILESDIR%\glm.bat
   - call %ENVFILESDIR%\glew-1.11.0.bat
-  - call %ENVFILESDIR%\glut.bat
+  - call %ENVFILESDIR%\glut-2.8.1.bat
   - set PATH=%PATH%;"c:\Program Files\Git\bin"
   - set BUILD_GENERATOR=Visual Studio 14 Win64
   - set GLEW_ROOT=c:\libs\glew-1.11.0
-  - set CMAKE_EXTRA_ARGS=-DCLONE_SUBPROJECTS=ON -DGLEW_INCLUDE_DIR=%GLEW_INCLUDE_DIR% -DOPENGL_LIBRARY_DIR=c:\libs\freeglut\lib\x64 -DGLUT_INCLUDE_DIR=%GLUT_INCLUDE_DIR% -DGLM_ROOT_DIR=%GLM_ROOT_DIR%
+  - set CMAKE_EXTRA_ARGS=-DCLONE_SUBPROJECTS=ON -DGLEW_INCLUDE_DIR=%GLEW_INCLUDE_DIR% -DOPENGL_LIBRARY_DIR=%OPENGL_LIBRARY_DIR% -DGLUT_INCLUDE_DIR=%GLUT_INCLUDE_DIR% -DGLM_ROOT_DIR=%GLM_ROOT_DIR%
   - bash --login .gitlab-ci.sh
   tags:
   - win7

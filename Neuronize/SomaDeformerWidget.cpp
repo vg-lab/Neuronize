@@ -29,8 +29,11 @@ SomaDeformerWidget::SomaDeformerWidget (const QString &tempDir, QWidget *parent 
   : QWidget ( parent )
 {
   ui.setupUi ( this );
+    hideAdvancedOptions();
+
 
   viewer = new SomaDeformerWidgetViewer ( this );
+  this->somaCreator = nullptr;
 
   mtmpDir = tempDir;
   mXMLFile = tempDir + "/Definition.xml";
@@ -57,7 +60,6 @@ SomaDeformerWidget::SomaDeformerWidget (const QString &tempDir, QWidget *parent 
                      this,
                      SLOT( loadPredefinedXMLSomaDefAndSimulate ( )) );
 
-  QObject::connect ( ui.pushButton_ExportModel, SIGNAL( clicked ( )), this, SLOT( exportModel ( )) );
   QObject::connect ( ui.pushButton_ImportSWC, SIGNAL( clicked ( )), this, SLOT( loadSWCFile ( )) );
 
   //Mass Spring conections
@@ -112,12 +114,8 @@ SomaDeformerWidget::SomaDeformerWidget (const QString &tempDir, QWidget *parent 
                      this,
                      SLOT( setDeleteRedundantVertex ( )) );
 
-  QObject::connect ( ui.pushButton_GenerateSoma, SIGNAL( clicked ( )), this, SLOT( startDeformation ( )) );
 
-  QObject::connect ( ui.pushButton_RebuildSoma,
-                     SIGNAL( clicked ( )),
-                     this,
-                     SLOT( loadPredefinedXMLSomaDefAndGOAdvancedOptions ( )) );
+  connect ( ui.pushButton_RebuildSoma,&QPushButton::released,this,[&](){ ui.tabWidget_Controls->setCurrentIndex ( 1 );});
 
   QObject::connect ( ui.pushButton_FinalizeSoma, SIGNAL( clicked ( )), this, SLOT( finalizeSoma ( )) );
   QObject::connect ( ui.pushButton_NextStep, SIGNAL( clicked ( )), this, SLOT( finalizeSoma ( )) );
@@ -202,6 +200,7 @@ void SomaDeformerWidget::loadXMLSomaDef ( )
 
 void SomaDeformerWidget::loadPredefinedXMLSomaDef ( )
 {
+  ui.pushButton_SphericalSoma->setVisible(this->somaCreator->isSomaContours());
   generateSoma ( );
 
   ui.pushButton_FinalizeSoma->setEnabled ( false );
@@ -227,6 +226,7 @@ void SomaDeformerWidget::generateSoma ( )
   float lRadius = ui.doubleSpinBox_ScaleFactor->value ( );
   float lScale = ui.doubleSpinBox_ScaleFactor->value ( );
 
+
   if ( ui.checkBox_useSWCFile->isChecked ( ))
   {
     //Get the soma radius and the scale this
@@ -251,10 +251,13 @@ void SomaDeformerWidget::generateSoma ( )
     {
       if ( ui.radioButton_XMLSoma->isChecked ( ))
       {
+          somaCreator->generateGeodesicFiles(lScale);
         viewer->generateSomaFromXML ( mXMLFile, lScale );
       }
     }
   }
+
+  startDeformation();
 }
 
 void SomaDeformerWidget::startDeformation ( )
@@ -330,23 +333,52 @@ void SomaDeformerWidget::setDendriticParams ( )
   );
 }
 
-void SomaDeformerWidget::exportModel ( )
+void SomaDeformerWidget::exportModel (const QString& fileName )
 {
 
-  QString fileName = QFileDialog::getSaveFileName ( this );
-  if ( fileName.isEmpty ( ))
-  {
-    return;
-  }
-  else
-  {
-    viewer->setNormalizeExportedModel ( ui.checkBox_NormalizeModel->isChecked ( ));
-    viewer->exportModel ( fileName );
+//  QString fileName = QFileDialog::getSaveFileName ( this );
+//  if ( fileName.isEmpty ( ))
+//  {
+//    return;
+//  }
+//  else
+//  {
+      auto fileNameModel = fileName + "/soma.obj";
+    //viewer->setNormalizeExportedModel ( ui.checkBox_NormalizeModel->isChecked ( ));
+    viewer->setNormalizeExportedModel ( false);
+    viewer->exportModel ( fileNameModel );
 
+
+    MeshVCG meshVcg (fileNameModel.toStdString());
+    std::ofstream csvFile;
+    csvFile.open(fileName.toStdString() + "/soma.csv",std::ofstream::out);
+    csvFile << "Area;Area2D;Volume;Mass Center-x;Mass Center-y;Mass Center-z" << std::endl;
+    auto massCenter = meshVcg.getCenter();
+    auto displacement = this->somaCreator->getMswcImporter()->getDisplacement();
+    massCenter += displacement;
+    csvFile << meshVcg.getArea() << ";" << meshVcg.getMax2DArea(0.5f) << ";" << meshVcg.getVolume() << ";" <<
+                massCenter[0] << ";" << massCenter[1] << ";" << massCenter[2] << std::endl;
+
+    csvFile.close();
+
+    if (this->somaCreator->getNeuron() != nullptr) {
+        std::ofstream ascFile;
+        ascFile.open(fileName.toStdString() + "/skel.asc",std::ofstream::out);
+        ascFile << this->somaCreator->getNeuron()->to_asc(meshVcg.sliceContours(0.1f),
+                {displacement[0],displacement[1],displacement[2]});
+        ascFile.close();
+    } else if (this->somaCreator->getASCparser() != nullptr) {
+        this->somaCreator->getASCparser()->toASC(meshVcg.sliceContours(0.1f),
+                {displacement[0],displacement[1],displacement[2]},
+                fileName.toStdString() + "/skel.asc");
+    } else {
+        //TODO arreglar todavia no funciona bien
+       //this->somaCreator->getMswcImporter()->toASC(meshVcg.sliceContours(0.5f),fileName.toStdString() + "/skel.asc");
+    }
     //Export configuration name
     QString result = viewer->configurationToString ( );
-    strToFile ( result.toStdString ( ), ( fileName.toStdString ( ) + ".cfg" ));
-  }
+    strToFile ( result.toStdString ( ), ( fileName.toStdString ( ) + "/soma.cfg" ));
+  //}
 }
 
 void SomaDeformerWidget::exportModelWithSTDName ( )
@@ -359,6 +391,8 @@ void SomaDeformerWidget::exportModelWithSTDName ( )
   viewer->setNormalizeExportedModel(true);
   QString fileName = mtmpDir + "/SomaGenerated/SomaDeformed.obj";
   viewer->exportModel ( fileName );
+
+  this->exportModel(Neuronize::outPath);
 
 
     //Export configuration name
@@ -439,10 +473,10 @@ void SomaDeformerWidget::finalizeSoma ( )
 void SomaDeformerWidget::restoreDefaultValues ( )
 {
   ui.doubleSpinBox_ScaleFactor->setValue ( 1.0 );
-  ui.spinBox_UnCollapseSprigns->setValue ( 25 );
+  ui.spinBox_UnCollapseSprigns->setValue ( 7 );
   ui.doubleSpinBox_NodeMass->setValue ( 0.64 );
   ui.doubleSpinBox_MS_Stiffness->setValue ( 20.0 );
-  ui.doubleSpinBox_MS_Dumping->setValue ( 0.05 );
+  ui.doubleSpinBox_MS_Dumping->setValue ( 0.2 );
   ui.doubleSpinBox_MS_Integrator_dt->setValue ( 0.005 );
 
   setMSDt ( );
@@ -459,7 +493,7 @@ void SomaDeformerWidget::showContinueMsg ( )
   mMsgTimer->stop ( );
 
   QMessageBox Msgbox;
-  QString lMsge = "The soma is ready, if you like its shape, go to \"Next step\".\n";
+  QString lMsge = "The soma is ready, if you like its shape, go to \"Dendrite Generation\".\n";
   lMsge += "Otherwise, press \"Rebuild (advanced options)\".";
 
   Msgbox.setWindowTitle ( "Neuronize" );
@@ -488,6 +522,14 @@ void SomaDeformerWidget::useSphericalSoma() {
 
 void SomaDeformerWidget::setSomaCreator(SomaCreatorWidget *somaCreator) {
   this->somaCreator = somaCreator;
+}
+
+void SomaDeformerWidget::hideAdvancedOptions() {
+    ui.tabWidget_Controls->removeTab(3);
+    ui.tabWidget_Controls->removeTab(2);
+
+    ui.groupBox_MS_Simulation_Params->hide();
+
 }
 
 

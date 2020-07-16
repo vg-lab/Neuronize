@@ -1,2 +1,2 @@
 # -*- mode: cmake -*-
-git_subproject( SkelGenerator git@gitlab.gmrv.es:ivelasco/SkelGenerator.git a385a043 )
+git_subproject( SkelGenerator https://github.com/vg-lab/SkelGenerator.git 8b011b4 )

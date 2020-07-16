@@ -32,7 +32,10 @@
 
 #include <libs/libNeuroUtils/SWCImporter.h>
 #include <libs/libNeuroUtils/BaseMesh.h>
-#include <libs/libNeuroUtils/AS2SWCV2.h>
+#include <libs/libNeuroUtils/ASC2SWCV2.h>
+#include <QtWidgets/QProgressDialog>
+#include <QFutureWatcher>
+#include <QLineEdit>
 
 #include "ui_SomaCreatorWidget.h"
 
@@ -83,8 +86,6 @@ class SomaCreatorWidget: public QWidget, public Ui::SomaCreatorWidget
     //Methods for magazine.
     void setExitDirectory ( );
 
-    void generateXMLSoma ( );
-
     void generateXMLSoma ( QString fileName, bool useSoma );
 
     void calcNearestVertex ( );
@@ -93,13 +94,23 @@ class SomaCreatorWidget: public QWidget, public Ui::SomaCreatorWidget
 
     void resetInterface ( );
 
-    void showRepairDialog ( );
+    void openSaveFileDialog(QLineEdit *target, const QString &title, const QString &types);
 
-    void compareMeshes( );
+    void openDirectory(QLineEdit* target, const QString& title);
+
+    void openSelectFileDialog(QLineEdit *target, const QString &title, const QString &types, bool multiFile);
+
+    void openDir(QLineEdit* des,QString test);
+
+    void onGenerateNeurons();
+
+    void onGenerateOneNeuron();
 
   signals:
 
     void somaCreated ( );
+
+    void generateNeurons(QString inputDirectory,QString outputDirectory, int subdivisions,QString baseName);
 
   public:
     SomaCreatorWidget (const QString &tempDir,QWidget *parent = 0);
@@ -115,7 +126,6 @@ class SomaCreatorWidget: public QWidget, public Ui::SomaCreatorWidget
     void setNeuron(skelgenerator::Neuron *neuron);
 
     bool isSomaContours();
-
 
 private:
 
@@ -143,12 +153,18 @@ private:
     std::vector < unsigned int > mNearestVertex;
     skelgenerator::Neuron* neuron;
     bool somaContours;
-    std::vector<Spine> spines;
+    std::vector<Spine*> spines;
     std::vector<std::vector<OpenMesh::Vec3d>> contours;
-
+    ASC2SWCV2* ASCparser;
 public:
-    const vector<Spine> &getSpines() const;
+    const vector<Spine*> &getSpines() const;
     const vector<vector<OpenMesh::Vec3d>> &getContours() const;
+
+    ASC2SWCV2 *getASCparser() const;
+
+    SWCImporter *getMswcImporter() const;
+
+    void generateGeodesicFiles(float lscale);
 
 private:
 

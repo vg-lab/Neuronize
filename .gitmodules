@@ -4,7 +4,3 @@
 [submodule "VCG"]
 	path = VCG
 	url = https://github.com/cnr-isti-vclab/vcglib.git
-[submodule "MeshReconstruct"]
-	path = MeshReconstruct
-	url = git@gitlab.gmrv.es:cbbsp1/MeshReconstruct.git
-	branch = Python3

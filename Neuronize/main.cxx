@@ -19,8 +19,6 @@
  */
 
 #include <QApplication>
-#include <QDirIterator>
-#include <QDir>
 #include "neuronize.h"
 
 

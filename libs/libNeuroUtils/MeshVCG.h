@@ -32,13 +32,13 @@ class MyVertex; class MyEdge; class MyFace;
             vcg::Use<MyFace>     ::AsFaceType>{};
 
 class MyVertex
-        : public vcg::Vertex<MyUsedTypes, vcg::vertex::Coord3d, vcg::vertex::Normal3d, vcg::vertex::Color4b, vcg::vertex::Qualityf, vcg::vertex::VFAdj, vcg::vertex::BitFlags> {
+: public vcg::Vertex<MyUsedTypes, vcg::vertex::Coord3d, vcg::vertex::Normal3d, vcg::vertex::Color4b, vcg::vertex::Qualityf, vcg::vertex::VFAdj,vcg::vertex::VEAdj, vcg::vertex::BitFlags> {
 };
 
 class MyFace
         : public vcg::Face<MyUsedTypes, vcg::face::Mark, vcg::face::FFAdj, vcg::face::VFAdj, vcg::face::VertexRef, vcg::face::Normal3d, vcg::face::BitFlags> {
 };
-    class MyEdge    : public vcg::Edge<   MyUsedTypes, vcg::edge::EFAdj,vcg::edge::VertexRef, vcg::edge::BitFlags,vcg::edge::EEAdj> {};
+    class MyEdge    : public vcg::Edge<   MyUsedTypes, vcg::edge::EFAdj,vcg::edge::VertexRef, vcg::edge::BitFlags,vcg::edge::EEAdj,vcg::edge::VEAdj> {};
     class MyMesh    : public vcg::tri::TriMesh< std::vector<MyVertex>, std::vector<MyFace> , std::vector<MyEdge>  > {};
 
     class NEUROUTILS_API MeshVCG {
@@ -82,6 +82,7 @@ class MyFace
         double getArea();
 
         std::vector<MeshVCG*> slice(float zStep);
+        std::vector<std::vector<Eigen::Vector3f>> sliceContours(float zStep);
         const std::string &getPath() const;
 
         float getMax2DArea(float zStep = 0.1f);
@@ -94,6 +95,8 @@ class MyFace
         static QColor getColor(float value);
 
         HausdorffRet hausdorffDistance(MeshVCG &otherMesh, const std::string &path = "");
+
+        void removeUnreferenceVertex();
 
     private:
          MeshVCG*  sliceAux(float z);

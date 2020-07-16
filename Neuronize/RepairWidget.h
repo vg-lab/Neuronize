@@ -2,8 +2,8 @@
 // Created by ivelascog on 6/06/19.
 //
 
-#ifndef NEURONIZE_REPAIRDIALOG_H
-#define NEURONIZE_REPAIRDIALOG_H
+#ifndef NEURONIZE_REPAIRWIDGET_H
+#define NEURONIZE_REPAIRWIDGET_H
 
 
 #include <QDialog>
@@ -16,20 +16,20 @@
 #include <QToolBox>
 #include <QDoubleSpinBox>
 #include <QCheckBox>
+#include <QtWidgets/QRadioButton>
 
-class RepairDialog: public QDialog {
+class RepairWidget : public QWidget {
     Q_OBJECT
 public:
-    RepairDialog(QWidget* parent = 0);
-
+    explicit RepairWidget(QWidget *parent = 0);
 private:
     QLineEdit* csvPath;
     QLineEdit* inputPath;
     QPushButton* csvButton;
     QPushButton* inputButton;
     QPushButton* advancedButton;
+    QPushButton *repairButton;
     QWidget* advancedWidget;
-    QDialogButtonBox* buttonBox;
     QComboBox* saveCombo;
     QFutureWatcher<void>* futureWatcher;
     QProgressDialog* progressDialog;
@@ -39,16 +39,32 @@ private:
     QSpinBox* precisionBox;
     QCheckBox* segmentsCheckBox;
     QSpinBox* kernelSizeBox;
+    QRadioButton *fileRadio;
+    QRadioButton *folderRadio;
+    QPushButton *folderInputButton;
+    QPushButton *folderOutputButton;
+    QLineEdit *folderInputEdit;
+    QLineEdit *folderOutputEdit;
 
 private slots:
     void onOk();
     void openSelectFileDialog(QLineEdit* dest, const QString& message, const QString& formats);
+
+    void openFolder(QLineEdit *dest, const QString &message);
     void onProcessFinish();
     void onAdvancedPress();
     void saveFileDialog(QLineEdit *dest, const QString &message, const QString &formats);
 
     void addToBBDD(const QString& string,const QString& qString);
+
+    void onRadioChanged(bool b);
+
+    void setupUi();
+
+    void setupConnections();
+
+    void initUi() const;
 };
 
 
-#endif //NEURONIZE_REPAIRDIALOG_H
+#endif //NEURONIZE_REPAIRWIDGET_H

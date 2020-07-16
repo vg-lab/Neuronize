@@ -27,6 +27,8 @@
 #include <QtConcurrent/QtConcurrent>
 #include <queue>
 #include <libs/libGLNeuroUtils/MeshRenderer.h>
+#include <random>
+#include <MeshReconstructWrapper/MeshReconstruct.h>
 //#include <QtGui>
 
 // Constructor must call the base class constructor.
@@ -825,15 +827,17 @@ void NeuroGeneratorWidgetViewer::generateSpinesInSegment ( unsigned int pNumSpin
 
   spineMeshRend = new MeshRenderer ( );
 
-  if ( lNumMeshes != 0 )
-  {
-    for ( int i = 0; i < lNumMeshes; ++i )
-    {
-      delete mSpinesSynthContainers.getElementAt ( i );
-    }
+//  if ( lNumMeshes != 0 )
+//  {
+//    for ( int i = 0; i < lNumMeshes; ++i )
+//    {
+//      delete mSpinesSynthContainers.getElementAt ( i );
+//    }
+//
+//    mSpinesSynthContainers.getContainer ( ).clear ( );
+//  }
 
-    mSpinesSynthContainers.getContainer ( ).clear ( );
-  }
+    mSpinesSynthContainers.destroyAllElementsInContainer();
 
   meshSpines =
     new SpinesSWC ( mesh, pNumSpinesByGroup, pHorResol, pVerResol, pMinLongSpine, pMaxLongSpine, pMinRadio, pMaxRadio );
@@ -860,13 +864,6 @@ void NeuroGeneratorWidgetViewer::generateSpinesInSegment ( unsigned int pNumSpin
 
   mSpinesSynthContainers.addElement ( new BaseMesh ( ));
   mSpinesSynthContainers.getElementAt ( i )->JoinBaseMesh ( meshSpines );
-
-
-  MeshDef::ConstVertexIter iniLimit = mSpinesSynthContainers.getElementAt ( i )->getMesh ( )->vertices_begin ( );
-  MeshDef::ConstVertexIter finLimit = mSpinesSynthContainers.getElementAt ( i )->getMesh ( )->vertices_end ( );
-
-  mSpinesSynthContainers.getElementAt ( i )->setVertexColor ( iniLimit, finLimit, MeshDef::Color ( 0.6, 0.0, 0.0, 1.0 )
-  );
 
   mLastSpinesInfo.clear ( );
   mLastSpinesInfo = meshSpines->getSpinesInfo ( );
@@ -1140,10 +1137,21 @@ void NeuroGeneratorWidgetViewer::update ( )
 
 void NeuroGeneratorWidgetViewer::exportNeuron ( QString pFile )
 {
-  //Export the mesh
-  meshRend->getBaseMesh ( )->exportMesh ( pFile.toStdString ( ));
+  //Export the mesh;
+  auto exporMesh (meshRend->getBaseMesh());
 
-  if ( mXMLProgressiveNeuroVizManager != NULL )
+    boost::numeric::ublas::matrix<float> translationMatrix (4,4);
+    auto displacement = mSWCImporter->getDisplacement();
+  generateSquareTraslationMatrix(translationMatrix,displacement[0],displacement[1],displacement[2]);
+
+  exporMesh->applyMatrixTransform(translationMatrix,4);
+  exporMesh->exportMesh ( pFile.toStdString ( ));
+
+  generateSquareTraslationMatrix(translationMatrix,-displacement[0],-displacement[1],-displacement[2]);
+  exporMesh->applyMatrixTransform(translationMatrix,4);
+
+
+    if ( mXMLProgressiveNeuroVizManager != NULL )
   {
     delete mXMLProgressiveNeuroVizManager;
   }
@@ -1163,7 +1171,19 @@ void NeuroGeneratorWidgetViewer::exportNeuron ( QString pFile )
 
 void NeuroGeneratorWidgetViewer::exportSpines ( QString pFile )
 {
-  spineMeshRend->getBaseMesh ( )->exportMesh ( pFile.toStdString ( ));
+
+    auto exporMesh (spineMeshRend->getBaseMesh());
+
+    boost::numeric::ublas::matrix<float> translationMatrix (4,4);
+    auto displacement = mSWCImporter->getDisplacement();
+    generateSquareTraslationMatrix(translationMatrix,displacement[0],displacement[1],displacement[2]);
+
+    exporMesh->applyMatrixTransform(translationMatrix,4);
+    exporMesh->exportMesh ( pFile.toStdString ( ));
+
+    generateSquareTraslationMatrix(translationMatrix,-displacement[0],-displacement[1],-displacement[2]);
+    exporMesh->applyMatrixTransform(translationMatrix,4);
+
 }
 
 void NeuroGeneratorWidgetViewer::exportGroupOfSpines ( QString pFile )
@@ -1525,29 +1545,125 @@ void NeuroGeneratorWidgetViewer::InitLight ( )
 
 QString NeuroGeneratorWidgetViewer::helpString ( ) const
 {
-  QString text ( "<h2>Neuronize</h2>" );
+  QString text ( "<h2>NeuronizeV2</h2>" );
+  text += "<p>NeuronizeV2 is a tool focused on improving interoperability between two commonly used applications in the"
+          " field of neuroscience, Imaris and Neurolucida®. Both tools use proprietary formats to store the information,"
+          " which causes the information extracted using one tool cannot be used in the other. To solve this problem, "
+          "NeuronizeV2 offers the possibility of generating tracing files for Neurolucida® from the Imaris Filament Tracer files.</p>";
 
-  text +=
-    "Neuronize is used for building three-dimensional models for neuronal cells from the morphological information extracted through computer-aided tracing applications (.swc and .asc).<br><br>";
-  text += "Neuronize is designed to be easy to use. <br><br>";
-  text +=
-    "There is a standard menu at the top and 5 buttons. The first button can be used to start building a new neuron. The second button �undo�, represented with an arrow, allows going one step back, in case you want to redo the current step from scratch. The camera button, allows saving snapshots at any moment of your meshes. The help button shows this help and information about the application. The last button can be used to close the application.<br><br>";
-  text +=
-    "The process of building a neuron implies a few steps. Steps are designed to be easy to follow (default itinerary). Alternatively, you can choose to modify the advance options of a particular step if desired.<br><br>";
-  text += "To follow the default itinerary just do the following:<br><br>";
-  text +=
-    "	1.	Once the application is opened, press �Load File� and examine until finding your computer-aided tracing file (.swc or .asc) within your directories (this can take a few seconds). You can find and try two example files: ExampleNeuron1.asc and ExampleNeuron2.swc.<br><br>";
-  text +=
-    "		Once the soma has been loaded, the message� Soma to build = ... � will change to something similar to �Soma to build = ExampleNeuron1.swc�. Then, press �Next step�.<br><br>";
-  text +=
-    "	2.	Now, you are at the �Soma builder� tab. Press �Build soma� to start the deformation of the soma. If you like its shape, simply press �Next step�. (Alternatively, you can press �Rebuild (advanced options)� to build the soma changing the parameter options and pressing �Build soma�. Here, you can export the soma model by pressing �Export soma mesh� if desired).<br><br>";
-  text +=
-    "	3.	We are now at �Dendrites/Spines builder� tab. Press �Build dendrites� to start building the dendrites (this may take a few seconds). If you like the neuron, simply press �Next step�. You can also smooth the dendrites by pressing �Smooth�. If you want to return to the original construction, simply press again �Build dendrites�.<br><br>";
-  text +=
-    "		(Alternatively, you can press �Rebuild (advanced options)� to build the dendrites changing the parameter options and pressing �Build dendrites�. �. Here, you can export the neuron model by pressing �Export neuron mesh� if desired).<br><br>";
-  text +=
-    "	4.	Now, you have the possibility of building spines. This process normally takes several minutes, so please, consider it before starting, since it will imply waiting for a while. If you do not desire to build the spines, you can simply press �Finish� to save your model in the directory of your choice. If you want to build the spines, press �Build Spines�. This will take you to the �Advanced spines options� tab, where a default density spine dataset and a default spine morphology dataset are selected (future versions will allow to include your own spine density and morphology datasets). Press the button �Build spines�. A message warning that this process takes several minutes will appear. The length will vary depending on your neuron, and can take from several minutes to a few hours. If you decide not to build the spines, press �No�, and then �Finish� to save your neuron. If you still want to continue, press �Yes� and wait for the spines to be built. Once finished, you can press �Finish� and save your neuron and your spines, in a directory of your choice.<br><br>";
+  text += "<p>On the other hand, the meshes exported by Imaris can contain morphological errors (holes, faces that "
+          "intersect, etc.). These errors are propagated to the metrics computed on these meshes which implies a certain"
+          " error. NeuronizeV2 can repair these meshes and then compute more accurate metrics. In addition, the tool can"
+          " export the meshes (the original and the repaired one) to widely used standard formats, which allows that "
+          "these meshes can be easily used in other tools or shared.</p>";
 
+  text += "<p>Apart from the functions related to interoperability, the tool is also capable of generating a "
+          "three-dimensional representation of the neuron. The tool can use the spine information included in the new "
+          "version of the Neurolucida® tracing files to place the dendritic spines in their actual positions and "
+          "orientations. Likewise, the tool can take advantage of the information contained in the Imaris Filament "
+          "Tracer files for, in addition to placing the spines in their real positions, using the real geometry present "
+          "in the input file.</p>";
+
+  text += "<p>Additionally, Neurolucida® files can also include detailed information about the soma "
+          "(defined as a set of 2D contours). This information can also be used by the tool to generate a highly "
+          "accurate soma mesh.</p>";
+
+  text += "<p>Finally, to improve data sharing among neuroscientists, the tool incorporates a small database. This database"
+          " stores all the information related to the generated neuron, and the repaired spines, in standard formats. "
+          "Additionally, the tool can export the neuron metrics to a CSV file to be easily processed.</p>";
+
+  text += "<p>The way to interact with the tool to achieve all these functions is detailed below.</p>";
+
+  text += "<h3>Generation of a three-dimensional representation from morphological information.</h3>";
+
+  text += "<p>To generate three-dimensional representations form the morphological information of the tracing files the "
+          "tool offers two ways: to generate the three-dimensional representation from a single file or generate "
+          "representations of several neurons all at once.</p>";
+
+  text += "<p>First, the process of generating a three-dimensional representation of a single file is detailed, "
+          "for which the “One Neuron” button must be selected.</p>";
+
+  text += "<ol>";
+
+  text += "<li>The first step is to select the input files to generate the neuron. There are two options: to select "
+          "tracing files (SWC or ASC) with the “tracing file” button, or to load a neuron from Imaris Filament Tracer "
+          "(VRML) files. To do this, the “VRML Files” button must be selected; then, the file or files containing the "
+          "basal dendrites are selected and, if necessary, the file containing the apical dendrite is selected. Finally,"
+          " if the user wants to keep the tracing file generated by the tool, he/she clicks on the “Save Tracing” button"
+          " and inserts the name for the output file. Note that, the name that will be given to the neuron by the "
+          "application will be the name of the input file if it is a tracing file or the name of the folder where the "
+          "basal dendrites and axon are found in the case of Imaris Filament Tracer VRML input files.</li>";
+
+  text += "<li>Next, the user goes to the “Soma Builder” tab. If the input file contains soma information, it will be "
+         "displayed. If this information is incorrect or does not seem realistic, the user can ignore it by clicking on "
+         "the “Use Spherical Soma” button to use an initial spherical soma. Once the initial soma has been decided, "
+         "clicking on the “Build Soma” button starts the deformation process. If the user is satisfied with the result, "
+         "he/she will click on the “Go to Neurite Generation” button to proceed to the next step. If the result is not "
+         "satisfactory, the user can click on the “Rebuild (advanced options)” button to change the parameters of the "
+         "deformation process. Finally, if the user wants to export the deformed soma model, he/she will click on the "
+         "“Export Soma” button.</li>";
+
+  text +="<li>The next step is done from the “Neurites Builder” tab, clicking on the “Build Neurites” button to "
+         "generate the neurites. Once built, the geometry can be smoothed using the “Smooth” button. Finally, click on "
+         "the  “Go to Spine Generation” button to go to the next step.</li>";
+
+  text += "<li>At this point, the user must decide whether to export the neuron in the current state (without spines) by"
+          " clicking on the “Export without spines” button or if he/she wants to add the spines by clicking on the "
+          "“Build Spines” button.</li>";
+
+  text += "<li>If the user has decided to add the spines, he/she need to choose between the different options available. "
+          "Note that, by default, the application selects the most accurate spines that it can place depending on the "
+          "input file. Once the spine addition process is over (it may take some time), the neuron mesh can be exported "
+          "as well as a mesh containing all the generated spines.</li>";
+
+  text += "</ol>";
+
+  text += "<p>If the user wants to generate more than one three-dimensional representation, he/She can click on the "
+          "“Set of Neurons” button, and then select the input directory and the output directory. Note that the input "
+          "directories have particular requirements (see manual). Finally, there are two configuration options: one "
+          "allows choosing how many times the smoothing process is applied on a neuron and the other establishes a base "
+          "name for the folders generated by the tool. The process of automatic generation of tracings from geometry "
+          "files is immersed within the neuron generation steps. To generate several tracings automatically in an "
+          "unsupervised way from Imaris Filament Tracer files, several neurons will be generated at once and the files "
+          "of the generated tracings will be found within the output folder of each corresponding neuron.</p>";
+
+  text += "<h3>Mesh Repair</h3>";
+
+  text += "<p>To repair the meshes it is necessary to have Python3 installed ("
+          "<a href=\"https://www.python.org/ftp/python/3.7.4/python-3.7.4-amd64.exe\">https://www.python.org/ftp/python/3.7.4/python-3.7.4-amd64.exe</a>) . "
+          "If Python3 is installed in the system, the “Repair Mesh” tab will be active.</p>";
+
+  text += "<p>As in the previous case, the user can process a single file (VRML o IMX) with the “File” button, or "
+          "process at once a set of files in a folder by clicking on the “Folder” button. In both cases, he/she needs to"
+          " select the input and the output (be them a file or a folder). Finally, by clicking on “Advanced Options”, a "
+          "series of advanced options are shown (by default, these options are configured to repair dendritic spines). "
+          "When the user places the mouse over the name of these options, a dialog will appear indicating its "
+          "functionality.</p>";
+
+  text += "<h3>Mesh Comparison</h3>";
+
+  text += "<p>The tool also allows comparing different meshes and observing the differences between them. This tool is "
+          "very useful for comparing the original and repaired meshes.</p>";
+
+  text += "<p>To compare two meshes, first, the files must be loaded (the application supports OBJ, OFF, PLY and STL "
+          "formats) by clicking on the “Select File” buttons. Once the two files are selected, the two meshes will be "
+          "loaded. The color of the different parts of the meshes will indicate the distance between the meshes (warm "
+          "colors imply a greater distance). The application also shows a correspondence between colors and distance, "
+          "and a series of metrics (such max distance, min distance and mean distance) related to this distance.</p>";
+
+  text += "<p>On the other hand, the application also allows interacting with the views that are coordinated in such a "
+          "way that the camera movements done in one of them are replicated in the other.</p>";
+
+  text += "<h3>Exportation of the generated neurons</h3>";
+
+  text += "<p>The application has a small local database that stores all the neurons processed with the application and "
+          "all the spines.</p>";
+
+  text += "<p>To export the information contained in this database, the user clicks on the “File -> Export Neuron Info” "
+          "menu, Next, a dialog will open that allows selecting the neurons to be exported. Once those neurons are "
+          "selected, the user clicks on the “OK” button and selects the directory where the information will be "
+          "exported. This exported information consists of one folder for each neuron that contains two CSV files, "
+          "one with the soma information and the other with all its spines information.</p>";
   return text;
 }
 
@@ -1719,11 +1835,11 @@ void NeuroGeneratorWidgetViewer::generateSpinesVrml(skelgenerator::Neuron *neuro
         delete meshSpines;
         meshSpines = NULL;
     }
+
     std::string dirPath = tempPath + "/tmpSpines";
     QDir().mkdir(QString::fromStdString(dirPath));
 
     boost::numeric::ublas::matrix<float> translationMatrix (4,4);
-    boost::numeric::ublas::matrix<float> scaleMatrix (4,4);
 
     auto displacement = mSWCImporter->getDisplacement();
 
@@ -1737,11 +1853,13 @@ void NeuroGeneratorWidgetViewer::generateSpinesVrml(skelgenerator::Neuron *neuro
     for (const auto& spine:neuron->getSpines()) {
         std::string filename = spine->to_obj_without_base(dirPath,i);
         if (!haveSpinesNeuron) {
-            Neuronize::bbdd.addSpineVRML(spine, filename, fi.baseName().toStdString(), tempPath, displacement);
+            Neuronize::bbdd.addSpineFilament(spine, filename, fi.baseName().toStdString(), tempPath, displacement);
         }
         SpinesSWC* auxMesh = new SpinesSWC();
         auxMesh->loadModel(filename);
         auxMesh->applyMatrixTransform(translationMatrix,4);
+        MeshDef::Color color = SpinesSWC::getRandomColor();
+        auxMesh->setVertexColor(auxMesh->getMesh()->vertices_begin(),auxMesh->getMesh()->vertices_end(),color);
         auxMesh->updateBaseMesh();
         spinesMeshes[i] = auxMesh;
         i++;
@@ -1757,17 +1875,9 @@ void NeuroGeneratorWidgetViewer::generateSpinesVrml(skelgenerator::Neuron *neuro
         }
     }
 
-
+    mSpinesSynthContainers.destroyAllElementsInContainer();
     mSpinesSynthContainers.addElement(new BaseMesh());
     mSpinesSynthContainers.getElementAt(0)->JoinBaseMesh(meshSpines);
-
-
-    MeshDef::ConstVertexIter iniLimit = mSpinesSynthContainers.getElementAt(0)->getMesh()->vertices_begin();
-    MeshDef::ConstVertexIter finLimit = mSpinesSynthContainers.getElementAt(0)->getMesh()->vertices_end();
-
-    mSpinesSynthContainers.getElementAt(0)->setVertexColor(iniLimit, finLimit, MeshDef::Color(0.6, 0.0, 0.0, 1.0)
-    );
-
 
     if ( spineMeshRend != NULL )
     {
@@ -1817,7 +1927,7 @@ SpinesSWC* NeuroGeneratorWidgetViewer::fusionSpines(SpinesSWC* mesh1, SpinesSWC*
 }
 
 void
-NeuroGeneratorWidgetViewer::generateSpinesASC(std::vector<Spine>& spines,unsigned int pHorResol, unsigned int pVerResol,
+NeuroGeneratorWidgetViewer::generateSpinesASC(std::vector<Spine*>& spines,unsigned int pHorResol, unsigned int pVerResol,
                                               float pMinLongSpine, float pMaxLongSpine, float pMinRadio,
                                               float pMaxRadio) {
     unsigned int lNumMeshes = mSpinesSynthContainers.getContainer ( ).size ( );
@@ -1867,11 +1977,6 @@ NeuroGeneratorWidgetViewer::generateSpinesASC(std::vector<Spine>& spines,unsigne
     mSpinesSynthContainers.getElementAt ( i )->JoinBaseMesh ( meshSpines );
 
 
-    MeshDef::ConstVertexIter iniLimit = mSpinesSynthContainers.getElementAt ( i )->getMesh ( )->vertices_begin ( );
-    MeshDef::ConstVertexIter finLimit = mSpinesSynthContainers.getElementAt ( i )->getMesh ( )->vertices_end ( );
-
-    mSpinesSynthContainers.getElementAt ( i )->setVertexColor ( iniLimit, finLimit, MeshDef::Color ( 0.6, 0.0, 0.0, 1.0 )
-    );
 
     mLastSpinesInfo.clear ( );
     mLastSpinesInfo = meshSpines->getSpinesInfo ( );
@@ -1896,6 +2001,151 @@ NeuroGeneratorWidgetViewer::generateSpinesASC(std::vector<Spine>& spines,unsigne
     spineMeshRend->getBaseMesh()->applyMatrixTransform(translationMatrix,4);
 
     updateGL ( );
+}
+
+void NeuroGeneratorWidgetViewer::generateSpinesImaris(skelgenerator::Neuron *neuron, const std::string &tempPath) {
+
+    std::string dirPath = tempPath + "/tmpSpines";
+    neuron->imarisSpinesToObj(dirPath);
+
+    boost::numeric::ublas::matrix<float> translationMatrix (4,4);
+
+    auto displacement = mSWCImporter->getDisplacement();
+
+    generateSquareTraslationMatrix(translationMatrix,-displacement[0],-displacement[1],-displacement[2]);
+    int total_files = neuron->getImarisSpines().size();
+    std::vector<SpinesSWC*> spinesMeshes;
+    spinesMeshes.reserve(total_files);
+    QFileInfo fi(mSWCFile);
+    std::string neuronName = fi.baseName().toStdString();
+    bool haveSpinesNeuron = Neuronize::bbdd.haveSpinesNeuron(fi.baseName().toStdString());
+
+    QDirIterator it (QString::fromStdString(dirPath),QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+
+    Neuronize::bbdd.openTransaction();
+    while (it.hasNext()) {
+        auto file = it.next();
+
+        if (!haveSpinesNeuron) {
+            QString name = file;
+            name.chop(6);
+            Neuronize::bbdd.addSpineImarisNeuron(file.toStdString(),name.toStdString(),neuronName);
+        }
+
+        SpinesSWC* auxMesh = new SpinesSWC();
+        auxMesh->loadModel(file.toStdString());
+        auxMesh->applyMatrixTransform(translationMatrix,4);
+        MeshDef::Color color = SpinesSWC::getRandomColor();
+        auxMesh->setVertexColor(auxMesh->getMesh()->vertices_begin(),auxMesh->getMesh()->vertices_end(),color);
+        auxMesh->updateBaseMesh();
+        spinesMeshes.push_back(auxMesh);
+    }
+    Neuronize::bbdd.closeTransaction();
+
+    meshSpines = fusionAllSpines(spinesMeshes);
+    for(int i = 0; i < spinesMeshes.size();i++) {
+        if (spinesMeshes[i] != meshSpines) {
+            delete spinesMeshes[i];
+        } else {
+            std::cout << i << ":"<< spinesMeshes.size() <<std::endl;
+        }
+    }
+
+    mSpinesSynthContainers.destroyAllElementsInContainer();
+    mSpinesSynthContainers.addElement(new BaseMesh());
+    mSpinesSynthContainers.getElementAt(0)->JoinBaseMesh(meshSpines);
+
+
+
+    if ( spineMeshRend != NULL )
+    {
+        delete spineMeshRend;
+    }
+
+    spineMeshRend = new MeshRenderer ( );
+
+    spineMeshRend->setMeshToRender(mSpinesSynthContainers.getElementAt(0));
+
+    spineMeshRend->setRenderOptions ( renderMask );
+
+    updateGL();
+}
+
+void NeuroGeneratorWidgetViewer::generateRepairedImarisSpines(skelgenerator::Neuron *neuron, string tmpDir) {
+    QString inputFile = QString::fromStdString(neuron->getImarisFile());
+    QString outPath = QString::fromStdString(tmpDir) + "/repairedMeshes";
+    meshreconstruct::MeshReconstruct::getInstance()->repairFile(QString::fromStdString(tmpDir) +"/csv.csv",inputFile,"Obj",50,
+            30, false,3,true,outPath);
+
+    QFileInfo outFi (inputFile);
+    outPath += "/" + outFi.baseName();
+
+    boost::numeric::ublas::matrix<float> translationMatrix (4,4);
+
+    auto displacement = mSWCImporter->getDisplacement();
+
+    generateSquareTraslationMatrix(translationMatrix,-displacement[0],-displacement[1],-displacement[2]);
+    int total_files = neuron->getImarisSpines().size();
+    std::vector<SpinesSWC*> spinesMeshes;
+    spinesMeshes.reserve(total_files);
+    QFileInfo fi(mSWCFile);
+    std::string neuronName = fi.baseName().toStdString();
+    bool haveSpinesNeuron = Neuronize::bbdd.haveSpinesNeuron(fi.baseName().toStdString());
+
+    QDirIterator it(outPath,QStringList() << "*_R.obj", QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+
+    Neuronize::bbdd.openTransaction();
+    while (it.hasNext()) {
+        auto file = it.next();
+
+        if (!haveSpinesNeuron) {
+            QString originalFile = file;
+            int pos = originalFile.size() - 5;
+            QFileInfo fileInfo(file);
+            QString name = fileInfo.fileName();
+            name.chop(6);
+            originalFile.replace(pos,1,"O");
+            Neuronize::bbdd.addSpineImarisNeuron(originalFile.toStdString(),file.toStdString(),name.toStdString(),neuronName);
+        }
+
+        SpinesSWC* auxMesh = new SpinesSWC();
+        auxMesh->loadModel(file.toStdString());
+        auxMesh->applyMatrixTransform(translationMatrix,4);
+        MeshDef::Color color = SpinesSWC::getRandomColor();
+        auxMesh->setVertexColor(auxMesh->getMesh()->vertices_begin(),auxMesh->getMesh()->vertices_end(),color);
+        auxMesh->updateBaseMesh();
+        spinesMeshes.push_back(auxMesh);
+    }
+    Neuronize::bbdd.closeTransaction();
+
+    meshSpines = fusionAllSpines(spinesMeshes);
+    for(int i = 0; i < spinesMeshes.size();i++) {
+        if (spinesMeshes[i] != meshSpines) {
+            delete spinesMeshes[i];
+        } else {
+            std::cout << i << ":"<< spinesMeshes.size() <<std::endl;
+        }
+    }
+
+    mSpinesSynthContainers.destroyAllElementsInContainer();
+    mSpinesSynthContainers.addElement(new BaseMesh());
+    mSpinesSynthContainers.getElementAt(0)->JoinBaseMesh(meshSpines);
+
+    if ( spineMeshRend != NULL )
+    {
+        delete spineMeshRend;
+    }
+
+    spineMeshRend = new MeshRenderer ( );
+
+    spineMeshRend->setMeshToRender(mSpinesSynthContainers.getElementAt(0));
+
+    spineMeshRend->setRenderOptions ( renderMask );
+
+    updateGL();
+
+
+
 }
 
 
